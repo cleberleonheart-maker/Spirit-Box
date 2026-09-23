@@ -14,6 +14,7 @@ object Prefs {
     private const val KEY_SETTLE = "settle"
     private const val KEY_GAP = "gap"
     private const val KEY_ALERTS = "alerts"
+    private const val KEY_MUTED = "muted"
 
     private const val KEY_SCAN_ACTIVE = "scanActive"
     private const val KEY_SCAN_MODE = "scanMode"
@@ -68,6 +69,11 @@ object Prefs {
 
     fun saveAlerts(c: Context, v: Boolean) =
         prefs(c).edit().putBoolean(KEY_ALERTS, v).apply()
+
+    fun muted(c: Context): Boolean = prefs(c).getBoolean(KEY_MUTED, false)
+
+    fun saveMuted(c: Context, v: Boolean) =
+        prefs(c).edit().putBoolean(KEY_MUTED, v).apply()
 
     data class ScanState(
         val mode: String,

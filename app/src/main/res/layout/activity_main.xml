@@ -28,16 +28,33 @@
         android:textColor="@color/text_secondary"
         android:textSize="13sp" />
 
-    <ProgressBar
-        android:id="@+id/meter"
-        style="?android:attr/progressBarStyleHorizontal"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="10dp"
+        android:layout_height="wrap_content"
         android:layout_marginTop="18dp"
-        android:max="100"
-        android:progress="0"
-        android:progressBackgroundTint="@color/panel"
-        android:progressTint="@color/accent" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ProgressBar
+            android:id="@+id/meter"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="10dp"
+            android:layout_weight="1"
+            android:max="100"
+            android:progress="0"
+            android:progressBackgroundTint="@color/panel"
+            android:progressTint="@color/accent" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnMute"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:minWidth="72dp"
+            android:text="@string/btn_mute"
+            app:cornerRadius="24dp" />
+    </LinearLayout>
 
     <com.spiritbox.app.WaterfallView
         android:id="@+id/waterfall"

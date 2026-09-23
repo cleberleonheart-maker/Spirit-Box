@@ -49,6 +49,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var etGap: EditText
     private lateinit var btnManualCapture: MaterialButton
     private lateinit var btnHold: MaterialButton
+    private lateinit var btnMute: MaterialButton
     private lateinit var btnShare: MaterialButton
     private lateinit var listCaptures: ListView
 
@@ -126,6 +127,7 @@ class MainActivity : AppCompatActivity() {
         etGap = findViewById(R.id.etGap)
         btnManualCapture = findViewById(R.id.btnManualCapture)
         btnHold = findViewById(R.id.btnHold)
+        btnMute = findViewById(R.id.btnMute)
         btnShare = findViewById(R.id.btnShare)
 
         spBand.adapter = ArrayAdapter(
@@ -142,6 +144,7 @@ class MainActivity : AppCompatActivity() {
         listCaptures.setOnItemClickListener { _, _, position, _ ->
             captureEntries.getOrNull(position)?.let { showCaptureDetail(it) }
         }
+        loadPersistedCaptures()
 
         updateToggle()
 
@@ -182,6 +185,16 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        btnMute.setOnClickListener {
+            val muted = !Prefs.muted(this)
+            Prefs.saveMuted(this, muted)
+            updateMuteButton()
+            if (SpiritBoxEvents.serviceRunning) {
+                SpiritBoxService.setMuted(this, muted)
+            }
+        }
+        updateMuteButton()
+
         btnShare.setOnClickListener { shareCaptures() }
     }
 
@@ -219,6 +232,88 @@ class MainActivity : AppCompatActivity() {
         etGap.text.toString().toLongOrNull()?.let { Prefs.saveGap(this, it) }
         Prefs.saveAlerts(this, swAlerts.isChecked)
     }
+
+    private fun loadPersistedCaptures() {
+        val file = File(filesDir, "capturas.csv")
+        if (!file.exists()) return
+        try {
+            val lines = file.readLines()
+            for (i in 1 until lines.size) { // pula cabeçalho
+                val cols = parseCsvLine(lines[i])
+                if (cols.size < 3) continue
+                val time = parseIsoUtc(cols[0]) ?: continue
+                val freqKHz = parseFreqToKHz(cols[1]) ?: continue
+                val level = parseLevel(cols[2]) ?: continue
+                adapter.add("${formatFreq(freqKHz)}  ·  nível $level%")
+                captureEntries.add(CaptureEntry(freqKHz, level, time))
+            }
+            while (adapter.count > 200) {
+                adapter.remove(adapter.getItem(0))
+                if (captureEntries.isNotEmpty()) captureEntries.removeAt(0)
+            }
+            if (adapter.count > 0) {
+                listCaptures.smoothScrollToPosition(adapter.count - 1)
+            }
+        } catch (e: Exception) {
+            // CSV corrompido ou ilegível: segue sem histórico
+        }
+    }
+
+    private fun parseCsvLine(line: String): List<String> {
+        val result = ArrayList<String>()
+        val sb = StringBuilder()
+        var inQuotes = false
+        var i = 0
+        while (i < line.length) {
+            val ch = line[i]
+            if (inQuotes) {
+                if (ch == '"') {
+                    if (i + 1 < line.length && line[i + 1] == '"') {
+                        sb.append('"')
+                        i++
+                    } else {
+                        inQuotes = false
+                    }
+                } else {
+                    sb.append(ch)
+                }
+            } else {
+                when (ch) {
+                    '"' -> inQuotes = true
+                    ',' -> {
+                        result.add(sb.toString())
+                        sb.setLength(0)
+                    }
+                    else -> sb.append(ch)
+                }
+            }
+            i++
+        }
+        result.add(sb.toString())
+        return result
+    }
+
+    private fun parseIsoUtc(text: String): Long? = try {
+        SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
+            timeZone = java.util.TimeZone.getTimeZone("UTC")
+        }.parse(text)?.time
+    } catch (_: Exception) {
+        null
+    }
+
+    private fun parseFreqToKHz(text: String): Double? {
+        val t = text.trim()
+        return when {
+            t.endsWith("MHz", ignoreCase = true) ->
+                t.dropLast(3).trim().toDoubleOrNull()?.times(1000.0)
+            t.endsWith("kHz", ignoreCase = true) ->
+                t.dropLast(3).trim().toDoubleOrNull()
+            else -> t.toDoubleOrNull()
+        }
+    }
+
+    private fun parseLevel(text: String): Int? =
+        text.removeSuffix("%").trim().toIntOrNull()?.coerceIn(0, 100)
 
     private fun showCaptureDetail(entry: CaptureEntry) {
         val time = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
@@ -300,6 +395,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateHoldButton(hold: Boolean) {
         btnHold.text = getString(if (hold) R.string.btn_release else R.string.btn_hold)
+    }
+
+    private fun updateMuteButton() {
+        val muted = Prefs.muted(this)
+        btnMute.text = getString(if (muted) R.string.btn_unmute else R.string.btn_mute)
     }
 
     private fun formatFreq(khz: Double): String {

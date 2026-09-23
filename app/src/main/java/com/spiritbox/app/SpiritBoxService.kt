@@ -49,6 +49,8 @@ class SpiritBoxService : Service() {
         private const val ACTION_STOP = "com.spiritbox.app.STOP"
         private const val ACTION_CAPTURE = "com.spiritbox.app.CAPTURE"
         private const val ACTION_HOLD = "com.spiritbox.app.HOLD"
+        private const val ACTION_MUTE = "com.spiritbox.app.MUTE"
+        private const val EXTRA_MUTED = "muted"
         private const val EXTRA_MODE = "mode"
         private const val EXTRA_SERVER = "server"
         private const val EXTRA_RANGE_INDEX = "rangeIndex"
@@ -105,6 +107,15 @@ class SpiritBoxService : Service() {
             context.startService(
                 Intent(context, SpiritBoxService::class.java).apply {
                     action = ACTION_HOLD
+                }
+            )
+        }
+
+        fun setMuted(context: Context, muted: Boolean) {
+            context.startService(
+                Intent(context, SpiritBoxService::class.java).apply {
+                    action = ACTION_MUTE
+                    putExtra(EXTRA_MUTED, muted)
                 }
             )
         }
@@ -232,6 +243,14 @@ class SpiritBoxService : Service() {
                     )
                 }
             }
+            ACTION_MUTE -> {
+                val muted = intent.getBooleanExtra(EXTRA_MUTED, Prefs.muted(this))
+                Prefs.saveMuted(this, muted)
+                applyMute()
+                SpiritBoxEvents.pushStatus(
+                    getString(if (muted) R.string.status_muted else R.string.status_unmuted)
+                )
+            }
             ACTION_STOP -> {
                 Prefs.clearActiveScan(this)
                 SpiritBoxEvents.holdActive = false
@@ -295,6 +314,7 @@ class SpiritBoxService : Service() {
         } else {
             val at = createAudioTrack()
             audioTrack = at
+            applyMute()
             val c = WebSdrClient(
                 this,
                 at,
@@ -302,8 +322,7 @@ class SpiritBoxService : Service() {
                 { rms ->
                     sdrTuner?.setRms(rms)
                     SpiritBoxEvents.pushRms(rms)
-                },
-                onGiveUp = { onWebSdrGiveUp() }
+                }
             )
             client = c
             val tuner = WebSdrSweepTuner(c)
@@ -354,16 +373,6 @@ class SpiritBoxService : Service() {
         SpiritBoxEvents.pushServiceStopped()
     }
 
-    private fun onWebSdrGiveUp() {
-        Handler(Looper.getMainLooper()).post {
-            if (engine == null && client == null && fm == null) return@post
-            Prefs.clearActiveScan(this)
-            stopScan()
-            stopForeground(STOP_FOREGROUND_REMOVE)
-            stopSelf()
-        }
-    }
-
     private fun acquireWakeLock() {
         if (wakeLock?.isHeld == true) return
         val pm = getSystemService(Context.POWER_SERVICE) as? PowerManager ?: return
@@ -406,6 +415,14 @@ class SpiritBoxService : Service() {
             String.format(Locale.US, "%.3f MHz", khz / 1000)
         } else {
             "${khz.toInt()} kHz"
+        }
+    }
+
+    private fun applyMute() {
+        val muted = Prefs.muted(this)
+        try {
+            audioTrack?.setVolume(if (muted) 0f else 1f)
+        } catch (_: Exception) {
         }
     }
 

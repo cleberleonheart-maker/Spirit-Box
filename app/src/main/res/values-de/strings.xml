@@ -24,7 +24,7 @@
     <string name="ws_closed">Verbindung beendet: %1$s</string>
     <string name="ws_connect_error">Verbindungsfehler: %1$s</string>
     <string name="ws_error">Fehler: %1$s</string>
-    <string name="ws_give_up">Aufgegeben: nach %1$d Versuchen keine Verbindung.</string>
+    <string name="ws_give_unused">Aufgegeben: nach %1$d Versuchen keine Verbindung.</string>
     <string name="ws_no_data">Keine Daten für %1$d s. Verbinde neu...</string>
     <string name="fm_tune_failed">FM: Abstimmung fehlgeschlagen (Code %1$d)</string>
     <string name="fm_antenna_removed">FM: Antenne entfernt (Kopfhörer verwenden)</string>
@@ -67,4 +67,8 @@
     <string name="band_military">Militär 225-400 MHz</string>
     <string name="switch_alerts">Alarm</string>
     <string name="action_save">Speichern</string>
+    <string name="btn_mute">MUTE</string>
+    <string name="btn_unmute">SOUND</string>
+    <string name="status_muted">Ton aus</string>
+    <string name="status_unmuted">Ton an</string>
 </resources>

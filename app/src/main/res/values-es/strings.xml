@@ -24,7 +24,7 @@
     <string name="ws_closed">Conexión cerrada: %1$s</string>
     <string name="ws_connect_error">Error de conexión: %1$s</string>
     <string name="ws_error">Error: %1$s</string>
-    <string name="ws_give_up">Abandonando: sin conexión tras %1$d intentos.</string>
+    <string name="ws_give_unused">Abandonando: sin conexión tras %1$d intentos.</string>
     <string name="ws_no_data">Sin datos durante %1$d s. Reconectando...</string>
     <string name="fm_tune_failed">FM: fallo al sintonizar (código %1$d)</string>
     <string name="fm_antenna_removed">FM: antena desconectada (usa auriculares)</string>
@@ -67,4 +67,8 @@
     <string name="band_military">Militar 225-400 MHz</string>
     <string name="switch_alerts">Alerta</string>
     <string name="action_save">Guardar</string>
+    <string name="btn_mute">SILENCIO</string>
+    <string name="btn_unmute">SONIDO</string>
+    <string name="status_muted">Sonido desactivado</string>
+    <string name="status_unmuted">Sonido activado</string>
 </resources>

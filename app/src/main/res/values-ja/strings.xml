@@ -24,7 +24,7 @@
     <string name="ws_closed">接続が閉じられました: %1$s</string>
     <string name="ws_connect_error">接続エラー: %1$s</string>
     <string name="ws_error">エラー: %1$s</string>
-    <string name="ws_give_up">%1$d 回試しても接続できないため断念します。</string>
+    <string name="ws_give_unused">%1$d 回試しても接続できないため断念します。</string>
     <string name="ws_no_data">%1$d 秒間データがありません。再接続中...</string>
     <string name="fm_tune_failed">FM: 同調に失敗しました (コード %1$d)</string>
     <string name="fm_antenna_removed">FM: アンテナが外れました (ヘッドホンを使用)</string>
@@ -67,4 +67,8 @@
     <string name="band_military">軍用 225-400 MHz</string>
     <string name="switch_alerts">通知音</string>
     <string name="action_save">保存</string>
+    <string name="btn_mute">ミュート</string>
+    <string name="btn_unmute">サウンド</string>
+    <string name="status_muted">サウンドオフ</string>
+    <string name="status_unmuted">サウンドオン</string>
 </resources>

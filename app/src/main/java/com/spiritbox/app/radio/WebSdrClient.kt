@@ -23,8 +23,7 @@ class WebSdrClient(
     private val context: Context,
     private val audioTrack: AudioTrack,
     private val onStatus: (String) -> Unit,
-    private val onRms: (Double) -> Unit,
-    private val onGiveUp: () -> Unit = {}
+    private val onRms: (Double) -> Unit
 ) {
     @Volatile
     private var ws: WebSocket? = null
@@ -77,7 +76,8 @@ class WebSdrClient(
         if (closed.get()) return
         val secure = hostPort.endsWith(":443")
         val scheme = if (secure) "wss" else "ws"
-        onStatus(context.getString(R.string.ws_connecting, hostPort, retries.get() + 1))
+        val attempt = (retries.get() + 1).coerceAtMost(99)
+        onStatus(context.getString(R.string.ws_connecting, hostPort, attempt))
         val socket = try {
             WebSocketFactory()
                 .setConnectionTimeout(10000)
@@ -170,13 +170,6 @@ class WebSdrClient(
     private fun scheduleReconnect() {
         if (closed.get()) return
         if (!reconnecting.compareAndSet(false, true)) return
-        if (retries.get() >= MAX_RETRIES) {
-            reconnecting.set(false)
-            onStatus(context.getString(R.string.ws_give_up, MAX_RETRIES))
-            Log.w(TAG, "Desistindo após $MAX_RETRIES tentativas")
-            onGiveUp()
-            return
-        }
         val delay = (1000L * (retries.get() + 1)).coerceAtMost(10000L)
         retries.incrementAndGet()
         Thread {
@@ -258,7 +251,6 @@ class WebSdrClient(
         const val DEFAULT_SERVER = "websdr.ewi.utwente.nl:8901"
         private const val TAG = "SpiritBox"
         private const val JOIN_TIMEOUT_MS = 1000L
-        private const val MAX_RETRIES = 10
         private const val IDLE_TIMEOUT_MS = 30000L
         private const val WATCHDOG_INTERVAL_MS = 5000L
 
