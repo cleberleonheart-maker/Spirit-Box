@@ -1,0 +1,9 @@
+<resources>
+    <color name="bg_dark">#0B0E14</color>
+    <color name="panel">#151A24</color>
+    <color name="accent">#39D5C9</color>
+    <color name="accent_dim">#1F7A74</color>
+    <color name="text_primary">#E8EAF0</color>
+    <color name="text_secondary">#8A93A6</color>
+    <color name="danger">#C94F4F</color>
+</resources>

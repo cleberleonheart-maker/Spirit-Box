@@ -1,0 +1,73 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
+
+def ksProps = new Properties()
+def ksPropsFile = rootProject.file('keystore.properties')
+if (ksPropsFile.exists()) {
+    ksPropsFile.withInputStream { ksProps.load(it) }
+}
+// Senha de release: SEMPRE use a variável de ambiente SPIRIT_KS_PASS.
+// O keystore.properties contém a senha em texto plano (risco se vazar);
+// mantemos o fallback apenas para compatibilidade com builds locais.
+def senhaKs = System.getenv('SPIRIT_KS_PASS')
+if (senhaKs == null || senhaKs.isEmpty()) {
+    senhaKs = ksProps.getProperty('storePassword')
+    if (senhaKs == null || senhaKs.isEmpty()) {
+        throw new GradleException(
+            'Senha do keystore ausente. Defina a variável de ambiente SPIRIT_KS_PASS'
+            + ' ou a propriedade storePassword em keystore.properties.'
+        )
+    }
+    println 'AVISO: usando storePassword de keystore.properties (texto plano). Prefira SPIRIT_KS_PASS.'
+}
+def spiritKs = rootProject.file(ksProps.getProperty('storeFile', 'keystore/spirit.keystore'))
+
+android {
+    namespace 'com.spiritbox.app'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "com.spiritbox.app"
+        minSdk 24
+        targetSdk 35
+        versionCode ((project.findProperty('versionCode') as String ?: '1').toInteger())
+        versionName (project.findProperty('versionName') as String ?: '1.0')
+    }
+
+    signingConfigs {
+        release {
+            if (spiritKs.exists()) {
+                storeFile spiritKs
+                storePassword senhaKs
+                keyAlias ksProps.getProperty('keyAlias', 'spirit')
+                keyPassword senhaKs
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (spiritKs.exists()) signingConfig signingConfigs.release
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+}
+
+dependencies {
+    compileOnly files('libs/radio-stub.jar')
+    implementation 'androidx.core:core-ktx:1.13.1'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'com.neovisionaries:nv-websocket-client:2.14'
+    testImplementation 'junit:junit:4.13.2'
+}
