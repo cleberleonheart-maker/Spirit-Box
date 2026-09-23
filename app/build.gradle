@@ -8,21 +8,27 @@ def ksPropsFile = rootProject.file('keystore.properties')
 if (ksPropsFile.exists()) {
     ksPropsFile.withInputStream { ksProps.load(it) }
 }
-// Senha de release: SEMPRE use a variável de ambiente SPIRIT_KS_PASS.
-// O keystore.properties contém a senha em texto plano (risco se vazar);
-// mantemos o fallback apenas para compatibilidade com builds locais.
-def senhaKs = System.getenv('SPIRIT_KS_PASS')
-if (senhaKs == null || senhaKs.isEmpty()) {
-    senhaKs = ksProps.getProperty('storePassword')
-    if (senhaKs == null || senhaKs.isEmpty()) {
+def spiritKs = rootProject.file(ksProps.getProperty('storeFile', 'keystore/spirit.keystore'))
+
+def releasePassword = {
+    // Senha de release: prefira a variável de ambiente SPIRIT_KS_PASS.
+    // O keystore.properties contém a senha em texto plano (risco se vazar);
+    // mantemos o fallback apenas para compatibilidade com builds locais.
+    def senha = System.getenv('SPIRIT_KS_PASS')
+    if (senha == null || senha.isEmpty()) {
+        senha = ksProps.getProperty('storePassword')
+        if (senha != null && !senha.isEmpty()) {
+            println 'AVISO: usando storePassword de keystore.properties (texto plano). Prefira SPIRIT_KS_PASS.'
+        }
+    }
+    if (senha == null || senha.isEmpty()) {
         throw new GradleException(
             'Senha do keystore ausente. Defina a variável de ambiente SPIRIT_KS_PASS'
             + ' ou a propriedade storePassword em keystore.properties.'
         )
     }
-    println 'AVISO: usando storePassword de keystore.properties (texto plano). Prefira SPIRIT_KS_PASS.'
+    senha
 }
-def spiritKs = rootProject.file(ksProps.getProperty('storeFile', 'keystore/spirit.keystore'))
 
 android {
     namespace 'com.spiritbox.app'
@@ -39,6 +45,7 @@ android {
     signingConfigs {
         release {
             if (spiritKs.exists()) {
+                def senhaKs = releasePassword()
                 storeFile spiritKs
                 storePassword senhaKs
                 keyAlias ksProps.getProperty('keyAlias', 'spirit')
