@@ -429,7 +429,13 @@ class SpiritBoxService : Service() {
                     .build()
             )
             .setBufferSizeInBytes(maxOf(minBuf, rate * 2))
-            .setPerformanceMode(AudioTrack.PERFORMANCE_MODE_LOW_LATENCY)
+            .setPerformanceMode(
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    AudioTrack.PERFORMANCE_MODE_LOW_LATENCY
+                } else {
+                    0
+                }
+            )
             .build()
     }
 
