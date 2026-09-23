@@ -414,7 +414,7 @@ class SpiritBoxService : Service() {
         val minBuf = AudioTrack.getMinBufferSize(
             rate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT
         )
-        return AudioTrack.Builder()
+        val builder = AudioTrack.Builder()
             .setAudioAttributes(
                 AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_MEDIA)
@@ -429,14 +429,10 @@ class SpiritBoxService : Service() {
                     .build()
             )
             .setBufferSizeInBytes(maxOf(minBuf, rate * 2))
-            .setPerformanceMode(
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    AudioTrack.PERFORMANCE_MODE_LOW_LATENCY
-                } else {
-                    0
-                }
-            )
-            .build()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            builder.setPerformanceMode(AudioTrack.PERFORMANCE_MODE_LOW_LATENCY)
+        }
+        return builder.build()
     }
 
     private fun requestAudioFocus() {
