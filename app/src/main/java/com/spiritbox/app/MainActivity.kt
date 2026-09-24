@@ -26,6 +26,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.spiritbox.app.radio.SweepEngine
 import java.io.File
 import java.text.SimpleDateFormat
@@ -196,6 +197,28 @@ class MainActivity : AppCompatActivity() {
         updateMuteButton()
 
         btnShare.setOnClickListener { shareCaptures() }
+
+        spiritCheckUpdatesSilently()
+    }
+
+    /** Auto-check de atualização. Respeita o cooldown do Prefs; resultado vira diálogo. */
+    private fun spiritCheckUpdatesSilently() {
+        UpdateChecker.check(this) { info ->
+            if (info == null) return@check
+            MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.check_update_title)
+                .setMessage(getString(R.string.check_update_msg, info.versionName))
+                .setPositiveButton(R.string.check_update_btn) { _, _ ->
+                    startActivity(
+                        Intent(
+                            Intent.ACTION_VIEW,
+                            Uri.parse(UpdateChecker.RELEASES_PAGE)
+                        )
+                    )
+                }
+                .setNegativeButton(R.string.check_update_later, null)
+                .show()
+        }
     }
 
     override fun onStart() {

@@ -24,6 +24,7 @@ object Prefs {
     private const val KEY_SCAN_THRESHOLD = "scanThreshold"
     private const val KEY_SCAN_SETTLE = "scanSettle"
     private const val KEY_SCAN_GAP = "scanGap"
+    private const val KEY_LAST_UPDATE_CHECK = "lastUpdateCheckAt"
 
     private fun prefs(c: Context): SharedPreferences =
         c.getSharedPreferences(NAME, Context.MODE_PRIVATE)
@@ -115,4 +116,9 @@ object Prefs {
             p.getLong(KEY_SCAN_GAP, 300L)
         )
     }
+
+    fun lastUpdateCheckAt(c: Context): Long = prefs(c).getLong(KEY_LAST_UPDATE_CHECK, 0L)
+
+    fun markUpdateCheck(c: Context, at: Long = System.currentTimeMillis()) =
+        prefs(c).edit().putLong(KEY_LAST_UPDATE_CHECK, at).apply()
 }

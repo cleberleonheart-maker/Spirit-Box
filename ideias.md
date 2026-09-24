@@ -1,5 +1,11 @@
 # Ideias para o SpiritBox
 
+## Implementado recentemente
+- **Auto-check de atualização** (UpdateChecker + VersionComparator): consulta o
+  GitHub (`cleberleonheart-maker/Spirit-Box`) uma vez por dia e oferece download
+  via diálogo. Silencioso se falhar / não houver release. Obs.: o repo precisa ter
+  uma release publicada (ou ser público) senão a checagem volta 404 e nunca dispara.
+
 ## Mini mapa de movimento (oculto)
 - Um mini mapa/heatmap que capta **movimento**: detecta atividade variável no sinal (não só pico) e marca onde houve movimento ao longo do tempo.
 - **Fica oculto por padrão** — só aparece na UI quando detectar movimento real (alguma função interna/experimental, longe da tela principal).
