@@ -280,15 +280,38 @@ class MainActivity : AppCompatActivity() {
                 .setTitle(R.string.check_update_title)
                 .setMessage(getString(R.string.check_update_msg, info.versionName))
                 .setPositiveButton(R.string.check_update_btn) { _, _ ->
-                    startActivity(
-                        Intent(
-                            Intent.ACTION_VIEW,
-                            Uri.parse(UpdateChecker.RELEASES_PAGE)
-                        )
-                    )
+                    downloadAndInstallUpdate(info)
                 }
                 .setNegativeButton(R.string.check_update_later, null)
                 .show()
+        }
+    }
+
+    private fun downloadAndInstallUpdate(info: UpdateChecker.UpdateInfo) {
+        UpdateChecker.downloadLatest(
+            this,
+            { msg -> Toast.makeText(this, msg, Toast.LENGTH_SHORT).show() },
+            { file ->
+                if (file == null) {
+                    Toast.makeText(this, R.string.update_download_failed, Toast.LENGTH_LONG).show()
+                } else {
+                    installApk(file)
+                }
+            }
+        )
+    }
+
+    private fun installApk(file: File) {
+        val uri = FileProvider.getUriForFile(this, "$packageName.fileprovider", file)
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            setDataAndType(uri, "application/vnd.android.package-archive")
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        try {
+            startActivity(intent)
+        } catch (e: Exception) {
+            Toast.makeText(this, R.string.update_download_failed, Toast.LENGTH_LONG).show()
         }
     }
 

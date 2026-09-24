@@ -5,6 +5,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import org.json.JSONObject
+import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.concurrent.Executors
@@ -26,6 +27,7 @@ object UpdateChecker {
     private const val REPO = "cleberleonheart-maker/Spirit-Box"
     private const val LATEST_API = "https://api.github.com/repos/$REPO/releases/latest"
     const val RELEASES_PAGE = "https://github.com/$REPO/releases"
+    private const val LATEST_APK = "https://github.com/$REPO/releases/latest/download/app-release.apk"
 
     private const val COOLDOWN_MS = 24L * 60 * 60 * 1000 // 1 consulta automática por dia
 
@@ -65,6 +67,43 @@ object UpdateChecker {
             null
         } finally {
             conn?.disconnect()
+        }
+    }
+
+    /**
+     * Baixa o APK da release mais recente para o cache do app.
+     * @param onProgress entregue na main thread com uma mensagem de progresso.
+     * @param onResult entregue na main thread com o arquivo baixado, ou null.
+     */
+    fun downloadLatest(
+        context: Context,
+        onProgress: (String) -> Unit,
+        onResult: (File?) -> Unit
+    ) {
+        executor.execute {
+            var file: File? = null
+            try {
+                onProgress(context.getString(R.string.update_downloading))
+                val target = File(context.cacheDir, "spiritbox-update.apk")
+                val conn = URL(LATEST_APK).openConnection() as HttpURLConnection
+                conn.instanceFollowRedirects = true
+                conn.connectTimeout = 15_000
+                conn.readTimeout = 30_000
+                conn.setRequestProperty("User-Agent", "SpiritBox-Android")
+                if (conn.responseCode in 200..299) {
+                    conn.inputStream.use { input ->
+                        target.outputStream().use { out -> input.copyTo(out) }
+                    }
+                    file = target
+                } else {
+                    Log.w(TAG, "Download APK: HTTP ${conn.responseCode}")
+                }
+                conn.disconnect()
+            } catch (e: Exception) {
+                Log.w(TAG, "Falha no download da atualização", e)
+            }
+            val result = file
+            Handler(Looper.getMainLooper()).post { onResult(result) }
         }
     }
 
