@@ -144,6 +144,14 @@ class SweepEngine(
         ex.scheduleWithFixedDelay({ tick() }, TICK_MS, TICK_MS, TimeUnit.MILLISECONDS)
     }
 
+    /** Prende a varredura em [freqKHz] (usado por favoritos). */
+    fun stayOn(freqKHz: Double) {
+        if (!running || freqKHz <= 0) return
+        currentFreq = freqKHz
+        hold = true
+        phase = Phase.TUNE
+    }
+
     fun stop() {
         if (!running) return
         running = false

@@ -49,6 +49,9 @@
    <string name="service_resumed">Varredura retomada</string>
    <string name="share_title">Compartilhar capturas</string>
    <string name="share_no_file">Nenhuma captura para exportar ainda.</string>
+    <string name="share_waterfall_title">Compartilhar waterfall</string>
+    <string name="fav_prompt">★ Favoritos</string>
+    <string name="bookmark_off">☆</string>
    <string name="default_threshold">12</string>
    <string name="default_settle">150</string>
    <string name="btn_hold">TRAVAR</string>

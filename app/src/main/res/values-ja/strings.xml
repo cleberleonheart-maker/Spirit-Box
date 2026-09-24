@@ -49,6 +49,9 @@
    <string name="service_resumed">スキャンを再開しました</string>
    <string name="share_title">捕捉を共有</string>
    <string name="share_no_file">まだエクスポートできる捕捉がありません。</string>
+    <string name="share_waterfall_title">ウォーターフォールを共有</string>
+    <string name="fav_prompt">★ お気に入り</string>
+    <string name="bookmark_off">☆</string>
    <string name="default_threshold">12</string>
    <string name="default_settle">150</string>
    <string name="btn_hold">ホールド</string>

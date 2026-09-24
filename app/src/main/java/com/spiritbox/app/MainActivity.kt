@@ -58,6 +58,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnManualCapture: MaterialButton
     private lateinit var btnHold: MaterialButton
     private lateinit var btnMute: MaterialButton
+    private lateinit var btnBookmark: MaterialButton
+    private lateinit var spFav: Spinner
     private lateinit var btnShare: MaterialButton
     private lateinit var btnTheme: MaterialButton
     private lateinit var btnNight: MaterialButton
@@ -70,6 +72,7 @@ class MainActivity : AppCompatActivity() {
     private class CaptureEntry(val freqKHz: Double, val level: Int, val time: Long)
 
     private val captureEntries = ArrayList<CaptureEntry>()
+    private var lastFreq: Double = 0.0
 
     private val notifPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -81,6 +84,8 @@ class MainActivity : AppCompatActivity() {
     private val listener = object : SpiritBoxEvents.Listener {
         override fun onFreq(freqKHz: Double) {
             tvFreq.text = formatFreq(freqKHz)
+            lastFreq = freqKHz
+            updateBookmarkButton()
         }
 
         override fun onStatus(text: String) {
@@ -141,6 +146,8 @@ class MainActivity : AppCompatActivity() {
         btnManualCapture = findViewById(R.id.btnManualCapture)
         btnHold = findViewById(R.id.btnHold)
         btnMute = findViewById(R.id.btnMute)
+        btnBookmark = findViewById(R.id.btnBookmark)
+        spFav = findViewById(R.id.spFav)
         btnShare = findViewById(R.id.btnShare)
         btnTheme = findViewById(R.id.btnTheme)
         btnNight = findViewById(R.id.btnNight)
@@ -212,6 +219,23 @@ class MainActivity : AppCompatActivity() {
         updateMuteButton()
 
         btnShare.setOnClickListener { shareCaptures() }
+
+        btnBookmark.setOnClickListener {
+            if (lastFreq <= 0) {
+                Toast.makeText(this, R.string.scan_waiting_freq, Toast.LENGTH_SHORT).show()
+            } else {
+                Prefs.toggleFavorite(this, lastFreq)
+                updateBookmarkButton()
+                loadFavorites()
+            }
+        }
+
+        setupFavorites()
+
+        waterfall.setOnLongClickListener {
+            shareWaterfall()
+            true
+        }
 
         btnTheme.setOnClickListener {
             val next = (Prefs.themeMode(this) + 1) % THEME_MODES
@@ -413,6 +437,70 @@ class MainActivity : AppCompatActivity() {
         }
         try {
             startActivity(Intent.createChooser(send, getString(R.string.share_title)))
+        } catch (e: ActivityNotFoundException) {
+            Toast.makeText(this, R.string.share_no_file, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun setupFavorites() {
+        spFav.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: View?, position: Int, id: Long) {
+                if (position <= 0) return
+                val favs = Prefs.favorites(this@MainActivity)
+                val freq = favs.getOrNull(position - 1) ?: return
+                spFav.setSelection(0)
+                if (!SpiritBoxEvents.serviceRunning) {
+                    Toast.makeText(this@MainActivity, R.string.scan_not_running, Toast.LENGTH_SHORT).show()
+                    return
+                }
+                lastFreq = freq
+                SpiritBoxService.tuneTo(this@MainActivity, freq)
+                tvFreq.text = formatFreq(freq)
+                updateBookmarkButton()
+            }
+
+            override fun onNothingSelected(parent: android.widget.AdapterView<*>?) = Unit
+        }
+        loadFavorites()
+    }
+
+    private fun loadFavorites() {
+        val favs = Prefs.favorites(this)
+        val items = ArrayList<String>()
+        items.add(getString(R.string.fav_prompt))
+        items.addAll(favs.map { formatFreq(it) })
+        spFav.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, items).apply {
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
+        spFav.setSelection(0)
+        updateBookmarkButton()
+    }
+
+    private fun updateBookmarkButton() {
+        btnBookmark.text = if (Prefs.isFavorite(this, lastFreq)) "★" else getString(R.string.bookmark_off)
+    }
+
+    private fun shareWaterfall() {
+        val bmp = try {
+            waterfall.snapshotBitmap()
+        } catch (_: Exception) {
+            null
+        } ?: return
+        val file = File(cacheDir, "waterfall.png")
+        try {
+            file.outputStream().use { bmp.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, it) }
+        } catch (e: Exception) {
+            Toast.makeText(this, R.string.share_no_file, Toast.LENGTH_SHORT).show()
+            return
+        }
+        val uri: Uri = FileProvider.getUriForFile(this, "$packageName.fileprovider", file)
+        val send = Intent(Intent.ACTION_SEND).apply {
+            type = "image/png"
+            putExtra(Intent.EXTRA_STREAM, uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        try {
+            startActivity(Intent.createChooser(send, getString(R.string.share_waterfall_title)))
         } catch (e: ActivityNotFoundException) {
             Toast.makeText(this, R.string.share_no_file, Toast.LENGTH_SHORT).show()
         }

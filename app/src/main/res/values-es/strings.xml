@@ -49,6 +49,9 @@
    <string name="service_resumed">Barrido reanudado</string>
    <string name="share_title">Compartir capturas</string>
    <string name="share_no_file">Aún no hay nada que exportar.</string>
+    <string name="share_waterfall_title">Compartir waterfall</string>
+    <string name="fav_prompt">★ Favoritos</string>
+    <string name="bookmark_off">☆</string>
    <string name="default_threshold">12</string>
    <string name="default_settle">150</string>
    <string name="btn_hold">BLOQUEAR</string>

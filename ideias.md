@@ -1,6 +1,14 @@
 # Ideias para o SpiritBox
 
 ## Implementado recentemente
+- **Bookmarks / favoritos**: botão ★ marca/desmarca a frequência atual (persistida
+  em Prefs como lista de kHz); spinner "★ Favoritos" sintoniza direto num favorito
+  via `ACTION_TUNE` + `SweepEngine.stayOn()`.
+- **Exportar PNG do waterfall**: long-press no waterfall compartilha um snapshot
+  (bitmap atual + marcadores) via FileProvider.
+- **Gravar clipes**: buffer circular com os últimos 8 s de áudio decodificado
+  (PCM A-law 11025 Hz); a cada captura grava um WAV em
+  `Download/SpiritBox/spiritbox_clip_*.wav` (somente modo SDR, API ≥ 29).
 - **Auto-check de atualização** (UpdateChecker + VersionComparator): consulta o
   GitHub (`cleberleonheart-maker/Spirit-Box`) uma vez por dia e oferece download
   via diálogo. Silencioso se falhar / não houver release. Obs.: o repo precisa ter
@@ -16,11 +24,8 @@
 - Se implementar, mantê-lo ativo/oculto: só é exibido quando há movimento (toggle interno, sem publicar na loja nas primeiras versões).
 
 ## Próximas (não implementadas)
-- **Gravar clipes**: ao detectar captura, salvar os últimos N segundos de áudio para replay.
 - **Filtro de ruído**: usar os parâmetros do WebSDR (`noisered`, `autonotch`) por banda.
-- **Bookmark / favoritos**: salvar frequências de interesse e retornar a elas.
 - **Histórico persistente buscável**: leitura do CSV na UI (já feito: capturas recarregam ao abrir o app).
-- **Exportar PNG do waterfall atual**.
 - **Widget de notificação com play/pause**.
 - **Remover modo FM stub** ou marcá-lo experimental.
 

@@ -49,6 +49,9 @@
    <string name="service_resumed">Suche fortgesetzt</string>
    <string name="share_title">Erfassungen teilen</string>
    <string name="share_no_file">Noch nichts zu exportieren.</string>
+    <string name="share_waterfall_title">Waterfall teilen</string>
+    <string name="fav_prompt">★ Favoriten</string>
+    <string name="bookmark_off">☆</string>
    <string name="default_threshold">12</string>
    <string name="default_settle">150</string>
    <string name="btn_hold">HALTEN</string>

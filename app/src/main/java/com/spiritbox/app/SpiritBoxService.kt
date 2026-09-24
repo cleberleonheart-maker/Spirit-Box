@@ -50,7 +50,9 @@ class SpiritBoxService : Service() {
         private const val ACTION_CAPTURE = "com.spiritbox.app.CAPTURE"
         private const val ACTION_HOLD = "com.spiritbox.app.HOLD"
         private const val ACTION_MUTE = "com.spiritbox.app.MUTE"
+        private const val ACTION_TUNE = "com.spiritbox.app.TUNE"
         private const val EXTRA_MUTED = "muted"
+        private const val EXTRA_FREQ = "freq"
         private const val EXTRA_MODE = "mode"
         private const val EXTRA_SERVER = "server"
         private const val EXTRA_RANGE_INDEX = "rangeIndex"
@@ -61,6 +63,7 @@ class SpiritBoxService : Service() {
         private const val AUDIO_RATE = 11025
         private const val WAKELOCK_TIMEOUT_MS = 6 * 60 * 60 * 1000L
         private const val NOTIF_UPDATE_INTERVAL_MS = 400L
+        private const val CLIP_SECONDS = 8
 
         private val FALLBACK_SERVERS = listOf(
             "websdr.ewi.utwente.nl:8901",
@@ -120,6 +123,15 @@ class SpiritBoxService : Service() {
             )
         }
 
+        fun tuneTo(context: Context, freqKHz: Double) {
+            context.startService(
+                Intent(context, SpiritBoxService::class.java).apply {
+                    action = ACTION_TUNE
+                    putExtra(EXTRA_FREQ, freqKHz)
+                }
+            )
+        }
+
         fun stop(context: Context) {
             context.startService(
                 Intent(context, SpiritBoxService::class.java).apply {
@@ -143,6 +155,7 @@ class SpiritBoxService : Service() {
     private var audioFocusRequest: AudioFocusRequest? = null
     private var captureLog: File? = null
     private var wakeLock: PowerManager.WakeLock? = null
+    private var clipRecorder: AudioClipRecorder? = null
 
     @Volatile
     private var lastFreq: Double = 0.0
@@ -251,6 +264,16 @@ class SpiritBoxService : Service() {
                     getString(if (muted) R.string.status_muted else R.string.status_unmuted)
                 )
             }
+            ACTION_TUNE -> {
+                val e = engine
+                if (e == null) {
+                    SpiritBoxEvents.pushStatus(getString(R.string.scan_not_running))
+                    stopSelf()
+                } else {
+                    val freq = intent.getDoubleExtra(EXTRA_FREQ, 0.0)
+                    if (freq > 0) e.stayOn(freq)
+                }
+            }
             ACTION_STOP -> {
                 Prefs.clearActiveScan(this)
                 SpiritBoxEvents.holdActive = false
@@ -315,6 +338,8 @@ class SpiritBoxService : Service() {
             val at = createAudioTrack()
             audioTrack = at
             applyMute()
+            val rec = AudioClipRecorder(CLIP_SECONDS)
+            clipRecorder = rec
             val c = WebSdrClient(
                 this,
                 at,
@@ -322,7 +347,8 @@ class SpiritBoxService : Service() {
                 { rms ->
                     sdrTuner?.setRms(rms)
                     SpiritBoxEvents.pushRms(rms)
-                }
+                },
+                { samples -> rec.add(samples) }
             )
             client = c
             val tuner = WebSdrSweepTuner(c)
@@ -364,6 +390,7 @@ class SpiritBoxService : Service() {
         sdrTuner = null
         fm?.stop()
         fm = null
+        clipRecorder = null
         // O AudioTrack do modo SDR é liberado pelo próprio thread de escrita
         // (AudioWriterThread) durante client.close(), evitando uso-após-release.
         audioTrack = null
@@ -511,6 +538,40 @@ class SpiritBoxService : Service() {
             Log.w(TAG, "Falha ao gravar captura", e)
         }
         if (Prefs.alerts(this)) playCaptureAlert()
+        if (activeMode == MODE_SDR) saveClipFor()
+    }
+
+    private fun saveClipFor() {
+        val rec = clipRecorder ?: return
+        if (!rec.hasData()) return
+        val samples: ShortArray = try {
+            rec.snapshot()
+        } catch (e: Exception) {
+            Log.w(TAG, "Falha ao ler clipe", e)
+            return
+        }
+        if (samples.isEmpty()) return
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return
+        try {
+            val name = "spiritbox_clip_${SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())}.wav"
+            val resolver = contentResolver
+            val collection = MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+            val uri = resolver.insert(
+                collection,
+                ContentValues().apply {
+                    put(MediaStore.MediaColumns.DISPLAY_NAME, name)
+                    put(MediaStore.MediaColumns.MIME_TYPE, "audio/wav")
+                    put(MediaStore.MediaColumns.RELATIVE_PATH, "${Environment.DIRECTORY_DOWNLOADS}/SpiritBox")
+                }
+            )
+            if (uri != null) {
+                resolver.openOutputStream(uri)?.use { os ->
+                    rec.writeWav(os, AudioClipRecorder.SAMPLE_RATE, samples)
+                }
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Falha ao salvar clipe WAV", e)
+        }
     }
 
     private fun playCaptureAlert() {

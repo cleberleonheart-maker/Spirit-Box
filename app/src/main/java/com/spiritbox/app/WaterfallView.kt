@@ -79,6 +79,16 @@ class WaterfallView @JvmOverloads constructor(
         invalidate()
     }
 
+    /** Copia o waterfall atual para um Bitmap (com marcadores). */
+    fun snapshotBitmap(): Bitmap {
+        val out = Bitmap.createBitmap(COLS, ROWS, Bitmap.Config.ARGB_8888)
+        out.setPixels(pixels, 0, COLS, 0, 0, COLS, ROWS)
+        for (c in 0 until COLS) {
+            if (marks[c]) out.setPixel(c, ROWS - 1, markColor)
+        }
+        return out
+    }
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         bitmap.setPixels(pixels, 0, COLS, 0, 0, COLS, ROWS)

@@ -23,7 +23,8 @@ class WebSdrClient(
     private val context: Context,
     private val audioTrack: AudioTrack,
     private val onStatus: (String) -> Unit,
-    private val onRms: (Double) -> Unit
+    private val onRms: (Double) -> Unit,
+    private val pcmSink: (ShortArray) -> Unit = {}
 ) {
     @Volatile
     private var ws: WebSocket? = null
@@ -120,6 +121,7 @@ class WebSdrClient(
                 val samples = AlawDecoder.decode(bytes)
                 lastDataMs.set(System.currentTimeMillis())
                 onRms(rms(samples))
+                pcmSink(samples)
                 audioWriter?.offer(samples)
             }
 

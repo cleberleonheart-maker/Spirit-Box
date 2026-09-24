@@ -17,6 +17,7 @@ object Prefs {
     private const val KEY_MUTED = "muted"
     private const val KEY_THEME_MODE = "themeMode"
     private const val KEY_RED_NIGHT = "redNight"
+    private const val KEY_FAVORITES = "favorites"
 
     private const val KEY_SCAN_ACTIVE = "scanActive"
     private const val KEY_SCAN_MODE = "scanMode"
@@ -88,6 +89,26 @@ object Prefs {
 
     fun saveRedNight(c: Context, v: Boolean) =
         prefs(c).edit().putBoolean(KEY_RED_NIGHT, v).apply()
+
+    fun favorites(c: Context): List<Double> {
+        val raw = prefs(c).getString(KEY_FAVORITES, "") ?: return emptyList()
+        return raw.split(',').mapNotNull { it.trim().toDoubleOrNull() }
+    }
+
+    fun isFavorite(c: Context, freqKHz: Double): Boolean =
+        favorites(c).any { kotlin.math.abs(it - freqKHz) < 1.0 }
+
+    fun toggleFavorite(c: Context, freqKHz: Double): Boolean {
+        val current = favorites(c).toMutableList()
+        val has = current.any { kotlin.math.abs(it - freqKHz) < 1.0 }
+        val updated = if (has) {
+            current.filterNot { kotlin.math.abs(it - freqKHz) < 1.0 }
+        } else {
+            (current + freqKHz).sorted()
+        }
+        prefs(c).edit().putString(KEY_FAVORITES, updated.joinToString(",")).apply()
+        return !has
+    }
 
     data class ScanState(
         val mode: String,
