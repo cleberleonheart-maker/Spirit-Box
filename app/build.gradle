@@ -54,6 +54,9 @@ android {
                 storePassword senhaKs
                 keyAlias ksProps.getProperty('keyAlias', 'spirit')
                 keyPassword senhaKs
+                enableV1Signing true
+                enableV2Signing true
+                enableV3Signing true
             }
         }
     }
