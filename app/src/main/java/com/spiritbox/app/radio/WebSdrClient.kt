@@ -226,13 +226,36 @@ class WebSdrClient(
             s.sendText("GET /~~param?gain=10000")
             s.sendText("GET /~~param?agchang=0")
             s.sendText("GET /~~param?squelch=0")
-            s.sendText("GET /~~param?autonotch=0")
-            s.sendText("GET /~~param?noisered=0")
+            sendNoiseFilter()
         } catch (e: Exception) {
             Log.w(TAG, "Falha ao enviar parâmetros de áudio", e)
             connected = false
             scheduleReconnect()
         }
+    }
+
+    @Volatile
+    var noiseReduction: Boolean = false
+
+    fun applyNoiseFilter(enabled: Boolean) {
+        noiseReduction = enabled
+        val s = ws ?: return
+        if (!connected) return
+        try {
+            sendNoiseFilter()
+        } catch (e: Exception) {
+            Log.w(TAG, "Falha ao enviar filtro de ruído", e)
+            connected = false
+            scheduleReconnect()
+        }
+    }
+
+    private fun sendNoiseFilter() {
+        val s = ws
+        if (s == null || !connected) return
+        val v = if (noiseReduction) 1 else 0
+        s.sendText("GET /~~param?autonotch=$v")
+        s.sendText("GET /~~param?noisered=$v")
     }
 
     fun close() {

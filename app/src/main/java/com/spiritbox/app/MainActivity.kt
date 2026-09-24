@@ -51,6 +51,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var etServer: EditText
     private lateinit var swFm: MaterialSwitch
     private lateinit var swAlerts: MaterialSwitch
+    private lateinit var swNoise: MaterialSwitch
     private lateinit var spBand: Spinner
     private lateinit var etDwell: EditText
     private lateinit var etSettle: EditText
@@ -140,6 +141,7 @@ class MainActivity : AppCompatActivity() {
         etServer = findViewById(R.id.etServer)
         swFm = findViewById(R.id.swFm)
         swAlerts = findViewById(R.id.swAlerts)
+        swNoise = findViewById(R.id.swNoise)
         listCaptures = findViewById(R.id.listCaptures)
         scrollRoot = findViewById(R.id.scrollRoot)
         spBand = findViewById(R.id.spBand)
@@ -222,6 +224,13 @@ class MainActivity : AppCompatActivity() {
         }
         updateMuteButton()
 
+        swNoise.setOnCheckedChangeListener { _, checked ->
+            Prefs.saveNoiseReduction(this, checked)
+            if (SpiritBoxEvents.serviceRunning) {
+                SpiritBoxService.setNoiseReduction(this, checked)
+            }
+        }
+
         btnShare.setOnClickListener { shareCaptures() }
 
         btnBookmark.setOnClickListener {
@@ -298,6 +307,7 @@ class MainActivity : AppCompatActivity() {
         etServer.setText(Prefs.server(this))
         swFm.isChecked = Prefs.fmMode(this)
         swAlerts.isChecked = Prefs.alerts(this)
+        swNoise.isChecked = Prefs.noiseReduction(this)
         spBand.setSelection(Prefs.rangeIndex(this).coerceIn(0, SweepEngine.PRESETS.size - 1))
         etDwell.setText(Prefs.dwell(this).toString())
         etSettle.setText(Prefs.settle(this).toString())
@@ -316,6 +326,7 @@ class MainActivity : AppCompatActivity() {
         etThreshold.text.toString().toIntOrNull()?.let { Prefs.saveThreshold(this, it) }
         etGap.text.toString().toLongOrNull()?.let { Prefs.saveGap(this, it) }
         Prefs.saveAlerts(this, swAlerts.isChecked)
+        Prefs.saveNoiseReduction(this, swNoise.isChecked)
     }
 
     private fun followCapturesIfNearBottom() {

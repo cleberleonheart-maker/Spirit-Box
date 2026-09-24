@@ -69,11 +69,14 @@
    <string name="band_marine">VHF maritime</string>
    <string name="band_military">Military 225-400 MHz</string>
    <string name="switch_alerts">Alert</string>
+   <string name="switch_noise">Noise reduction</string>
    <string name="action_save">Save</string>
    <string name="btn_mute">MUTE</string>
    <string name="btn_unmute">SOUND</string>
-   <string name="status_muted">Sound off</string>
-   <string name="status_unmuted">Sound on</string>
+<string name="status_muted">Sound off</string>
+    <string name="status_unmuted">Sound on</string>
+    <string name="status_noise_on">Noise filter on</string>
+    <string name="status_noise_off">Noise filter off</string>
     <string name="check_update_title">Update available</string>
     <string name="check_update_msg">A new version (%1$s) of Spirit Box is available. What would you like to do?</string>
     <string name="check_update_btn">DOWNLOAD</string>

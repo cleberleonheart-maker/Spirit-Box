@@ -69,11 +69,14 @@
    <string name="band_marine">VHF marítimo</string>
    <string name="band_military">Militar 225-400 MHz</string>
    <string name="switch_alerts">Alerta</string>
+   <string name="switch_noise">Redução de ruído</string>
    <string name="action_save">Salvar</string>
    <string name="btn_mute">MUDO</string>
    <string name="btn_unmute">SOM</string>
-   <string name="status_muted">Som desligado</string>
-   <string name="status_unmuted">Som ligado</string>
+<string name="status_muted">Som desligado</string>
+    <string name="status_unmuted">Som ligado</string>
+    <string name="status_noise_on">Filtro de ruído ativado</string>
+    <string name="status_noise_off">Filtro de ruído desativado</string>
     <string name="check_update_title">Atualização disponível</string>
     <string name="check_update_msg">Há uma nova versão (%1$s) do Spirit Box. O que deseja fazer?</string>
     <string name="check_update_btn">BAIXAR</string>

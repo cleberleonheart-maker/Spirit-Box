@@ -50,8 +50,10 @@ class SpiritBoxService : Service() {
         private const val ACTION_CAPTURE = "com.spiritbox.app.CAPTURE"
         private const val ACTION_HOLD = "com.spiritbox.app.HOLD"
         private const val ACTION_MUTE = "com.spiritbox.app.MUTE"
+        private const val ACTION_NOISE = "com.spiritbox.app.NOISE"
         private const val ACTION_TUNE = "com.spiritbox.app.TUNE"
         private const val EXTRA_MUTED = "muted"
+        private const val EXTRA_NOISE = "noise"
         private const val EXTRA_FREQ = "freq"
         private const val EXTRA_MODE = "mode"
         private const val EXTRA_SERVER = "server"
@@ -119,6 +121,15 @@ class SpiritBoxService : Service() {
                 Intent(context, SpiritBoxService::class.java).apply {
                     action = ACTION_MUTE
                     putExtra(EXTRA_MUTED, muted)
+                }
+            )
+        }
+
+        fun setNoiseReduction(context: Context, enabled: Boolean) {
+            context.startService(
+                Intent(context, SpiritBoxService::class.java).apply {
+                    action = ACTION_NOISE
+                    putExtra(EXTRA_NOISE, enabled)
                 }
             )
         }
@@ -265,6 +276,16 @@ class SpiritBoxService : Service() {
                     getString(if (muted) R.string.status_muted else R.string.status_unmuted)
                 )
             }
+            ACTION_NOISE -> {
+                val enabled = intent.getBooleanExtra(EXTRA_NOISE, Prefs.noiseReduction(this))
+                Prefs.saveNoiseReduction(this, enabled)
+                client?.applyNoiseFilter(enabled)
+                SpiritBoxEvents.pushStatus(
+                    getString(
+                        if (enabled) R.string.status_noise_on else R.string.status_noise_off
+                    )
+                )
+            }
             ACTION_TUNE -> {
                 val e = engine
                 if (e == null) {
@@ -351,6 +372,7 @@ class SpiritBoxService : Service() {
                 },
                 { samples -> rec.add(samples) }
             )
+            c.noiseReduction = Prefs.noiseReduction(this)
             client = c
             val tuner = WebSdrSweepTuner(c)
             sdrTuner = tuner
