@@ -79,6 +79,11 @@
     <string name="status_noise_off">Noise filter off</string>
     <string name="update_downloading">Downloading update…</string>
     <string name="update_download_failed">Could not download the update</string>
+    <string name="btn_emf">EMF</string>
+    <string name="emf_dialog_title">EMF meter</string>
+    <string name="emf_dialog_hint">Experimental prototype — reflects signal activity variation.</string>
+    <string name="motion_unlocked">Investigation mode on</string>
+    <string name="motion_locked">Investigation mode off</string>
     <string name="check_update_title">Update available</string>
     <string name="check_update_msg">A new version (%1$s) of Spirit Box is available. What would you like to do?</string>
     <string name="check_update_btn">DOWNLOAD</string>

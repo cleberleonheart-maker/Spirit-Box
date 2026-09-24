@@ -19,6 +19,7 @@ object Prefs {
     private const val KEY_RED_NIGHT = "redNight"
     private const val KEY_FAVORITES = "favorites"
     private const val KEY_NOISE = "noiseReduction"
+    private const val KEY_MOTION_UNLOCKED = "motionUnlocked"
 
     private const val KEY_SCAN_ACTIVE = "scanActive"
     private const val KEY_SCAN_MODE = "scanMode"
@@ -84,6 +85,11 @@ object Prefs {
 
     fun saveNoiseReduction(c: Context, v: Boolean) =
         prefs(c).edit().putBoolean(KEY_NOISE, v).apply()
+
+    fun motionUnlocked(c: Context): Boolean = prefs(c).getBoolean(KEY_MOTION_UNLOCKED, false)
+
+    fun saveMotionUnlocked(c: Context, v: Boolean) =
+        prefs(c).edit().putBoolean(KEY_MOTION_UNLOCKED, v).apply()
 
     /** 0 = sistema, 1 = claro, 2 = escuro. */
     fun themeMode(c: Context): Int = prefs(c).getInt(KEY_THEME_MODE, 0)

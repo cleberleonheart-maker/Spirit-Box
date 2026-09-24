@@ -82,6 +82,13 @@
             android:layout_height="100dp"
             android:layout_marginTop="10dp" />
 
+        <com.spiritbox.app.MiniMapView
+            android:id="@+id/miniMap"
+            android:layout_width="match_parent"
+            android:layout_height="36dp"
+            android:layout_marginTop="4dp"
+            android:visibility="gone" />
+
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -290,6 +297,15 @@
                 android:layout_marginStart="8dp"
                 android:layout_weight="1"
                 android:text="@string/btn_night_off"
+                app:cornerRadius="24dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnEmf"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:text="@string/btn_emf"
                 app:cornerRadius="24dp" />
         </LinearLayout>
 

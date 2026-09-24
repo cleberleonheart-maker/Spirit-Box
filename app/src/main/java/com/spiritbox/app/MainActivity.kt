@@ -1,15 +1,19 @@
 package com.spiritbox.app
 
 import android.Manifest
+import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.os.PowerManager
 import android.provider.Settings
 import android.view.View
@@ -65,9 +69,22 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnShare: MaterialButton
     private lateinit var btnTheme: MaterialButton
     private lateinit var btnNight: MaterialButton
+    private lateinit var btnEmf: MaterialButton
+    private lateinit var miniMap: MiniMapView
     private lateinit var redFilter: View
     private lateinit var listCaptures: ListView
     private var scrollRoot: NestedScrollView? = null
+
+    private val monitor = ActivityMonitor()
+    private val emfHandler = Handler(Looper.getMainLooper())
+    private val mapHandler = Handler(Looper.getMainLooper())
+    private var emfRunning = false
+    private var emfValue = 0f
+    private var emfTrend = 0f
+    private var emfGauge: EmfGaugeView? = null
+    private var emfReadout: TextView? = null
+    private var statusTaps = 0
+    private var lastStatusTap = 0L
 
     private val captures = ArrayList<String>()
     private lateinit var adapter: ArrayAdapter<String>
@@ -99,6 +116,7 @@ class MainActivity : AppCompatActivity() {
             adapter.add("${formatFreq(freqKHz)}  ·  nível $level%")
             captureEntries.add(CaptureEntry(freqKHz, level, System.currentTimeMillis()))
             waterfall.markCapture(freqKHz)
+            monitor.onCapture(freqKHz, level)
             if (adapter.count > 200) {
                 adapter.remove(adapter.getItem(0))
                 if (captureEntries.isNotEmpty()) captureEntries.removeAt(0)
@@ -109,9 +127,13 @@ class MainActivity : AppCompatActivity() {
 
         override fun onRms(rms: Double) {
             meter.progress = (rms * 100).toInt().coerceIn(0, 100)
+            monitor.onRms(rms)
         }
 
         override fun onServiceStopped() {
+            monitor.reset()
+            miniMap.reset()
+            miniMap.visibility = View.GONE
             updateToggle()
         }
 
@@ -157,7 +179,9 @@ class MainActivity : AppCompatActivity() {
         btnShare = findViewById(R.id.btnShare)
         btnTheme = findViewById(R.id.btnTheme)
         btnNight = findViewById(R.id.btnNight)
+        btnEmf = findViewById(R.id.btnEmf)
         redFilter = findViewById(R.id.redFilter)
+        miniMap = findViewById(R.id.miniMap)
 
         spBand.adapter = ArrayAdapter(
             this, android.R.layout.simple_spinner_item,
@@ -194,6 +218,9 @@ class MainActivity : AppCompatActivity() {
                 val threshold = etThreshold.text.toString().toIntOrNull() ?: 12
                 val gap = etGap.text.toString().toLongOrNull() ?: 300L
                 waterfall.configure(range.startKHz.toDouble(), range.endKHz.toDouble())
+                monitor.configureBand(range.startKHz.toDouble(), range.endKHz.toDouble())
+                monitor.reset()
+                miniMap.reset()
                 SpiritBoxService.start(this, mode, server, range, dwell, settle, threshold, gap)
             }
         }
@@ -264,6 +291,24 @@ class MainActivity : AppCompatActivity() {
             applyNightFilter()
         }
 
+        btnEmf.setOnClickListener { openEmfDialog() }
+
+        tvStatus.setOnClickListener {
+            val now = System.currentTimeMillis()
+            statusTaps = if (now - lastStatusTap < 2000) statusTaps + 1 else 1
+            lastStatusTap = now
+            if (statusTaps >= 7) {
+                statusTaps = 0
+                val on = !Prefs.motionUnlocked(this)
+                Prefs.saveMotionUnlocked(this, on)
+                Toast.makeText(
+                    this,
+                    getString(if (on) R.string.motion_unlocked else R.string.motion_locked),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+
         updateMuteButton()
         updateThemeButton()
         updateNightButton()
@@ -315,15 +360,72 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun openEmfDialog() {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_emf)
+        emfGauge = dialog.findViewById(R.id.emfGauge)
+        emfReadout = dialog.findViewById(R.id.emfReadout)
+        emfRunning = true
+        emfHandler.post(emfRunnable)
+        dialog.setOnDismissListener {
+            emfRunning = false
+            emfHandler.removeCallbacks(emfRunnable)
+        }
+        dialog.show()
+    }
+
+    private val emfRunnable = object : Runnable {
+        override fun run() {
+            if (!emfRunning) return
+            val m = monitor.movement().toFloat()
+            emfTrend = emfTrend + (m - emfTrend) * 0.2f
+            val noise = ((Math.random() * 8) - 4).toFloat()
+            emfValue = (emfValue + emfTrend * 0.35f + noise).coerceIn(0f, 99.9f)
+            emfGauge?.setValue(emfValue / 100f)
+            val color = when {
+                emfValue >= 70f -> Color.rgb(0xE0, 0x2C, 0x20)
+                emfValue >= 40f -> Color.rgb(0xF0, 0xA0, 0x00)
+                else -> Color.rgb(0x37, 0xB0, 0x50)
+            }
+            emfReadout?.setTextColor(color)
+            emfReadout?.text = String.format(Locale.US, "%.1f mG", emfValue)
+            emfHandler.postDelayed(this, 250)
+        }
+    }
+
+    private val mapRunnable = object : Runnable {
+        override fun run() {
+            mapHandler.postDelayed(this, 600)
+            if (!Prefs.motionUnlocked(this@MainActivity)) {
+                if (miniMap.visibility == View.VISIBLE) miniMap.visibility = View.GONE
+                return
+            }
+            val m = monitor.movement()
+            miniMap.push(m)
+            val shouldShow = m >= 30 && SpiritBoxEvents.serviceRunning
+            if (shouldShow && miniMap.visibility != View.VISIBLE) {
+                miniMap.visibility = View.VISIBLE
+            } else if (!shouldShow && miniMap.visibility == View.VISIBLE) {
+                miniMap.visibility = View.GONE
+            }
+        }
+    }
+
     override fun onStart() {
         super.onStart()
         SpiritBoxEvents.addListener(listener)
+        mapHandler.post(mapRunnable)
         updateToggle()
     }
 
     override fun onStop() {
         super.onStop()
         SpiritBoxEvents.removeListener(listener)
+        mapHandler.removeCallbacks(mapRunnable)
+        if (emfRunning) {
+            emfRunning = false
+            emfHandler.removeCallbacks(emfRunnable)
+        }
     }
 
     private fun loadPrefs() {
