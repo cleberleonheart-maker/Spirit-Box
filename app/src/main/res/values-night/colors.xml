@@ -6,4 +6,5 @@
     <color name="text_primary">#E8EAF0</color>
     <color name="text_secondary">#8A93A6</color>
     <color name="danger">#C94F4F</color>
+    <color name="capture_mark">#FFFFFF</color>
 </resources>

@@ -103,7 +103,7 @@ class MainActivity : AppCompatActivity() {
                 if (captureEntries.isNotEmpty()) captureEntries.removeAt(0)
             }
             listCaptures.smoothScrollToPosition(adapter.count - 1)
-            scrollRoot?.post { scrollRoot?.fullScroll(View.FOCUS_DOWN) }
+            followCapturesIfNearBottom()
         }
 
         override fun onRms(rms: Double) {
@@ -316,6 +316,15 @@ class MainActivity : AppCompatActivity() {
         etThreshold.text.toString().toIntOrNull()?.let { Prefs.saveThreshold(this, it) }
         etGap.text.toString().toLongOrNull()?.let { Prefs.saveGap(this, it) }
         Prefs.saveAlerts(this, swAlerts.isChecked)
+    }
+
+    private fun followCapturesIfNearBottom() {
+        val sv = scrollRoot ?: return
+        val child = sv.getChildAt(0) ?: return
+        val maxY = (child.height - sv.height).coerceAtLeast(0)
+        if (sv.scrollY >= maxY - 120) {
+            sv.post { sv.smoothScrollTo(0, maxY) }
+        }
     }
 
     private fun loadPersistedCaptures() {

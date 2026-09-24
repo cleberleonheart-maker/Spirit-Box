@@ -29,7 +29,7 @@ class WaterfallView @JvmOverloads constructor(
     private val pixels = IntArray(COLS * ROWS)
     private val bitmap: Bitmap = Bitmap.createBitmap(COLS, ROWS, Bitmap.Config.ARGB_8888)
     private val paint = Paint().apply { isFilterBitmap = false }
-    private val markColor by lazy { context.getColor(R.color.danger) }
+    private val markColor by lazy { context.getColor(R.color.capture_mark) }
     private val srcRect = Rect(0, 0, COLS, ROWS)
     private val dstRect = Rect()
 
@@ -101,9 +101,9 @@ class WaterfallView @JvmOverloads constructor(
     private fun colorFor(level: Float): Int {
         val t = level.coerceIn(0f, 0.9f) / 0.9f
         if (t <= 0.01f) return bgColor()
-        val r = (0x15 + ((0x39 - 0x15) * t).toInt()).coerceIn(0, 255)
-        val g = (0x1A + ((0xD5 - 0x1A) * t).toInt()).coerceIn(0, 255)
-        val b = (0x24 + ((0xC9 - 0x24) * t).toInt()).coerceIn(0, 255)
+        val r = (0x1A + ((0xFF - 0x1A) * t).toInt()).coerceIn(0, 255)
+        val g = (0x06 + ((0x45 - 0x06) * t).toInt()).coerceIn(0, 255)
+        val b = (0x08 + ((0x2A - 0x08) * t).toInt()).coerceIn(0, 255)
         return Color.rgb(r, g, b)
     }
 }
