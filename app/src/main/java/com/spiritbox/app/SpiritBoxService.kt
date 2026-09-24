@@ -378,8 +378,7 @@ class SpiritBoxService : Service() {
         val pm = getSystemService(Context.POWER_SERVICE) as? PowerManager ?: return
         wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "$packageName:scan").apply {
             setReferenceCounted(false)
-            val timeout = WAKELOCK_TIMEOUT_MS
-            if (timeout > 0) acquire(timeout) else acquire()
+            acquire(WAKELOCK_TIMEOUT_MS)
         }
     }
 
@@ -600,6 +599,19 @@ class SpiritBoxService : Service() {
             Intent(this, SpiritBoxService::class.java).apply { action = ACTION_CAPTURE },
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
+        val holdPi = PendingIntent.getService(
+            this, 2,
+            Intent(this, SpiritBoxService::class.java).apply { action = ACTION_HOLD },
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        val mutePi = PendingIntent.getService(
+            this, 3,
+            Intent(this, SpiritBoxService::class.java).apply {
+                action = ACTION_MUTE
+                putExtra(EXTRA_MUTED, !Prefs.muted(this@SpiritBoxService))
+            },
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
         val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Notification.Builder(this, CHANNEL_ID)
         } else {
@@ -613,6 +625,20 @@ class SpiritBoxService : Service() {
             .setOngoing(true)
             .addAction(
                 Notification.Action.Builder(null, getString(R.string.action_save), savePi).build()
+            )
+            .addAction(
+                Notification.Action.Builder(
+                    null,
+                    getString(if (SpiritBoxEvents.holdActive) R.string.btn_release else R.string.btn_hold),
+                    holdPi
+                ).build()
+            )
+            .addAction(
+                Notification.Action.Builder(
+                    null,
+                    getString(if (Prefs.muted(this)) R.string.btn_unmute else R.string.btn_mute),
+                    mutePi
+                ).build()
             )
             .addAction(
                 Notification.Action.Builder(null, getString(R.string.action_stop), stopPi).build()

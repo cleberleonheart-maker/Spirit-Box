@@ -12,21 +12,24 @@ import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
+import android.view.View
+import android.view.WindowManager
 import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.ListView
 import android.widget.ProgressBar
 import android.widget.Spinner
-import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.materialswitch.MaterialSwitch
 import com.spiritbox.app.radio.SweepEngine
 import java.io.File
 import java.text.SimpleDateFormat
@@ -35,14 +38,18 @@ import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
+    companion object {
+        private const val THEME_MODES = 3
+    }
+
     private lateinit var tvFreq: TextView
     private lateinit var tvStatus: TextView
     private lateinit var meter: ProgressBar
     private lateinit var waterfall: WaterfallView
     private lateinit var btnToggle: MaterialButton
     private lateinit var etServer: EditText
-    private lateinit var swFm: Switch
-    private lateinit var swAlerts: Switch
+    private lateinit var swFm: MaterialSwitch
+    private lateinit var swAlerts: MaterialSwitch
     private lateinit var spBand: Spinner
     private lateinit var etDwell: EditText
     private lateinit var etSettle: EditText
@@ -52,6 +59,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnHold: MaterialButton
     private lateinit var btnMute: MaterialButton
     private lateinit var btnShare: MaterialButton
+    private lateinit var btnTheme: MaterialButton
+    private lateinit var btnNight: MaterialButton
+    private lateinit var redFilter: View
     private lateinit var listCaptures: ListView
 
     private val captures = ArrayList<String>()
@@ -80,6 +90,7 @@ class MainActivity : AppCompatActivity() {
         override fun onCapture(freqKHz: Double, level: Int) {
             adapter.add("${formatFreq(freqKHz)}  ·  nível $level%")
             captureEntries.add(CaptureEntry(freqKHz, level, System.currentTimeMillis()))
+            waterfall.markCapture(freqKHz)
             if (adapter.count > 200) {
                 adapter.remove(adapter.getItem(0))
                 if (captureEntries.isNotEmpty()) captureEntries.removeAt(0)
@@ -109,6 +120,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        applyThemeMode()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -130,6 +142,9 @@ class MainActivity : AppCompatActivity() {
         btnHold = findViewById(R.id.btnHold)
         btnMute = findViewById(R.id.btnMute)
         btnShare = findViewById(R.id.btnShare)
+        btnTheme = findViewById(R.id.btnTheme)
+        btnNight = findViewById(R.id.btnNight)
+        redFilter = findViewById(R.id.redFilter)
 
         spBand.adapter = ArrayAdapter(
             this, android.R.layout.simple_spinner_item,
@@ -197,6 +212,25 @@ class MainActivity : AppCompatActivity() {
         updateMuteButton()
 
         btnShare.setOnClickListener { shareCaptures() }
+
+        btnTheme.setOnClickListener {
+            val next = (Prefs.themeMode(this) + 1) % THEME_MODES
+            Prefs.saveThemeMode(this, next)
+            applyThemeMode()
+            updateThemeButton()
+            recreate()
+        }
+
+        btnNight.setOnClickListener {
+            val on = !Prefs.redNight(this)
+            Prefs.saveRedNight(this, on)
+            applyNightFilter()
+        }
+
+        updateMuteButton()
+        updateThemeButton()
+        updateNightButton()
+        applyNightFilter()
 
         spiritCheckUpdatesSilently()
     }
@@ -395,7 +429,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun requestIgnoreBatteryOptimizations() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return
         val pm = getSystemService(PowerManager::class.java) ?: return
         if (pm.isIgnoringBatteryOptimizations(packageName)) return
         try {
@@ -423,6 +456,46 @@ class MainActivity : AppCompatActivity() {
     private fun updateMuteButton() {
         val muted = Prefs.muted(this)
         btnMute.text = getString(if (muted) R.string.btn_unmute else R.string.btn_mute)
+    }
+
+    private fun nightModeFor(mode: Int): Int = when (mode) {
+        1 -> AppCompatDelegate.MODE_NIGHT_NO
+        2 -> AppCompatDelegate.MODE_NIGHT_YES
+        else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+    }
+
+    private fun themeModeStringRes(mode: Int): Int = when (mode) {
+        1 -> R.string.theme_light
+        2 -> R.string.theme_dark
+        else -> R.string.theme_system
+    }
+
+    private fun applyThemeMode() {
+        AppCompatDelegate.setDefaultNightMode(nightModeFor(Prefs.themeMode(this)))
+    }
+
+    private fun updateThemeButton() {
+        btnTheme.text = getString(
+            R.string.btn_theme, getString(themeModeStringRes(Prefs.themeMode(this)))
+        )
+    }
+
+    private fun updateNightButton() {
+        btnNight.text = getString(
+            if (Prefs.redNight(this)) R.string.btn_night_on else R.string.btn_night_off
+        )
+    }
+
+    private fun applyNightFilter() {
+        val on = Prefs.redNight(this)
+        redFilter.visibility = if (on) View.VISIBLE else View.GONE
+        window.attributes = window.attributes.apply {
+            screenBrightness = if (on) {
+                0.55f
+            } else {
+                WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+            }
+        }
     }
 
     private fun formatFreq(khz: Double): String {

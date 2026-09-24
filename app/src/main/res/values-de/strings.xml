@@ -77,4 +77,10 @@
     <string name="check_update_later">SPÄTER</string>
     <string name="check_update_uptodate">Du hast bereits die neueste Version.</string>
     <string name="check_update_error">Aktualisierungsprüfung fehlgeschlagen.</string>
+    <string name="btn_theme">THEMA: %1$s</string>
+    <string name="theme_system">SYSTEM</string>
+    <string name="theme_light">HELL</string>
+    <string name="theme_dark">DUNKEL</string>
+    <string name="btn_night_off">NACHT</string>
+    <string name="btn_night_on">NACHT AN</string>
 </resources>

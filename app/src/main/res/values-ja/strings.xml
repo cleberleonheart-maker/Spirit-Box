@@ -77,4 +77,10 @@
     <string name="check_update_later">あとで</string>
     <string name="check_update_uptodate">すでに最新バージョンです。</string>
     <string name="check_update_error">アップデートを確認できませんでした。</string>
+    <string name="btn_theme">テーマ: %1$s</string>
+    <string name="theme_system">システム</string>
+    <string name="theme_light">ライト</string>
+    <string name="theme_dark">ダーク</string>
+    <string name="btn_night_off">ナイト</string>
+    <string name="btn_night_on">ナイト ON</string>
 </resources>

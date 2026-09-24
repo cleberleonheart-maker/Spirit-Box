@@ -5,6 +5,10 @@
   GitHub (`cleberleonheart-maker/Spirit-Box`) uma vez por dia e oferece download
   via diálogo. Silencioso se falhar / não houver release. Obs.: o repo precisa ter
   uma release publicada (ou ser público) senão a checagem volta 404 e nunca dispara.
+- **Tema claro/escuro/sistema** (DayNight) + **filtro vermelho noturno** com
+  toggle de brilho (overlay + `screenBrightness`).
+- **Marcadores de captura no waterfall** (linha vermelha na faixa capturada).
+- **Notificação com ações**: Salvar, Hold, Mudo e Parar.
 
 ## Mini mapa de movimento (oculto)
 - Um mini mapa/heatmap que capta **movimento**: detecta atividade variável no sinal (não só pico) e marca onde houve movimento ao longo do tempo.
@@ -14,12 +18,10 @@
 ## Próximas (não implementadas)
 - **Gravar clipes**: ao detectar captura, salvar os últimos N segundos de áudio para replay.
 - **Filtro de ruído**: usar os parâmetros do WebSDR (`noisered`, `autonotch`) por banda.
-- **Inserir nível por frequência no waterfall** — marcar capturas no waterfall.
 - **Bookmark / favoritos**: salvar frequências de interesse e retornar a elas.
 - **Histórico persistente buscável**: leitura do CSV na UI (já feito: capturas recarregam ao abrir o app).
 - **Exportar PNG do waterfall atual**.
 - **Widget de notificação com play/pause**.
-- **Tema dark / light automático**.
 - **Remover modo FM stub** ou marcá-lo experimental.
 
 ## Privacidade / segurança

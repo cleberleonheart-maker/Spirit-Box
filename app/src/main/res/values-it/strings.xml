@@ -77,4 +77,10 @@
     <string name="check_update_later">NON ORA</string>
     <string name="check_update_uptodate">Hai già l\'ultima versione.</string>
     <string name="check_update_error">Impossibile verificare gli aggiornamenti.</string>
+    <string name="btn_theme">TEMA: %1$s</string>
+    <string name="theme_system">SISTEMA</string>
+    <string name="theme_light">CHIARO</string>
+    <string name="theme_dark">SCURO</string>
+    <string name="btn_night_off">NOTTE</string>
+    <string name="btn_night_on">NOTTE ON</string>
 </resources>
