@@ -1,33 +1,41 @@
 # SpiritBox
 
-Aplicativo Android para varredura de frequências via WebSDR, com waterfall ao vivo, favoritos, capturas (CSV), exportação de imagem do waterfall e gravação de clipes de áudio (WAV).
+Aplicativo Android para varredura de frequências via WebSDR, com waterfall ao vivo, favoritos (bookmarks), capturas (CSV), exportação de imagem do waterfall e gravação de clipes de áudio (WAV).
+
+## Recursos
+
+- Varredura de faixas (AM, SW, CB, VHF aeronáutica, FM, METEO, marítimo, militar) com dwell/settle/limiar/gap configuráveis.
+- Waterfall ao vivo (gradiente vermelho) com marcadores de captura e exportação de imagem (toque longo).
+- Modo noturno (filtro vermelho) e tema claro/escuro/sistema.
+- Favoritos de frequência com sintonia direta.
+- Histórico de capturas persistido em CSV e espelhado em `Download/SpiritBox/`.
+- Clipes WAV dos últimos 8 s (modo SDR, API >= 29) salvos ao apertar **Salvar**.
+- Notificação com ações (Salvar, Hold, Mudo, Parar) e auto-check de atualização via GitHub Releases.
+- Modo FM experimental (rádio FM local) com aviso de indisponibilidade.
 
 ## Build
 
 ```bash
+# Debug (assinatura Android Debug)
 ./gradlew assembleDebug
+
+# Release (assinada com a keystore de produção)
+SPIRIT_KS_PASS='sua-senha' ./gradlew assembleRelease
 ```
 
-Requires Android SDK (see `local.properties`). Release build precisa do keystore (`SPIRIT_KS_PASS` ou `keystore.properties`).
+Requer Android SDK (ver `local.properties`).
+A keystore de release vive em `keystore/spirit.keystore` (fora do git); a senha vem de `SPIRIT_KS_PASS` ou do fallback `keystore.properties`.
 
 ## CI
 
-O workflow `.github/workflows/android.yml` roda testes, lint e `assembleDebug` a cada push/PR.
+- `.github/workflows/android.yml` — testes, lint e `assembleDebug` a cada push/PR.
+- `.github/workflows/release.yml` — ao publicar uma tag `v*`, builda a release **assinada com a sua keystore** (secrets `SPIRIT_KS_PASS` + `SPIRIT_KS_B64`) e anexa o APK à Release do GitHub:
 
-## Release
+```bash
+git tag v1.2
+git push origin v1.2
+```
 
-Para publicar uma versão final assinada:
+## Assinatura e atualizações
 
-1. Ajuste `versionCode`/`versionName` no `app/build.gradle` (padrões: 2 / 1.1).
-2. Crie uma tag `v*` e empurre para `main`:
-
-   ```bash
-   git tag v1.2
-   git push origin v1.2
-   ```
-
-3. O workflow `.github/workflows/release.yml` roda no push da tag: restaura o keystore do secret `SPIRIT_KS_B64`, builda o `assembleRelease` assinado (nome da versão vem da tag) e anexa o APK na GitHub Release.
-
-O keystore de release fica nos secrets do repositório (`SPIRIT_KS_B64` = base64 do `.keystore`, `SPIRIT_KS_PASS` = senha).
-
-> Instalações/atualizações só funcionam por cima de APK assinado com a **mesma chave**. A release da CI e os builds locais com o mesmo keystore atualizam sem desinstalar; uma chave diferente exige desinstalar antes.
+O keystore de produção atual é o `keystore/spirit.keystore` (SHA-256 `f5bce3d4…`, CN=SpiritBox, OU=Dev). Para instalar/atualizar sem conflito, use **sempre** APK com a mesma assinatura — a release da CI e os builds locais com esse keystore atualizam por cima sem desinstalar. APK assinado com outra chave (ex.: APK debug, ou a chave antiga `9105225d…`) exige **desinstalar antes**.
