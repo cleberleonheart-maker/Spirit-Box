@@ -42,8 +42,8 @@ android {
         applicationId "com.spiritbox.app"
         minSdk 24
         targetSdk 35
-        versionCode ((project.findProperty('versionCode') as String ?: '1').toInteger())
-        versionName (project.findProperty('versionName') as String ?: '1.0')
+        versionCode ((project.findProperty('versionCode') as String ?: '2').toInteger())
+        versionName (project.findProperty('versionName') as String ?: '1.1')
     }
 
     signingConfigs {
