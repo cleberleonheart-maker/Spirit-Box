@@ -9,6 +9,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -83,6 +87,11 @@ class MainActivity : AppCompatActivity() {
     private var emfTrend = 0f
     private var emfGauge: EmfGaugeView? = null
     private var emfReadout: TextView? = null
+    private var emfSensorManager: SensorManager? = null
+    private var sensorPresent = false
+    private var emfFieldUv = 0.0
+    private var emfBaselineUv = 0.0
+    private var emfFieldMillis = 0L
     private var statusTaps = 0
     private var lastStatusTap = 0L
 
@@ -365,22 +374,51 @@ class MainActivity : AppCompatActivity() {
         dialog.setContentView(R.layout.dialog_emf)
         emfGauge = dialog.findViewById(R.id.emfGauge)
         emfReadout = dialog.findViewById(R.id.emfReadout)
+        startEmfSensors()
         emfRunning = true
         emfHandler.post(emfRunnable)
         dialog.setOnDismissListener {
             emfRunning = false
             emfHandler.removeCallbacks(emfRunnable)
+            stopEmfSensors()
         }
         dialog.show()
+    }
+
+    private fun startEmfSensors() {
+        emfBaselineUv = 0.0
+        val sm = getSystemService(Context.SENSOR_SERVICE) as? SensorManager
+        val mag = sm?.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
+        sensorPresent = mag != null && sm.registerListener(emfMagnetListener, mag, SensorManager.SENSOR_DELAY_NORMAL)
+        if (sensorPresent) emfSensorManager = sm
+        if (!sensorPresent) {
+            Toast.makeText(this, R.string.emf_no_sensor, Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun stopEmfSensors() {
+        try {
+            emfSensorManager?.unregisterListener(emfMagnetListener)
+        } catch (_: Exception) {
+        }
+        emfSensorManager = null
+        sensorPresent = false
     }
 
     private val emfRunnable = object : Runnable {
         override fun run() {
             if (!emfRunning) return
-            val m = monitor.movement().toFloat()
-            emfTrend = emfTrend + (m - emfTrend) * 0.2f
-            val noise = ((Math.random() * 8) - 4).toFloat()
-            emfValue = (emfValue + emfTrend * 0.35f + noise).coerceIn(0f, 99.9f)
+            val value: Float
+            if (sensorPresent && System.currentTimeMillis() - emfFieldMillis < 2000) {
+                val devUv = Math.abs(emfFieldUv - emfBaselineUv)
+                value = (devUv * 10.0).toFloat()
+            } else {
+                val m = monitor.movement().toFloat()
+                emfTrend = emfTrend + (m - emfTrend) * 0.2f
+                val noise = ((Math.random() * 8) - 4).toFloat()
+                value = (emfValue + emfTrend * 0.35f + noise).coerceIn(0f, 99.9f)
+            }
+            emfValue = value.coerceIn(0f, 99.9f)
             emfGauge?.setValue(emfValue / 100f)
             val color = when {
                 emfValue >= 70f -> Color.rgb(0xE0, 0x2C, 0x20)
@@ -391,6 +429,26 @@ class MainActivity : AppCompatActivity() {
             emfReadout?.text = String.format(Locale.US, "%.1f mG", emfValue)
             emfHandler.postDelayed(this, 250)
         }
+    }
+
+    private val emfMagnetListener = object : SensorEventListener {
+        override fun onSensorChanged(event: SensorEvent?) {
+            if (event == null || event.sensor.type != Sensor.TYPE_MAGNETIC_FIELD) return
+            val x = event.values[0].toDouble()
+            val y = event.values[1].toDouble()
+            val z = event.values[2].toDouble()
+            val microT = kotlin.math.sqrt(x * x + y * y + z * z)
+            emfFieldUv = microT
+            emfFieldMillis = System.currentTimeMillis()
+            if (emfBaselineUv == 0.0) {
+                emfBaselineUv = microT
+            } else {
+                emfBaselineUv += (microT - emfBaselineUv) * 0.01
+                if (emfBaselineUv <= 0.0) emfBaselineUv = microT
+            }
+        }
+
+        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
     }
 
     private val mapRunnable = object : Runnable {
@@ -426,6 +484,7 @@ class MainActivity : AppCompatActivity() {
             emfRunning = false
             emfHandler.removeCallbacks(emfRunnable)
         }
+        stopEmfSensors()
     }
 
     private fun loadPrefs() {

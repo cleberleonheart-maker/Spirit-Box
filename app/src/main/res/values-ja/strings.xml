@@ -74,6 +74,17 @@
    <string name="btn_unmute">サウンド</string>
    <string name="status_muted">サウンドオフ</string>
    <string name="status_unmuted">サウンドオン</string>
+   <string name="switch_noise">ノイズ除去</string>
+   <string name="status_noise_on">ノイズフィルター有効</string>
+   <string name="status_noise_off">ノイズフィルター無効</string>
+   <string name="update_downloading">アップデートをダウンロード中…</string>
+   <string name="update_download_failed">アップデートをダウンロードできませんでした</string>
+   <string name="btn_emf">EMF</string>
+   <string name="emf_dialog_title">EMFメーター</string>
+   <string name="emf_dialog_hint">磁力計による磁場変化（mG）を測定します。</string>
+   <string name="emf_no_sensor">磁気センサーが見つかりません。シミュレーションモードを使用します。</string>
+   <string name="motion_unlocked">調査モード有効</string>
+   <string name="motion_locked">調査モード無効</string>
     <string name="check_update_title">アップデートのお知らせ</string>
     <string name="check_update_msg">Spirit Box の新しいバージョン（%1$s）が利用できます。どうしますか？</string>
     <string name="check_update_btn">ダウンロード</string>

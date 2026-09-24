@@ -74,6 +74,17 @@
    <string name="btn_unmute">SOUND</string>
    <string name="status_muted">Ton aus</string>
    <string name="status_unmuted">Ton an</string>
+   <string name="switch_noise">Rauschunterdrückung</string>
+   <string name="status_noise_on">Rauschfilter aktiviert</string>
+   <string name="status_noise_off">Rauschfilter deaktiviert</string>
+   <string name="update_downloading">Update wird heruntergeladen…</string>
+   <string name="update_download_failed">Update konnte nicht heruntergeladen werden</string>
+   <string name="btn_emf">EMF</string>
+   <string name="emf_dialog_title">EMF-Messgerät</string>
+   <string name="emf_dialog_hint">Misst die Variation des Magnetfelds (Magnetometer) in mG.</string>
+   <string name="emf_no_sensor">Magnetischer Sensor nicht gefunden; Simulationsmodus verwendet.</string>
+   <string name="motion_unlocked">Untersuchungsmodus aktiviert</string>
+   <string name="motion_locked">Untersuchungsmodus deaktiviert</string>
     <string name="check_update_title">Update verfügbar</string>
     <string name="check_update_msg">Eine neue Version (%1$s) von Spirit Box ist verfügbar. Möchtest du sie herunterladen?</string>
     <string name="check_update_btn">HERUNTERLADEN</string>

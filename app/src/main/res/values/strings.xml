@@ -81,7 +81,8 @@
     <string name="update_download_failed">Não foi possível baixar a atualização</string>
     <string name="btn_emf">EMF</string>
     <string name="emf_dialog_title">Medidor EMF</string>
-    <string name="emf_dialog_hint">Protótipo experimental — reflete a variação de atividade do sinal.</string>
+    <string name="emf_dialog_hint">Mede a variação do campo magnético (magnetômetro) em mG.</string>
+<string name="emf_no_sensor">Sensor magnético não encontrado; usando modo simulado.</string>
     <string name="motion_unlocked">Modo investigação ativado</string>
     <string name="motion_locked">Modo investigação desativado</string>
     <string name="check_update_title">Atualização disponível</string>
