@@ -4,11 +4,19 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollRoot"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:fillViewport="true"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:paddingBottom="32dp">
 
         <TextView
             android:id="@+id/tvFreq"
@@ -281,13 +289,14 @@
         <ListView
             android:id="@+id/listCaptures"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:layout_weight="1"
             android:divider="@color/panel"
             android:dividerHeight="1dp"
-            android:listSelector="@android:color/transparent" />
-    </LinearLayout>
+            android:listSelector="@android:color/transparent"
+            android:nestedScrollingEnabled="false" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
     <View
         android:id="@+id/redFilter"

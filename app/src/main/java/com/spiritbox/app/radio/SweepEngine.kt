@@ -214,6 +214,7 @@ class SweepEngine(
                             Log.w(TAG, "Falha no hook de captura", e)
                         }
                     }
+                    SpiritBoxEvents.pushSweepCycle()
                     if (hold) {
                         phase = Phase.TUNE
                     } else {
@@ -222,11 +223,9 @@ class SweepEngine(
                             currentFreq = next
                             phase = Phase.TUNE
                         } else if (sweepGapMs > 0) {
-                            SpiritBoxEvents.pushSweepCycle()
                             phase = Phase.GAP
                             phaseUntil = System.currentTimeMillis() + sweepGapMs
                         } else {
-                            SpiritBoxEvents.pushSweepCycle()
                             currentFreq = r.startKHz.toDouble()
                             phase = Phase.TUNE
                         }

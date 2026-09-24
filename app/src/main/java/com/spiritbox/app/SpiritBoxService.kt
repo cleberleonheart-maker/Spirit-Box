@@ -236,6 +236,7 @@ class SpiritBoxService : Service() {
                         SpiritBoxEvents.pushStatus(getString(R.string.scan_waiting_freq))
                     } else {
                         logCapture(freq, level)
+                        if (activeMode == MODE_SDR) saveClipFor()
                         SpiritBoxEvents.pushCapture(freq, level)
                         SpiritBoxEvents.pushStatus(getString(R.string.manual_capture_saved))
                     }
@@ -538,7 +539,6 @@ class SpiritBoxService : Service() {
             Log.w(TAG, "Falha ao gravar captura", e)
         }
         if (Prefs.alerts(this)) playCaptureAlert()
-        if (activeMode == MODE_SDR) saveClipFor()
     }
 
     private fun saveClipFor() {

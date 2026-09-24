@@ -27,6 +27,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.widget.NestedScrollView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.materialswitch.MaterialSwitch
@@ -65,6 +66,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnNight: MaterialButton
     private lateinit var redFilter: View
     private lateinit var listCaptures: ListView
+    private var scrollRoot: NestedScrollView? = null
 
     private val captures = ArrayList<String>()
     private lateinit var adapter: ArrayAdapter<String>
@@ -101,6 +103,7 @@ class MainActivity : AppCompatActivity() {
                 if (captureEntries.isNotEmpty()) captureEntries.removeAt(0)
             }
             listCaptures.smoothScrollToPosition(adapter.count - 1)
+            scrollRoot?.post { scrollRoot?.fullScroll(View.FOCUS_DOWN) }
         }
 
         override fun onRms(rms: Double) {
@@ -138,6 +141,7 @@ class MainActivity : AppCompatActivity() {
         swFm = findViewById(R.id.swFm)
         swAlerts = findViewById(R.id.swAlerts)
         listCaptures = findViewById(R.id.listCaptures)
+        scrollRoot = findViewById(R.id.scrollRoot)
         spBand = findViewById(R.id.spBand)
         etDwell = findViewById(R.id.etDwell)
         etSettle = findViewById(R.id.etSettle)
