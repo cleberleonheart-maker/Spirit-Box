@@ -97,4 +97,14 @@
     <string name="theme_dark">DUNKEL</string>
     <string name="btn_night_off">NACHT</string>
     <string name="btn_night_on">NACHT AN</string>
+    <string name="emf_map_btn">KARTE</string>
+    <string name="emf_map_title">EMF-Hotspot-Karte</string>
+    <string name="emf_map_stats">Punkte: %1$d · max %2$s mG</string>
+    <string name="emf_map_record">AUFNAHME</string>
+    <string name="emf_map_record_on">STOPP</string>
+    <string name="emf_map_clear">LÖSCHEN</string>
+    <string name="emf_map_locked">Aktiviere den Untersuchungsmodus (7 Tippen auf Status) für die Hotspot-Karte.</string>
+    <string name="emf_map_denied">Standort verweigert — Hotspot-Karte nicht verfügbar.</string>
+    <string name="emf_map_gps_off">Standort deaktiviert. Aktiviere GPS/Netz, um Hotspots aufzuzeichnen.</string>
+    <string name="emf_map_saved">Hotspots gespeichert.</string>
 </resources>

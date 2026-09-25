@@ -97,4 +97,14 @@
     <string name="theme_dark">OSCURO</string>
     <string name="btn_night_off">NOCHE</string>
     <string name="btn_night_on">NOCHE ON</string>
+    <string name="emf_map_btn">MAPA</string>
+    <string name="emf_map_title">Mapa de hotspots EMF</string>
+    <string name="emf_map_stats">Puntos: %1$d · máx %2$s mG</string>
+    <string name="emf_map_record">GRABAR</string>
+    <string name="emf_map_record_on">PARAR</string>
+    <string name="emf_map_clear">LIMPIAR</string>
+    <string name="emf_map_locked">Activa el modo investigación (7 toques en el estado) para el mapa de hotspots.</string>
+    <string name="emf_map_denied">Ubicación denegada — mapa de hotspots no disponible.</string>
+    <string name="emf_map_gps_off">Ubicación desactivada. Activa el GPS/red para registrar hotspots.</string>
+    <string name="emf_map_saved">Hotspots guardados.</string>
 </resources>

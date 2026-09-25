@@ -97,4 +97,14 @@
     <string name="theme_dark">ダーク</string>
     <string name="btn_night_off">ナイト</string>
     <string name="btn_night_on">ナイト ON</string>
+    <string name="emf_map_btn">マップ</string>
+    <string name="emf_map_title">EMFホットスポットマップ</string>
+    <string name="emf_map_stats">ポイント: %1$d · 最大 %2$s mG</string>
+    <string name="emf_map_record">記録</string>
+    <string name="emf_map_record_on">停止</string>
+    <string name="emf_map_clear">クリア</string>
+    <string name="emf_map_locked">調査モード（ステータスを7回タップ）を有効にすると、ホットスポットマップが使えます。</string>
+    <string name="emf_map_denied">位置情報が拒否されました — ホットスポットマップを利用できません。</string>
+    <string name="emf_map_gps_off">位置情報がオフです。GPS/ネットワークをオンにして記録してください。</string>
+    <string name="emf_map_saved">ホットスポットを保存しました。</string>
 </resources>

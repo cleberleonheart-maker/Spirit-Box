@@ -23,6 +23,11 @@
 - **EMF com magnetômetro real** (v1.6): leitura de `TYPE_MAGNETIC_FIELD`, mostra a
   variação do campo magnético em mG (desvio da linha de base). Sem sensor, cai no
   modo simulado com aviso.
+- **Gráfico de tendência do campo no EMF** (v1.7): série dos últimos ~60 s da
+  variação em mG desenhada no diálogo, colorida por intensidade.
+- **Mapa de hotspots magnéticos** (v1.7): grava trajetória com GPS enquanto o
+  campo varia, desenha o caminho e marca picos por intensidade; persistido em
+  `emf_hotspots.json` (oculto no modo investigação).
 - **Traduções completas** (pt-BR, en, de, es, it, ja) e lint sem erros.
 
 ## Próximas (não implementadas)
@@ -31,6 +36,10 @@
 - **Widget de notificação com play/pause**.
 - **Remover modo FM stub** ou marcá-lo experimental.
 - **Bookmarks exportados/importados**: salvar lista de favoritos como arquivo.
+
+## Ideias futuras (EMF / investigação)
+- **Mapa de hotspots sobre mapa de fundo / imagem**: hoje é projeção local (lat/lng
+  apenas); futuro: camada de mapa real e exportação do trajeto como imagem/GPX.
 
 ## Privacidade / segurança
 - **Senha do keystore**: trocar a senha atual (`keystore.properties` ainda tem a

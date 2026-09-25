@@ -97,4 +97,14 @@
     <string name="theme_dark">SCURO</string>
     <string name="btn_night_off">NOTTE</string>
     <string name="btn_night_on">NOTTE ON</string>
+    <string name="emf_map_btn">MAPPA</string>
+    <string name="emf_map_title">Mappa dei punti caldi EMF</string>
+    <string name="emf_map_stats">Punti: %1$d · max %2$s mG</string>
+    <string name="emf_map_record">REGISTRA</string>
+    <string name="emf_map_record_on">FERMA</string>
+    <string name="emf_map_clear">PULISCI</string>
+    <string name="emf_map_locked">Attiva la modalità indagine (7 tocchi sullo stato) per la mappa dei punti caldi.</string>
+    <string name="emf_map_denied">Posizione negata — mappa dei punti caldi non disponibile.</string>
+    <string name="emf_map_gps_off">Posizione disattivata. Attiva GPS/rete per registrare i punti caldi.</string>
+    <string name="emf_map_saved">Punti caldi salvati.</string>
 </resources>

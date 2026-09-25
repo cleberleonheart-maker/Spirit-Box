@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -9,7 +10,13 @@
     <com.spiritbox.app.EmfGaugeView
         android:id="@+id/emfGauge"
         android:layout_width="match_parent"
-        android:layout_height="150dp" />
+        android:layout_height="130dp" />
+
+    <com.spiritbox.app.EmfTrendView
+        android:id="@+id/emfTrend"
+        android:layout_width="match_parent"
+        android:layout_height="84dp"
+        android:layout_marginTop="8dp" />
 
     <TextView
         android:id="@+id/emfReadout"
@@ -31,4 +38,12 @@
         android:text="@string/emf_dialog_hint"
         android:textColor="@color/text_secondary"
         android:textSize="12sp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/emfMapBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/emf_map_btn"
+        app:cornerRadius="24dp" />
 </LinearLayout>

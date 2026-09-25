@@ -9,10 +9,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -41,9 +40,12 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.materialswitch.MaterialSwitch
 import com.spiritbox.app.radio.SweepEngine
 import java.io.File
+import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import org.json.JSONArray
+import org.json.JSONObject
 
 class MainActivity : AppCompatActivity() {
 
@@ -80,6 +82,7 @@ class MainActivity : AppCompatActivity() {
     private var scrollRoot: NestedScrollView? = null
 
     private val monitor = ActivityMonitor()
+    private val emfMeter = EmfMeter(this)
     private val emfHandler = Handler(Looper.getMainLooper())
     private val mapHandler = Handler(Looper.getMainLooper())
     private var emfRunning = false
@@ -87,13 +90,31 @@ class MainActivity : AppCompatActivity() {
     private var emfTrend = 0f
     private var emfGauge: EmfGaugeView? = null
     private var emfReadout: TextView? = null
-    private var emfSensorManager: SensorManager? = null
-    private var sensorPresent = false
-    private var emfFieldUv = 0.0
-    private var emfBaselineUv = 0.0
-    private var emfFieldMillis = 0L
+    private var emfTrendView: EmfTrendView? = null
+    private var emfDialog: Dialog? = null
+    private var hotspotDialog: Dialog? = null
+    private var recordingLocation = false
+    private var lastLocation: Location? = null
     private var statusTaps = 0
     private var lastStatusTap = 0L
+
+    private val locationListener = object : LocationListener {
+        override fun onLocationChanged(location: Location) {
+            lastLocation = location
+            if (recordingLocation) pushHotspot(location)
+        }
+    }
+
+    private val locationPerm =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
+            val fine = result[Manifest.permission.ACCESS_FINE_LOCATION] == true
+            val coarse = result[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+            if (fine || coarse) {
+                openEmfMapDialogCore()
+            } else {
+                Toast.makeText(this, R.string.emf_map_denied, Toast.LENGTH_LONG).show()
+            }
+        }
 
     private val captures = ArrayList<String>()
     private lateinit var adapter: ArrayAdapter<String>
@@ -374,52 +395,209 @@ class MainActivity : AppCompatActivity() {
         dialog.setContentView(R.layout.dialog_emf)
         emfGauge = dialog.findViewById(R.id.emfGauge)
         emfReadout = dialog.findViewById(R.id.emfReadout)
-        startEmfSensors()
+        emfTrendView = dialog.findViewById(R.id.emfTrend)
+        emfTrendView?.clear()
+        dialog.findViewById<MaterialButton>(R.id.emfMapBtn).setOnClickListener {
+            dialog.dismiss()
+            openEmfMapDialog()
+        }
+        emfMeter.start()
+        if (!emfMeter.available) {
+            Toast.makeText(this, R.string.emf_no_sensor, Toast.LENGTH_LONG).show()
+        }
         emfRunning = true
         emfHandler.post(emfRunnable)
+        emfDialog = dialog
         dialog.setOnDismissListener {
             emfRunning = false
             emfHandler.removeCallbacks(emfRunnable)
-            stopEmfSensors()
+            emfMeter.stop()
+            emfDialog = null
         }
         dialog.show()
     }
 
-    private fun startEmfSensors() {
-        emfBaselineUv = 0.0
-        val sm = getSystemService(Context.SENSOR_SERVICE) as? SensorManager
-        val mag = sm?.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
-        sensorPresent = mag != null && sm.registerListener(emfMagnetListener, mag, SensorManager.SENSOR_DELAY_NORMAL)
-        if (sensorPresent) emfSensorManager = sm
-        if (!sensorPresent) {
-            Toast.makeText(this, R.string.emf_no_sensor, Toast.LENGTH_LONG).show()
+    private fun openEmfMapDialog() {
+        if (!Prefs.motionUnlocked(this)) {
+            Toast.makeText(this, R.string.emf_map_locked, Toast.LENGTH_LONG).show()
+            return
+        }
+        val hasFine = ContextCompat.checkSelfPermission(
+            this, Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+        val hasCoarse = ContextCompat.checkSelfPermission(
+            this, Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+        if (!hasFine && !hasCoarse) {
+            locationPerm.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        } else {
+            openEmfMapDialogCore()
         }
     }
 
-    private fun stopEmfSensors() {
+    private fun openEmfMapDialogCore() {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_emf_hotspots)
+        val map = dialog.findViewById<EmfHotspotMapView>(R.id.emfMap)
+        val stats = dialog.findViewById<TextView>(R.id.emfMapStats)
+        val btnRecord = dialog.findViewById<MaterialButton>(R.id.emfMapRecord)
+        val btnClear = dialog.findViewById<MaterialButton>(R.id.emfMapClear)
+        map.setPoints(loadHotspots())
+        updateHotspotStats(stats, map)
+        emfMeter.start()
+        hotspotDialog = dialog
+        recordingLocation = false
+        btnRecord.text = getString(R.string.emf_map_record)
+
+        fun setRecording(on: Boolean) {
+            recordingLocation = on
+            btnRecord.text = getString(if (on) R.string.emf_map_record_on else R.string.emf_map_record)
+        }
+
+        btnRecord.setOnClickListener {
+            if (!recordingLocation && !isLocationEnabled()) {
+                Toast.makeText(this, R.string.emf_map_gps_off, Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
+            if (recordingLocation) {
+                stopLocationUpdates()
+                setRecording(false)
+            } else {
+                startLocationUpdates()
+                setRecording(true)
+            }
+        }
+        btnClear.setOnClickListener {
+            map.clear()
+            updateHotspotStats(stats, map)
+        }
+        dialog.setOnDismissListener {
+            recordingLocation = false
+            stopLocationUpdates()
+            emfMeter.stop()
+            saveHotspots(map.points())
+            hotspotDialog = null
+        }
+        dialog.show()
+    }
+
+    private fun pushHotspot(location: Location) {
+        val mG = emfMeter.milliGauss()
+        val dialog = hotspotDialog ?: return
+        if (mG == null) return
+        val map = dialog.findViewById<EmfHotspotMapView>(R.id.emfMap)
+        val stats = dialog.findViewById<TextView>(R.id.emfMapStats)
+        map.addPoint(location.latitude, location.longitude, mG)
+        updateHotspotStats(stats, map)
+    }
+
+    private fun updateHotspotStats(tv: TextView, map: EmfHotspotMapView) {
+        val pts = map.points()
+        val maxMg = pts.maxOfOrNull { it.mg } ?: 0f
+        tv.text = getString(
+            R.string.emf_map_stats, pts.size, String.format(Locale.US, "%.1f", maxMg)
+        )
+    }
+
+    private fun locationManager(): LocationManager =
+        getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+    private fun isLocationEnabled(): Boolean {
+        val lm = locationManager()
+        return lm.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
+            lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+    }
+
+    private fun startLocationUpdates() {
+        val fine = ContextCompat.checkSelfPermission(
+            this, Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+        val coarse = ContextCompat.checkSelfPermission(
+            this, Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+        if (!fine && !coarse) return
+        val lm = locationManager()
         try {
-            emfSensorManager?.unregisterListener(emfMagnetListener)
+            if (fine) {
+                lm.requestLocationUpdates(
+                    LocationManager.GPS_PROVIDER, 1000L, 1f, locationListener
+                )
+            }
+            lm.requestLocationUpdates(
+                LocationManager.NETWORK_PROVIDER, 2000L, 1f, locationListener
+            )
         } catch (_: Exception) {
         }
-        emfSensorManager = null
-        sensorPresent = false
+    }
+
+    private fun stopLocationUpdates() {
+        try {
+            locationManager().removeUpdates(locationListener)
+        } catch (_: Exception) {
+        }
+    }
+
+    private fun hotspotFile(): File = File(filesDir, "emf_hotspots.json")
+
+    private fun saveHotspots(list: List<EmfHotspotMapView.Point>) {
+        try {
+            val arr = JSONArray()
+            list.forEach { p ->
+                arr.put(
+                    JSONObject().apply {
+                        put("lat", p.lat)
+                        put("lng", p.lng)
+                        put("mg", p.mg.toDouble())
+                        put("t", p.time)
+                    }
+                )
+            }
+            val obj = JSONObject().put("points", arr)
+            FileOutputStream(hotspotFile()).write(obj.toString().toByteArray())
+        } catch (_: Exception) {
+        }
+    }
+
+    private fun loadHotspots(): ArrayList<EmfHotspotMapView.Point> {
+        val out = ArrayList<EmfHotspotMapView.Point>()
+        try {
+            val arr = JSONObject(hotspotFile().readText()).getJSONArray("points")
+            for (i in 0 until arr.length()) {
+                val o = arr.getJSONObject(i)
+                out.add(
+                    EmfHotspotMapView.Point(
+                        o.getDouble("lat"),
+                        o.getDouble("lng"),
+                        o.getDouble("mg").toFloat(),
+                        o.getLong("t")
+                    )
+                )
+            }
+        } catch (_: Exception) {
+        }
+        return out
     }
 
     private val emfRunnable = object : Runnable {
         override fun run() {
             if (!emfRunning) return
-            val value: Float
-            if (sensorPresent && System.currentTimeMillis() - emfFieldMillis < 2000) {
-                val devUv = Math.abs(emfFieldUv - emfBaselineUv)
-                value = (devUv * 10.0).toFloat()
+            val fresh = emfMeter.milliGauss()
+            val value: Float = if (fresh != null) {
+                fresh
             } else {
                 val m = monitor.movement().toFloat()
                 emfTrend = emfTrend + (m - emfTrend) * 0.2f
                 val noise = ((Math.random() * 8) - 4).toFloat()
-                value = (emfValue + emfTrend * 0.35f + noise).coerceIn(0f, 99.9f)
+                (emfValue + emfTrend * 0.35f + noise).coerceIn(0f, 99.9f)
             }
             emfValue = value.coerceIn(0f, 99.9f)
             emfGauge?.setValue(emfValue / 100f)
+            emfTrendView?.push(emfValue)
             val color = when {
                 emfValue >= 70f -> Color.rgb(0xE0, 0x2C, 0x20)
                 emfValue >= 40f -> Color.rgb(0xF0, 0xA0, 0x00)
@@ -429,26 +607,6 @@ class MainActivity : AppCompatActivity() {
             emfReadout?.text = String.format(Locale.US, "%.1f mG", emfValue)
             emfHandler.postDelayed(this, 250)
         }
-    }
-
-    private val emfMagnetListener = object : SensorEventListener {
-        override fun onSensorChanged(event: SensorEvent?) {
-            if (event == null || event.sensor.type != Sensor.TYPE_MAGNETIC_FIELD) return
-            val x = event.values[0].toDouble()
-            val y = event.values[1].toDouble()
-            val z = event.values[2].toDouble()
-            val microT = kotlin.math.sqrt(x * x + y * y + z * z)
-            emfFieldUv = microT
-            emfFieldMillis = System.currentTimeMillis()
-            if (emfBaselineUv == 0.0) {
-                emfBaselineUv = microT
-            } else {
-                emfBaselineUv += (microT - emfBaselineUv) * 0.01
-                if (emfBaselineUv <= 0.0) emfBaselineUv = microT
-            }
-        }
-
-        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
     }
 
     private val mapRunnable = object : Runnable {
@@ -484,7 +642,8 @@ class MainActivity : AppCompatActivity() {
             emfRunning = false
             emfHandler.removeCallbacks(emfRunnable)
         }
-        stopEmfSensors()
+        emfMeter.stop()
+        stopLocationUpdates()
     }
 
     private fun loadPrefs() {
