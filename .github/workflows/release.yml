@@ -41,8 +41,37 @@ jobs:
           keytool -list -v -keystore keystore/spirit.keystore \
             -storepass "$SPIRIT_KS_PASS" -alias spirit | grep -E 'Owner|SHA256'
 
+      - name: Derive versionCode from tag
+        id: ver
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          MAJ="${TAG%%.*}"
+          REST="${TAG#*.}"
+          if [ "$REST" = "$TAG" ]; then MIN=0; PAT=0; else
+            MIN="${REST%%.*}"
+            if [ "${REST#*.}" = "$REST" ]; then PAT=0; else PAT="${REST#*.}"; fi
+          fi
+          if ! [[ "$MAJ" =~ ^[0-9]+$ && "$MIN" =~ ^[0-9]+$ && "$PAT" =~ ^[0-9]+$ ]]; then
+            echo "ERRO: tag nao permite calcular versionCode: [$TAG]"
+            exit 1
+          fi
+          if [ "$MIN" -ge 100 ] || [ "$PAT" -ge 100 ]; then
+            echo "ERRO: minor e patch devem ser < 100 para o calculo: [$TAG]"
+            exit 1
+          fi
+          VC=$(( MAJ * 10000 + MIN * 100 + PAT ))
+          echo "tag=$TAG  versionName=$TAG  versionCode=$VC"
+          echo "version_code=$VC" >> "$GITHUB_OUTPUT"
+
       - name: Build signed release APK
-        run: ./gradlew assembleRelease -PversionName="${GITHUB_REF_NAME#v}" --console=plain
+        run: |
+          ./gradlew assembleRelease \
+            -PversionName="${GITHUB_REF_NAME#v}" \
+            -PversionCode="${{ steps.ver.outputs.version_code }}" \
+            --console=plain
+          APK=$(ls app/build/outputs/apk/release/*.apk | head -1)
+          "$ANDROID_HOME/build-tools/35.0.0/aapt2" dump badging "$APK" \
+            | grep -E "^package:" || true
 
       - name: Publish to GitHub Release
         uses: softprops/action-gh-release@v2
