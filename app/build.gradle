@@ -30,6 +30,22 @@ def releasePassword = {
     senha
 }
 
+/** Mesmo cálculo do passo "Derive versionCode from tag" da release.yml:
+ * MAJOR*10000 + MINOR*100 + PATCH, para builds locais e da CI concordarem. */
+def versionCodeFrom = { String nome ->
+    def p = nome.tokenize('.')
+    def maj = p.size() > 0 ? p[0] : '0'
+    def min = p.size() > 1 ? p[1] : '0'
+    def pat = p.size() > 2 ? p[2] : '0'
+    if (!(maj ==~ /\d+/ && min ==~ /\d+/ && pat ==~ /\d+/)) {
+        throw new GradleException("ERRO: versionName nao permite calcular versionCode: [$nome]")
+    }
+    if (min.toInteger() >= 100 || pat.toInteger() >= 100) {
+        throw new GradleException("ERRO: minor e patch devem ser < 100 para o calculo: [$nome]")
+    }
+    maj.toInteger() * 10000 + min.toInteger() * 100 + pat.toInteger()
+}
+
 android {
     namespace 'com.spiritbox.app'
     compileSdk 35
@@ -42,8 +58,13 @@ android {
         applicationId "com.spiritbox.app"
         minSdk 24
         targetSdk 35
-        versionCode ((project.findProperty('versionCode') as String ?: '10').toInteger())
-        versionName (project.findProperty('versionName') as String ?: '1.9')
+        // A CI sempre passa -PversionCode/-PversionName a partir da tag. Localmente
+        // o versionCode sai do versionName pela mesma fórmula da tag, e não de um
+        // contador manual: com um contador baixo (era 9) nenhum build local conseguia
+        // atualizar por cima de uma release da CI, que já vai para 10800+.
+        def nome = project.findProperty('versionName') as String ?: '1.9'
+        versionName nome
+        versionCode ((project.findProperty('versionCode') as String ?: versionCodeFrom(nome)).toInteger())
     }
 
     signingConfigs {
