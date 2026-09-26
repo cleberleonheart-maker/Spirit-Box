@@ -19,6 +19,9 @@ class WaterfallView @JvmOverloads constructor(
     companion object {
         private const val COLS = 240
         private const val ROWS = 48
+
+        /** Ampliacao nearest-neighbor do PNG exportado: 240x48 -> 1440x288. */
+        private const val EXPORT_SCALE = 6
     }
 
     private var bandStartKHz = SweepEngine.PRESETS[0].startKHz.toDouble()
@@ -79,14 +82,16 @@ class WaterfallView @JvmOverloads constructor(
         invalidate()
     }
 
-    /** Copia o waterfall atual para um Bitmap (com marcadores). */
+    /** Copia o waterfall atual para um Bitmap (com marcadores), ampliado para ter
+     * tamanho de leitura. A 1:1 a imagem sai com 240x48 px e qualquer visualizador
+     * abre uma tira de meio pixel de altura. */
     fun snapshotBitmap(): Bitmap {
-        val out = Bitmap.createBitmap(COLS, ROWS, Bitmap.Config.ARGB_8888)
-        out.setPixels(pixels, 0, COLS, 0, 0, COLS, ROWS)
+        val raw = Bitmap.createBitmap(COLS, ROWS, Bitmap.Config.ARGB_8888)
+        raw.setPixels(pixels, 0, COLS, 0, 0, COLS, ROWS)
         for (c in 0 until COLS) {
-            if (marks[c]) out.setPixel(c, ROWS - 1, markColor)
+            if (marks[c]) raw.setPixel(c, ROWS - 1, markColor)
         }
-        return out
+        return Bitmap.createScaledBitmap(raw, COLS * EXPORT_SCALE, ROWS * EXPORT_SCALE, false)
     }
 
     override fun onDraw(canvas: Canvas) {
