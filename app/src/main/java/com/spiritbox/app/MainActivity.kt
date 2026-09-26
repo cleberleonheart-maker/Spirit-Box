@@ -84,7 +84,7 @@ class MainActivity : AppCompatActivity() {
     private var scrollRoot: NestedScrollView? = null
 
     private val monitor = ActivityMonitor()
-    private val emfMeter = EmfMeter(this)
+    private val emfMeter by lazy { EmfMeter(this) }
     private val emfHandler = Handler(Looper.getMainLooper())
     private val mapHandler = Handler(Looper.getMainLooper())
     private var emfRunning = false
