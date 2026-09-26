@@ -47,6 +47,8 @@ import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -472,6 +474,12 @@ class MainActivity : AppCompatActivity() {
 
         fun setRecording(on: Boolean) {
             recordingLocation = on
+            emfHandler.removeCallbacks(noSensorCheck)
+            if (on) {
+                hotspotSaveFailed = false
+                recordStartPoints = map.points().size
+                emfHandler.postDelayed(noSensorCheck, 6000L)
+            }
             btnRecord.text = getString(if (on) R.string.emf_map_record_on else R.string.emf_map_record)
         }
 
@@ -491,26 +499,33 @@ class MainActivity : AppCompatActivity() {
         btnClear.setOnClickListener {
             map.clear()
             updateHotspotStats(stats, map)
+            hotspotIo.execute {
+                try {
+                    hotspotFile().delete()
+                } catch (e: Exception) {
+                    Log.w("SpiritBox", "Falha ao limpar hotspots", e)
+                }
+            }
         }
         dialog.setOnDismissListener {
             recordingLocation = false
+            emfHandler.removeCallbacks(noSensorCheck)
             stopLocationUpdates()
             emfMeter.stop()
-            saveHotspots(map.points())
             hotspotDialog = null
         }
         dialog.show()
     }
 
     private fun pushHotspot(location: Location) {
-        val mG = emfMeter.milliGauss()
         val dialog = hotspotDialog ?: return
+        val mG = emfMeter.milliGauss()
         if (mG == null) return
         val map = dialog.findViewById<EmfHotspotMapView>(R.id.emfMap)
         val stats = dialog.findViewById<TextView>(R.id.emfMapStats)
         map.addPoint(location.latitude, location.longitude, mG)
         updateHotspotStats(stats, map)
-        saveHotspots(map.points(), force = false)
+        appendHotspot(map.points().last())
     }
 
     private fun updateHotspotStats(tv: TextView, map: EmfHotspotMapView) {
@@ -559,43 +574,101 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun hotspotFile(): File = File(filesDir, "emf_hotspots.json")
+    private fun hotspotFile(): File = File(filesDir, "emf_hotspots.jsonl")
 
-    private var lastHotspotSave = 0L
+    private fun legacyHotspotFile(): File = File(filesDir, "emf_hotspots.json")
 
-    private fun saveHotspots(list: List<EmfHotspotMapView.Point>, force: Boolean = true) {
-        if (!force && System.currentTimeMillis() - lastHotspotSave < 3000L) return
-        try {
-            val arr = JSONArray()
-            list.forEach { p ->
-                arr.put(
-                    JSONObject().apply {
-                        put("lat", p.lat)
-                        put("lng", p.lng)
-                        put("mg", p.mg.toDouble())
-                        put("t", p.time)
-                    }
-                )
-            }
-            val obj = JSONObject().put("points", arr)
-            val tmp = File(filesDir, "emf_hotspots.json.tmp")
-            FileOutputStream(tmp).use { it.write(obj.toString().toByteArray()) }
-            if (!tmp.renameTo(hotspotFile())) {
-                hotspotFile().writeText(tmp.readText())
-                tmp.delete()
-            }
-            lastHotspotSave = System.currentTimeMillis()
-        } catch (_: Exception) {
+    /** Gravação dos hotspots fora da main thread. Um ponto por vez, em append: o
+     * arquivo antigo era reescrito inteiro a cada 3s, na main thread, com o custo
+     * crescendo junto com o trajeto. */
+    private val hotspotIo: ExecutorService = Executors.newSingleThreadExecutor()
+
+    @Volatile
+    private var hotspotSaveFailed = false
+
+    private var recordStartPoints = 0
+
+    /** Sem amostra o magnetômetro nao entrega nada, e o ponto era descartado em
+     * silencio -- era o sintoma do Doze. Como o sensor precisa de algumas leituras
+     * para fixar a linha de base, a espera evita acusar o aquecimento de falha. */
+    private val noSensorCheck = object : Runnable {
+        override fun run() {
+            if (!recordingLocation) return
+            val map = hotspotDialog?.findViewById<EmfHotspotMapView>(R.id.emfMap) ?: return
+            if (map.points().size > recordStartPoints) return
+            Toast.makeText(this@MainActivity, R.string.emf_map_no_sensor, Toast.LENGTH_LONG).show()
         }
     }
 
+    private fun pointJson(p: EmfHotspotMapView.Point): String =
+        JSONObject()
+            .put("lat", p.lat)
+            .put("lng", p.lng)
+            .put("mg", p.mg.toDouble())
+            .put("t", p.time)
+            .toString()
+
+    private fun appendHotspot(p: EmfHotspotMapView.Point) {
+        hotspotIo.execute {
+            try {
+                FileOutputStream(hotspotFile(), true).use {
+                    it.write((pointJson(p) + "\n").toByteArray())
+                }
+            } catch (e: Exception) {
+                Log.w("SpiritBox", "Falha ao gravar hotspot", e)
+                if (!hotspotSaveFailed) {
+                    hotspotSaveFailed = true
+                    emfHandler.post {
+                        Toast.makeText(this, R.string.emf_map_save_failed, Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        }
+    }
+
+    /** Ate a v1.8.1 o traco inteiro vivia num unico JSON reescrito a cada 3s. O
+     * formato agora e um ponto por linha, onde cada linha e independente: um
+     * processo morto no meio da caminhada deixa so a ultima linha de fora e o
+     * resto do traco continua legivel. */
     private fun loadHotspots(): ArrayList<EmfHotspotMapView.Point> {
+        migrateLegacyHotspots()
         val out = ArrayList<EmfHotspotMapView.Point>()
+        var ilegiveis = 0
         try {
-            val arr = JSONObject(hotspotFile().readText()).getJSONArray("points")
+            hotspotFile().forEachLine { line ->
+                if (line.isBlank()) return@forEachLine
+                try {
+                    val o = JSONObject(line)
+                    out.add(
+                        EmfHotspotMapView.Point(
+                            o.getDouble("lat"),
+                            o.getDouble("lng"),
+                            o.getDouble("mg").toFloat(),
+                            o.getLong("t")
+                        )
+                    )
+                } catch (_: Exception) {
+                    ilegiveis++
+                }
+            }
+        } catch (e: Exception) {
+            Log.w("SpiritBox", "Falha ao ler hotspots", e)
+        }
+        if (ilegiveis > 0) Log.w("SpiritBox", "$ilegiveis linha(s) de hotspot ilegivel(is), ignorada(s)")
+        return out
+    }
+
+    /** Converte o emf_hotspots.json antigo uma unica vez, para nao perder o traco
+     * de quem ja gravou na v1.8.1. */
+    private fun migrateLegacyHotspots() {
+        val legacy = legacyHotspotFile()
+        if (!legacy.exists()) return
+        val antigos = ArrayList<EmfHotspotMapView.Point>()
+        try {
+            val arr = JSONObject(legacy.readText()).getJSONArray("points")
             for (i in 0 until arr.length()) {
                 val o = arr.getJSONObject(i)
-                out.add(
+                antigos.add(
                     EmfHotspotMapView.Point(
                         o.getDouble("lat"),
                         o.getDouble("lng"),
@@ -604,9 +677,19 @@ class MainActivity : AppCompatActivity() {
                     )
                 )
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.w("SpiritBox", "Nao consegui ler o emf_hotspots.json antigo", e)
         }
-        return out
+        if (antigos.isNotEmpty()) {
+            try {
+                FileOutputStream(hotspotFile(), true).use { out ->
+                    antigos.forEach { out.write((pointJson(it) + "\n").toByteArray()) }
+                }
+            } catch (e: Exception) {
+                Log.w("SpiritBox", "Falha ao migrar hotspots", e)
+            }
+        }
+        legacy.delete()
     }
 
     private val emfRunnable = object : Runnable {
@@ -670,8 +753,16 @@ class MainActivity : AppCompatActivity() {
         }
         if (emfMeterLazy.isInitialized()) emfMeter.stop()
         stopLocationUpdates()
-        hotspotDialog?.findViewById<EmfHotspotMapView>(R.id.emfMap)
-            ?.let { saveHotspots(it.points()) }
+        // Nao ha mais nada a gravar aqui: cada ponto ja foi para o arquivo em
+        // append no pushHotspot, entao o onStop nao corre o risco de perder o
+        // traco -- e nem deve reapender o ultimo ponto, que criaria duplicata.
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // shutdown(), e nao shutdownNow(): os pontos que ja entraram na fila ainda
+        // precisam ser gravados -- e um append de ~60 bytes, nao ha fila relevante.
+        hotspotIo.shutdown()
     }
 
     private fun loadPrefs() {
