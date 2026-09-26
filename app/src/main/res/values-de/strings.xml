@@ -83,7 +83,6 @@
    <string name="update_install_denied">Installation blockiert. Erlaube Installation aus unbekannten Quellen oder deinstalliere die vorherige Version (andere Signatur).</string>
    <string name="app_version">Version %1$s</string>
    <string name="btn_emf">EMF</string>
-   <string name="emf_dialog_title">EMF-Messgerät</string>
    <string name="emf_dialog_hint">Misst die Variation des Magnetfelds (Magnetometer) in mG.</string>
    <string name="emf_no_sensor">Magnetischer Sensor nicht gefunden; Simulationsmodus verwendet.</string>
    <string name="motion_unlocked">Untersuchungsmodus aktiviert</string>
@@ -110,5 +109,4 @@
     <string name="emf_map_denied">Standort verweigert — Hotspot-Karte nicht verfügbar.</string>
     <string name="battery_not_exempt">Batterie optimiert: Scan und EMF-Karte funktionieren nicht mehr. Setze die Energieeinschränkung auf Keine.</string>
     <string name="emf_map_gps_off">Standort deaktiviert. Aktiviere GPS/Netz, um Hotspots aufzuzeichnen.</string>
-    <string name="emf_map_saved">Hotspots gespeichert.</string>
 </resources>

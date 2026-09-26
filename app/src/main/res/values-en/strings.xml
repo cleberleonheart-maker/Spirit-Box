@@ -83,7 +83,6 @@
     <string name="update_install_denied">Installation blocked. Allow installs from unknown sources, or uninstall the previous version (different signature).</string>
     <string name="app_version">Version %1$s</string>
     <string name="btn_emf">EMF</string>
-    <string name="emf_dialog_title">EMF meter</string>
     <string name="emf_dialog_hint">Reads real magnetic field variation (magnetometer) in mG.</string>
 <string name="emf_no_sensor">Magnetic sensor not found; using simulated mode.</string>
     <string name="motion_unlocked">Investigation mode on</string>
@@ -110,5 +109,4 @@
     <string name="emf_map_denied">Location denied — hotspots map unavailable.</string>
     <string name="battery_not_exempt">Battery optimized: scanning and the EMF map stop working. Set the energy restriction to None.</string>
     <string name="emf_map_gps_off">Location disabled. Turn on GPS/network to record hotspots.</string>
-    <string name="emf_map_saved">Hotspots saved.</string>
 </resources>

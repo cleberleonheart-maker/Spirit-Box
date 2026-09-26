@@ -83,7 +83,6 @@
     <string name="update_install_denied">Instalação bloqueada. Autorize apps de fontes desconhecidas ou desinstale a versão anterior (assinatura diferente).</string>
     <string name="app_version">Versão %1$s</string>
     <string name="btn_emf">EMF</string>
-    <string name="emf_dialog_title">Medidor EMF</string>
     <string name="emf_dialog_hint">Mede a variação do campo magnético (magnetômetro) em mG.</string>
 <string name="emf_no_sensor">Sensor magnético não encontrado; usando modo simulado.</string>
     <string name="motion_unlocked">Modo investigação ativado</string>
@@ -110,5 +109,4 @@
     <string name="emf_map_denied">Localização negada — mapa de hotspots indisponível.</string>
     <string name="battery_not_exempt">Bateria otimizada: a varredura e o mapa EMF param de funcionar. Ajuste a restrição de energia para Nenhum.</string>
     <string name="emf_map_gps_off">Localização desativada. Ative GPS/rede para registrar hotspots.</string>
-    <string name="emf_map_saved">Hotspots salvos.</string>
 </resources>
