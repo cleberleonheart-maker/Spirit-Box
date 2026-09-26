@@ -79,6 +79,9 @@
     <string name="status_noise_off">Filtro de ruído desativado</string>
     <string name="update_downloading">Baixando atualização…</string>
     <string name="update_download_failed">Não foi possível baixar a atualização</string>
+    <string name="update_install_failed">Não foi possível instalar a atualização</string>
+    <string name="update_install_denied">Instalação bloqueada. Autorize apps de fontes desconhecidas ou desinstale a versão anterior (assinatura diferente).</string>
+    <string name="app_version">Versão %1$s</string>
     <string name="btn_emf">EMF</string>
     <string name="emf_dialog_title">Medidor EMF</string>
     <string name="emf_dialog_hint">Mede a variação do campo magnético (magnetômetro) em mG.</string>

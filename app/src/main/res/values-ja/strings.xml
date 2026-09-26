@@ -78,7 +78,10 @@
    <string name="status_noise_on">ノイズフィルター有効</string>
    <string name="status_noise_off">ノイズフィルター無効</string>
    <string name="update_downloading">アップデートをダウンロード中…</string>
-   <string name="update_download_failed">アップデートをダウンロードできませんでした</string>
+    <string name="update_download_failed">アップデートをダウンロードできませんでした</string>
+    <string name="update_install_failed">アップデートをインストールできませんでした</string>
+    <string name="update_install_denied">インストールがブロックされました。不明なソースからのインストールを許可するか、前のバージョン（署名が異なります）をアンインストールしてください。</string>
+    <string name="app_version">バージョン %1$s</string>
    <string name="btn_emf">EMF</string>
    <string name="emf_dialog_title">EMFメーター</string>
    <string name="emf_dialog_hint">磁力計による磁場変化（mG）を測定します。</string>

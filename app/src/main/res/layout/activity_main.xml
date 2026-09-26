@@ -327,6 +327,15 @@
             android:dividerHeight="1dp"
             android:listSelector="@android:color/transparent"
             android:nestedScrollingEnabled="false" />
+
+        <TextView
+            android:id="@+id/tvVersion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:gravity="center"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

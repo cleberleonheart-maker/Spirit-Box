@@ -79,6 +79,9 @@
    <string name="status_noise_off">Rauschfilter deaktiviert</string>
    <string name="update_downloading">Update wird heruntergeladen…</string>
    <string name="update_download_failed">Update konnte nicht heruntergeladen werden</string>
+   <string name="update_install_failed">Update konnte nicht installiert werden</string>
+   <string name="update_install_denied">Installation blockiert. Erlaube Installation aus unbekannten Quellen oder deinstalliere die vorherige Version (andere Signatur).</string>
+   <string name="app_version">Version %1$s</string>
    <string name="btn_emf">EMF</string>
    <string name="emf_dialog_title">EMF-Messgerät</string>
    <string name="emf_dialog_hint">Misst die Variation des Magnetfelds (Magnetometer) in mG.</string>

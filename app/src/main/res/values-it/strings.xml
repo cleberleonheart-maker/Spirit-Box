@@ -78,7 +78,10 @@
    <string name="status_noise_on">Filtro antirumore attivato</string>
    <string name="status_noise_off">Filtro antirumore disattivato</string>
    <string name="update_downloading">Download dell\'aggiornamento…</string>
-   <string name="update_download_failed">Impossibile scaricare l\'aggiornamento</string>
+    <string name="update_download_failed">Impossibile scaricare l\'aggiornamento</string>
+    <string name="update_install_failed">Impossibile installare l\'aggiornamento</string>
+    <string name="update_install_denied">Installazione bloccata. Consenti app da origini sconosciute o disinstalla la versione precedente (firma diversa).</string>
+    <string name="app_version">Versione %1$s</string>
    <string name="btn_emf">EMF</string>
    <string name="emf_dialog_title">Misuratore EMF</string>
    <string name="emf_dialog_hint">Misura la variazione del campo magnetico (magnetometro) in mG.</string>

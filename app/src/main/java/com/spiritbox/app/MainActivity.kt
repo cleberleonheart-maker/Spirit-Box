@@ -19,6 +19,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
 import android.provider.Settings
+import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.widget.ArrayAdapter
@@ -79,6 +80,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var miniMap: MiniMapView
     private lateinit var redFilter: View
     private lateinit var listCaptures: ListView
+    private lateinit var tvVersion: TextView
     private var scrollRoot: NestedScrollView? = null
 
     private val monitor = ActivityMonitor()
@@ -195,6 +197,8 @@ class MainActivity : AppCompatActivity() {
         swAlerts = findViewById(R.id.swAlerts)
         swNoise = findViewById(R.id.swNoise)
         listCaptures = findViewById(R.id.listCaptures)
+        tvVersion = findViewById(R.id.tvVersion)
+        tvVersion.text = getString(R.string.app_version, BuildConfig.VERSION_NAME)
         scrollRoot = findViewById(R.id.scrollRoot)
         spBand = findViewById(R.id.spBand)
         etDwell = findViewById(R.id.etDwell)
@@ -353,7 +357,10 @@ class MainActivity : AppCompatActivity() {
             if (info == null) return@check
             MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.check_update_title)
-                .setMessage(getString(R.string.check_update_msg, info.versionName))
+                .setMessage(
+                    getString(R.string.check_update_msg, info.versionName) +
+                        "\n" + getString(R.string.app_version, BuildConfig.VERSION_NAME)
+                )
                 .setPositiveButton(R.string.check_update_btn) { _, _ ->
                     downloadAndInstallUpdate(info)
                 }
@@ -377,16 +384,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun installApk(file: File) {
-        val uri = FileProvider.getUriForFile(this, "$packageName.fileprovider", file)
-        val intent = Intent(Intent.ACTION_VIEW).apply {
-            setDataAndType(uri, "application/vnd.android.package-archive")
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
         try {
+            val uri = FileProvider.getUriForFile(this, "$packageName.fileprovider", file)
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(uri, "application/vnd.android.package-archive")
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
             startActivity(intent)
+        } catch (e: SecurityException) {
+            Log.w("SpiritBox", "Instalação do APK bloqueada", e)
+            Toast.makeText(this, R.string.update_install_denied, Toast.LENGTH_LONG).show()
         } catch (e: Exception) {
-            Toast.makeText(this, R.string.update_download_failed, Toast.LENGTH_LONG).show()
+            Log.w("SpiritBox", "Falha ao abrir o instalador", e)
+            Toast.makeText(this, R.string.update_install_failed, Toast.LENGTH_LONG).show()
         }
     }
 
