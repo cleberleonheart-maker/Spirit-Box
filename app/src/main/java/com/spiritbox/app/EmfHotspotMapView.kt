@@ -8,6 +8,7 @@ import android.util.AttributeSet
 import android.view.View
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.roundToInt
 
 /** Traça a trajetória do GPS com o campo em mG e marca hotspots maiores. */
 class EmfHotspotMapView @JvmOverloads constructor(
@@ -50,10 +51,16 @@ class EmfHotspotMapView @JvmOverloads constructor(
         postInvalidateOnAnimation()
     }
 
-    private fun colorFor(v: Float): Int = when {
-        v >= 70f -> Color.rgb(0xE0, 0x2C, 0x20)
-        v >= 40f -> Color.rgb(0xF0, 0xA0, 0x00)
-        else -> Color.rgb(0x37, 0xB0, 0x50)
+    private fun normFor(mg: Float, minMg: Float, maxMg: Float): Float =
+        if (maxMg <= minMg) 0.5f else ((mg - minMg) / (maxMg - minMg)).coerceIn(0f, 1f)
+
+    private fun colorFor(mg: Float, minMg: Float, maxMg: Float): Int {
+        val t = normFor(mg, minMg, maxMg)
+        return Color.rgb(
+            (0x20 + 0xC0 * t).roundToInt(),
+            (0xB0 * (1f - t)).roundToInt(),
+            0x20
+        )
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -69,9 +76,12 @@ class EmfHotspotMapView @JvmOverloads constructor(
         var maxLat = -Double.MAX_VALUE
         var minLng = Double.MAX_VALUE
         var maxLng = -Double.MAX_VALUE
+        var minMg = Float.MAX_VALUE
+        var maxMg = -Float.MAX_VALUE
         points.forEach {
             minLat = min(minLat, it.lat); maxLat = max(maxLat, it.lat)
             minLng = min(minLng, it.lng); maxLng = max(maxLng, it.lng)
+            minMg = min(minMg, it.mg); maxMg = max(maxMg, it.mg)
         }
         val spanLat = (maxLat - minLat).coerceAtLeast(0.00001)
         val spanLng = (maxLng - minLng).coerceAtLeast(0.00001)
@@ -85,12 +95,13 @@ class EmfHotspotMapView @JvmOverloads constructor(
         for (i in 1 until n) {
             val a = points[i - 1]
             val b = points[i]
-            pathPaint.color = colorFor(b.mg)
+            pathPaint.color = colorFor(b.mg, minMg, maxMg)
             canvas.drawLine(sx(a.lng), sy(a.lat), sx(b.lng), sy(b.lat), pathPaint)
         }
         for (p in points) {
-            val r = (6f + p.mg * 0.35f).coerceAtMost(22f)
-            dotPaint.color = colorFor(p.mg)
+            val t = normFor(p.mg, minMg, maxMg)
+            val r = 6f + t * 16f
+            dotPaint.color = colorFor(p.mg, minMg, maxMg)
             canvas.drawCircle(sx(p.lng), sy(p.lat), r, dotPaint)
             dotPaint.color = Color.argb(0xCC, 0xFF, 0xFF, 0xFF)
             canvas.drawCircle(sx(p.lng), sy(p.lat), r * 0.35f, dotPaint)
