@@ -5,7 +5,8 @@ Aplicativo Android para varredura de frequências via WebSDR, com waterfall ao v
 ## Recursos
 
 - Varredura de faixas (AM, SW, CB, VHF aeronáutica, FM, METEO, marítimo, militar) com dwell/settle/limiar/gap configuráveis.
-- Waterfall ao vivo (gradiente vermelho) com marcadores de captura e exportação de imagem (toque longo).
+- Waterfall ao vivo (gradiente vermelho) com eixo de frequência rotulado, toque para sintonizar a coluna, marcadores de captura e exportação de imagem (toque longo).
+- Piso de ruído por faixa: o limiar efetivo é o maior entre o valor configurado e 3× o ruído de fundo medido (percentil 20 das últimas passagens do dwell), para que uma faixa barulhenta não encha o histórico de falsos positivos.
 - Modo noturno (filtro vermelho) e tema claro/escuro/sistema.
 - Favoritos de frequência com sintonia direta.
 - Histórico de capturas persistido em CSV e espelhado em `Download/SpiritBox/`.

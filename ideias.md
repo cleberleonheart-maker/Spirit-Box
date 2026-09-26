@@ -55,6 +55,21 @@
 - **PNG do waterfall com tamanho de leitura** (v1.10): `snapshotBitmap()` agora
   amplia 6× nearest-neighbor (240×48 → 1440×288); antes a imagem compartilhada
   abria como uma tira fininha.
+- **Eixo de frequência no waterfall** (v1.10): faixa de 15 dp no rodapé com marcas em
+  passo redondo (1/2/5 × 10ⁿ) e rótulo em kHz até 999, MHz acima disso. O eixo também
+  entra no PNG exportado, desenhado depois da ampliação para não sair serrilhado.
+- **Toque para sintonizar** (v1.10): tocar numa coluna trava a varredura naquela
+  frequência (`ACTION_TUNE` → `stayOn`), arredondada para o passo da faixa — sem o
+  arredondamento a varredura pararia num valor que ela nunca visita. O long-press
+  (exportar) continua funcionando via `performLongClick()`.
+- **Textura min/max por coluna** (v1.10): `addSample` guardava só o máximo, então o dwell
+  inteiro virava 1 pixel e uma portadora CW ficava indistinguível de uma emissora de voz.
+  Agora guarda máximo e mínimo, e `apparentLevel()` pondera o pico pela modulação
+  (0,75× para sinal contínuo, 1,0× para modulado).
+- **Piso de ruído por faixa** (v1.10): `NoiseFloor` guarda as últimas 64 passagens e tira
+  o percentil 20. O limiar efetivo é `max(limiar do usuário, 3 × piso)` — nunca fica
+  abaixo do que o usuário configurou. Zera ao trocar de faixa, e só vale depois de 24
+  amostras (antes disso é o limiar do usuário).
 
 ## Próximas (não implementadas)
 - **Histórico persistente buscável**: leitura do CSV na UI (capturas já recarregam
@@ -65,15 +80,12 @@
 
 ## Novas ideias (26/09)
 ### Waterfall / leitura
-- **Eixo de frequência no waterfall** (hoje não mostra kHz em lugar nenhum) + toque para
-  sintonizar e pinça para zoom numa faixa.
-- **Textura do sinal**: `addSample` guarda só o máximo por coluna, então o dwell inteiro
-  vira 1 pixel. Guardar min/max por coluna mostra a modulação.
+- **Pinça para zoom** no waterfall: navegar dentro de uma faixa larga (militar) sem
+  precisar trocar de preset.
 
 ### Varredura
-- **Baseline por faixa**: o limiar é absoluto (0.12) em bandas com pisos de ruído muito
-  diferentes (AM vs militar 225–400 MHz). Normalizar por percentil do ruído de fundo.
 - **Fila de faixas**: varrer AM+SW+CB+METEO em sequência automática, com log de ciclo.
+- **Faixa personalizada**: editar início/fim/passo em vez de usar só os 8 presets.
 
 ### Dados / investigação
 - **Estatísticas por frequência**: nº de capturas, primeiro/último avistamento, nível
