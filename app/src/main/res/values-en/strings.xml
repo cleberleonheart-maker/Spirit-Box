@@ -113,4 +113,12 @@
     <string name="emf_map_gps_off">Location disabled. Turn on GPS/network to record hotspots.</string>
     <string name="emf_map_no_sensor">No sensor reading: no hotspot is being recorded. Check whether the battery is optimized or the device has no magnetometer.</string>
     <string name="emf_map_save_failed">Failed to save hotspots. The track stopped being saved — storage may be full.</string>
+    <string name="emf_status_idle">Ready to record.</string>
+    <string name="emf_status_no_permission">No location permission — nothing can be recorded.</string>
+    <string name="emf_status_gps_off">GPS and network are off — turn location on.</string>
+    <string name="emf_status_provider_failed">Failed to register GPS/network: %1$s</string>
+    <string name="emf_status_waiting_fix">Waiting for a GPS fix… (make sure the signal is visible)</string>
+    <string name="emf_status_sensor_blocked">Location is fine, but the magnetometer returns no reading. If the battery is optimized, the system holds the sensor back.</string>
+    <string name="emf_status_no_magnetometer">This device has no magnetometer — the hotspot map does not work here.</string>
+    <string name="emf_status_recording">Recording · %1$d points</string>
 </resources>

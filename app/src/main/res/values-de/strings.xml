@@ -113,4 +113,12 @@
     <string name="emf_map_gps_off">Standort deaktiviert. Aktiviere GPS/Netz, um Hotspots aufzuzeichnen.</string>
     <string name="emf_map_no_sensor">Keine Sensorlesung: es wird kein Hotspot aufgezeichnet. Prüfe, ob der Akku optimiert ist oder das Gerät kein Magnetometer hat.</string>
     <string name="emf_map_save_failed">Hotspots konnten nicht gespeichert werden. Die Aufzeichnung wurde gestoppt — der Speicher ist vielleicht voll.</string>
+    <string name="emf_status_idle">Bereit zum Aufzeichnen.</string>
+    <string name="emf_status_no_permission">Keine Standortberechtigung — es kann nichts aufgezeichnet werden.</string>
+    <string name="emf_status_gps_off">GPS und Netzwerk sind aus — aktiviere die Standortermittlung.</string>
+    <string name="emf_status_provider_failed">GPS/Netzwerk konnte nicht registriert werden: %1$s</string>
+    <string name="emf_status_waiting_fix">Warte auf GPS-Fix… (prüfe, ob Signal sichtbar ist)</string>
+    <string name="emf_status_sensor_blocked">Standort ist in Ordnung, aber das Magnetometer liefert keine Messung. Wenn der Akku optimiert ist, hält das System den Sensor zurück.</string>
+    <string name="emf_status_no_magnetometer">Dieses Gerät hat kein Magnetometer — die Hotspot-Karte funktioniert hier nicht.</string>
+    <string name="emf_status_recording">Zeichnet auf · %1$d Punkte</string>
 </resources>

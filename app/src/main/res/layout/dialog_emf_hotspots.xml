@@ -27,6 +27,18 @@
         android:textSize="12sp"
         tools:text="Pontos: 0 · máx 0.0 mG" />
 
+    <TextView
+        android:id="@+id/emfMapStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:gravity="center"
+        android:textColor="@color/text_secondary"
+        android:textSize="12sp"
+        android:visibility="gone"
+        tools:text="Aguardando fix de GPS…"
+        tools:visibility="visible" />
+
     <com.spiritbox.app.EmfHotspotMapView
         android:id="@+id/emfMap"
         android:layout_width="match_parent"

@@ -113,4 +113,12 @@
     <string name="emf_map_gps_off">位置情報がオフです。GPS/ネットワークをオンにして記録してください。</string>
     <string name="emf_map_no_sensor">センサーの読み取りなし: ホットスポットが記録されていません。バッテリー最適化中か、磁気センサーが無い可能性を確認してください。</string>
     <string name="emf_map_save_failed">ホットスポットの保存に失敗しました。記録が保存されていません。ストレージの空き容量が不足している可能性があります。</string>
+    <string name="emf_status_idle">記録の準備ができました。</string>
+    <string name="emf_status_no_permission">位置情報の権限がありません。記録できません。</string>
+    <string name="emf_status_gps_off">GPSとネットワークが無効です。位置情報を有効にしてください。</string>
+    <string name="emf_status_provider_failed">GPS/ネットワークの登録に失敗しました: %1$s</string>
+    <string name="emf_status_waiting_fix">GPSの測位を待機中…（電波が見えることを確認してください）</string>
+    <string name="emf_status_sensor_blocked">位置情報は正常ですが、磁気センサーが値を返しません。バッテリーが最適化されている場合、システムがセンサーを停止させます。</string>
+    <string name="emf_status_no_magnetometer">この端末には磁気センサーがありません。ホットスポットマップは使用できません。</string>
+    <string name="emf_status_recording">記録中 · %1$d ポイント</string>
 </resources>

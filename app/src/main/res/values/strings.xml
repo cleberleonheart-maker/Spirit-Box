@@ -113,4 +113,12 @@
     <string name="emf_map_gps_off">Localização desativada. Ative GPS/rede para registrar hotspots.</string>
     <string name="emf_map_no_sensor">Sem leitura do sensor: nenhum hotspot está sendo gravado. Verifique se a bateria está otimizada ou se o aparelho não tem magnetômetro.</string>
     <string name="emf_map_save_failed">Falha ao gravar hotspots. O trajeto parou de ser salvo — o armazenamento pode estar cheio.</string>
+    <string name="emf_status_idle">Pronto para gravar.</string>
+    <string name="emf_status_no_permission">Sem permissão de localização — nada pode ser registrado.</string>
+    <string name="emf_status_gps_off">GPS e rede desativados — ative a localização.</string>
+    <string name="emf_status_provider_failed">Falha ao registrar GPS/rede: %1$s</string>
+    <string name="emf_status_waiting_fix">Aguardando fix de GPS… (faça o sinal ficar visível)</string>
+    <string name="emf_status_sensor_blocked">Localização ok, mas o magnetômetro não entrega leitura. Se a bateria estiver otimizada, o sistema segura o sensor.</string>
+    <string name="emf_status_no_magnetometer">Este aparelho não tem magnetômetro — o mapa de hotspots não funciona aqui.</string>
+    <string name="emf_status_recording">Gravando · %1$d pontos</string>
 </resources>

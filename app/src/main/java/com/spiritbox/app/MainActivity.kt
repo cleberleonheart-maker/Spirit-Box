@@ -106,9 +106,19 @@ class MainActivity : AppCompatActivity() {
     private var statusTaps = 0
     private var lastStatusTap = 0L
 
+    /** Ultimo fix de localizacao recebido desde o ultimo PARAR. Sem isso o mapa
+     * ficava vazio por qualquer um dos quatro motivos e nenhum era distinguivel. */
+    @Volatile
+    private var locationFixSeen = false
+
+    /** Erro thrown ao registrar GPS ou rede; a mensagem vai para o status. */
+    @Volatile
+    private var locationProviderError: String? = null
+
     private val locationListener = object : LocationListener {
         override fun onLocationChanged(location: Location) {
             lastLocation = location
+            locationFixSeen = true
             if (recordingLocation) pushHotspot(location)
         }
     }
@@ -492,15 +502,54 @@ class MainActivity : AppCompatActivity() {
         btnRecord.text = getString(R.string.emf_map_record)
         warnBatteryIfRestricted()
 
+        val status = dialog.findViewById<TextView>(R.id.emfMapStatus)
+
+        /** O mapa vazio era indistinguivel entre quatro causas: sem permissao,
+         * sem provedor registrado, sem fix e sem leitura do sensor. Cada uma
+         * agora tem uma linha propria, atualizada ao vivo enquanto grava. */
+        fun refreshStatus() {
+            val dialogUp = hotspotDialog
+            if (dialogUp == null) return
+            val text = when {
+                !recordingLocation -> getString(R.string.emf_status_idle)
+                !hasLocationPermission() ->
+                    getString(R.string.emf_status_no_permission)
+                !isLocationEnabled() -> getString(R.string.emf_status_gps_off)
+                locationProviderError != null -> getString(
+                    R.string.emf_status_provider_failed, locationProviderError!!
+                )
+                !locationFixSeen ->
+                    getString(R.string.emf_status_waiting_fix)
+                !emfMeter.available -> getString(R.string.emf_status_no_magnetometer)
+                emfMeter.milliGauss() == null ->
+                    getString(R.string.emf_status_sensor_blocked)
+                else -> getString(R.string.emf_status_recording, map.points().size)
+            }
+            status.text = text
+            status.visibility = if (text.isBlank()) View.GONE else View.VISIBLE
+        }
+
+        val statusTick = object : Runnable {
+            override fun run() {
+                refreshStatus()
+                if (recordingLocation) emfHandler.postDelayed(this, 1000L)
+            }
+        }
+
         fun setRecording(on: Boolean) {
             recordingLocation = on
             emfHandler.removeCallbacks(noSensorCheck)
+            emfHandler.removeCallbacks(statusTick)
             if (on) {
                 hotspotSaveFailed = false
                 recordStartPoints = map.points().size
+                locationFixSeen = false
+                locationProviderError = null
                 emfHandler.postDelayed(noSensorCheck, 6000L)
+                emfHandler.post(statusTick)
             }
             btnRecord.text = getString(if (on) R.string.emf_map_record_on else R.string.emf_map_record)
+            refreshStatus()
         }
 
         btnRecord.setOnClickListener {
@@ -530,11 +579,13 @@ class MainActivity : AppCompatActivity() {
         dialog.setOnDismissListener {
             recordingLocation = false
             emfHandler.removeCallbacks(noSensorCheck)
+            emfHandler.removeCallbacks(statusTick)
             stopLocationUpdates()
             emfMeter.stop()
             hotspotDialog = null
         }
         dialog.show()
+        refreshStatus()
     }
 
     private fun pushHotspot(location: Location) {
@@ -565,6 +616,16 @@ class MainActivity : AppCompatActivity() {
             lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
     }
 
+    private fun hasLocationPermission(): Boolean {
+        val fine = ContextCompat.checkSelfPermission(
+            this, Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+        val coarse = ContextCompat.checkSelfPermission(
+            this, Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+        return fine || coarse
+    }
+
     private fun startLocationUpdates() {
         val fine = ContextCompat.checkSelfPermission(
             this, Manifest.permission.ACCESS_FINE_LOCATION
@@ -574,17 +635,30 @@ class MainActivity : AppCompatActivity() {
         ) == PackageManager.PERMISSION_GRANTED
         if (!fine && !coarse) return
         val lm = locationManager()
-        try {
-            if (fine) {
+        val errors = ArrayList<String>()
+
+        // Cada provedor e registrado no seu proprio try: uma excecao no GPS
+        // pulava o registro da rede, e o mapa ficava vazio para sempre sem
+        // nenhuma pista do motivo.
+        if (fine) {
+            try {
                 lm.requestLocationUpdates(
                     LocationManager.GPS_PROVIDER, 1000L, 1f, locationListener
                 )
+            } catch (e: Exception) {
+                errors.add("GPS: ${e.javaClass.simpleName}")
+                Log.w("SpiritBox", "Falha ao registrar GPS_PROVIDER", e)
             }
+        }
+        try {
             lm.requestLocationUpdates(
                 LocationManager.NETWORK_PROVIDER, 2000L, 1f, locationListener
             )
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            errors.add("rede: ${e.javaClass.simpleName}")
+            Log.w("SpiritBox", "Falha ao registrar NETWORK_PROVIDER", e)
         }
+        locationProviderError = if (errors.isEmpty()) null else errors.joinToString("; ")
     }
 
     private fun stopLocationUpdates() {
