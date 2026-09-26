@@ -40,12 +40,50 @@
   com `SystemClock.elapsedRealtime()` (immune a mudança de relógio) e zera
   `fieldUv`/`lastSampleElapsed` no `start()`, para não gravar hotspot com leitura velha.
 
+## Em andamento → entregue (v1.10)
+- **Relógio do `SweepEngine`** (v1.10): as fases (settle/hold/gap) passam a usar
+  `SystemClock.elapsedRealtime()`. Com `currentTimeMillis`, mudar o fuso ou o NTP
+  ajustar a hora no meio da varredura pulava o dwell ou prendia a fase — mesma
+  classe de bug que a v1.9 corrigiu no `EmfMeter`.
+- **`configureRange` volta ao início da faixa** (v1.10): trocar de banda no meio do
+  dwell continuava da frequência da banda antiga, então a varredura da nova começava
+  no meio dela. Também zera o `peak` e a fase.
+- **Janela para as passagens** (v1.10): `captureStreak` não decayia, então com
+  `requiredPasses=3` um pico isolado de 30 min atrás já contava como 3. Agora a
+  passagem só vale por `STREAK_WINDOW_MS` (60 s), e a decisão de capturar virou
+  `shouldCapture(...)` para poder ser testada.
+- **PNG do waterfall com tamanho de leitura** (v1.10): `snapshotBitmap()` agora
+  amplia 6× nearest-neighbor (240×48 → 1440×288); antes a imagem compartilhada
+  abria como uma tira fininha.
+
 ## Próximas (não implementadas)
 - **Histórico persistente buscável**: leitura do CSV na UI (capturas já recarregam
   ao abrir o app; falta busca/filtro).
 - **Widget de notificação com play/pause**.
 - **Remover modo FM stub** ou marcá-lo experimental.
 - **Bookmarks exportados/importados**: salvar lista de favoritos como arquivo.
+
+## Novas ideias (26/09)
+### Waterfall / leitura
+- **Eixo de frequência no waterfall** (hoje não mostra kHz em lugar nenhum) + toque para
+  sintonizar e pinça para zoom numa faixa.
+- **Textura do sinal**: `addSample` guarda só o máximo por coluna, então o dwell inteiro
+  vira 1 pixel. Guardar min/max por coluna mostra a modulação.
+
+### Varredura
+- **Baseline por faixa**: o limiar é absoluto (0.12) em bandas com pisos de ruído muito
+  diferentes (AM vs militar 225–400 MHz). Normalizar por percentil do ruído de fundo.
+- **Fila de faixas**: varrer AM+SW+CB+METEO em sequência automática, com log de ciclo.
+
+### Dados / investigação
+- **Estatísticas por frequência**: nº de capturas, primeiro/último avistamento, nível
+  máximo, e um painel de "top frequências".
+- **Exportar/importar favoritos e presets** em JSON, junto do trajeto EMF em **GPX**
+  (o `emf_hotspots.jsonl` já tem lat/lng).
+- **"Limpar dados de investigação"**: hotspots + histórico num botão só.
+
+### Android
+- **Notificação com frequência atual e contador de capturas**; widget com play/pause.
 
 ## Ideias futuras (EMF / investigação)
 - **Mapa de hotspots sobre mapa de fundo / imagem**: hoje é projeção local (lat/lng
