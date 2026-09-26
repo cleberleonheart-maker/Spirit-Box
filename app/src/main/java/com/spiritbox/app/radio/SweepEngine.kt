@@ -146,6 +146,21 @@ class SweepEngine(
     private val captureStreak = HashMap<Long, Int>()
     private val capturePassAt = HashMap<Long, Long>()
     private val lastCaptureByFreq = HashMap<Long, Long>()
+    private val noise = NoiseFloor()
+
+    /** Piso de ruido medido da faixa, em nivel do tuner. */
+    var noiseFloor: Double = 0.0
+        private set
+
+    /**
+     * Limiar efetivo: o que o usuario pediu, ou 3x o piso de ruido quando a faixa
+     * esta comprovadamente barulhenta. Nunca fica abaixo do valor do usuario, entao
+     * quem tuningou o limiar para catching sinal fraco nao perde nada.
+     */
+    fun effectiveThreshold(): Double {
+        val byFloor = noiseFloor * NoiseFloor.MULTIPLIER
+        return if (byFloor > captureThreshold) byFloor else captureThreshold
+    }
 
     /** Relogio monotono: as fases sao duracoes (settle/hold/gap) e nao instantes de
      * agenda. Com currentTimeMillis mudar o fuso ou o NTP ajustar a hora no meio da
@@ -160,6 +175,10 @@ class SweepEngine(
         currentFreq = r.startKHz.toDouble()
         peak = 0.0
         phase = Phase.TUNE
+        // O piso de ruido e' da faixa anterior: manter o antigo fazia a primeira
+        // volta da banda nova nascer ja com o limiar errado.
+        noise.clear()
+        noiseFloor = 0.0
     }
 
     fun setDwell(ms: Long) {
@@ -180,6 +199,7 @@ class SweepEngine(
         phase = Phase.TUNE
         peak = 0.0
         currentFreq = range.startKHz.toDouble()
+        noise.clear()
         tuner.start()
         SpiritBoxEvents.pushStatus(context.getString(R.string.status_sweep_started))
         val ex = Executors.newSingleThreadScheduledExecutor { r ->
@@ -240,7 +260,14 @@ class SweepEngine(
                 if (now >= phaseUntil) {
                     val freqEnd = currentFreq
                     val key = freqEnd.toLong()
-                    val passes = if (peak >= captureThreshold) {
+                    noise.add(peak.toFloat())
+                    noiseFloor = if (noise.size >= NoiseFloor.MIN_SAMPLES) {
+                        noise.percentile(NoiseFloor.PERCENTILE).toDouble()
+                    } else {
+                        0.0
+                    }
+                    val th = effectiveThreshold()
+                    val passes = if (peak >= th) {
                         val s = nextStreak(
                             captureStreak[key] ?: 0,
                             capturePassAt[key] ?: -1L,
@@ -256,7 +283,7 @@ class SweepEngine(
                     }
                     val last = lastCaptureByFreq[key] ?: 0L
                     if (shouldCapture(
-                            passes, requiredPasses, peak, captureThreshold, now, last
+                            passes, requiredPasses, peak, th, now, last
                         )
                     ) {
                         lastCaptureByFreq[key] = now
