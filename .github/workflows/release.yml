@@ -25,9 +25,18 @@ jobs:
         run: chmod +x gradlew
 
       - name: Restore keystore from secret
+        env:
+          SPIRIT_KS_B64: ${{ secrets.SPIRIT_KS_B64 }}
         run: |
           mkdir -p keystore
-          printf '%s' "${{ secrets.SPIRIT_KS_B64 }}" | tr -d '[:space:]' | base64 -d > keystore/spirit.keystore
+          printf '%s' "$SPIRIT_KS_B64" | tr -d '[:space:]' > /tmp/ks.b64
+          echo "secret: $(wc -c < /tmp/ks.b64) chars (esperado 3616)"
+          BAD=$(tr -d 'A-Za-z0-9+/=' < /tmp/ks.b64 | fold -w1 | sort -u | tr -d '\n')
+          if [ -n "$BAD" ]; then
+            echo "ERRO: caracteres fora do base64 no secret: [$BAD]"
+            exit 1
+          fi
+          base64 -d /tmp/ks.b64 > keystore/spirit.keystore
           printf 'storeFile=keystore/spirit.keystore\nkeyAlias=spirit\n' > keystore.properties
           keytool -list -v -keystore keystore/spirit.keystore \
             -storepass "$SPIRIT_KS_PASS" -alias spirit | grep -E 'Owner|SHA256'
