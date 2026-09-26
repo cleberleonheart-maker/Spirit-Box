@@ -257,7 +257,12 @@ class MainActivity : AppCompatActivity() {
                 val settle = etSettle.text.toString().toLongOrNull() ?: 150L
                 val threshold = etThreshold.text.toString().toIntOrNull() ?: 12
                 val gap = etGap.text.toString().toLongOrNull() ?: 300L
-                waterfall.configure(range.startKHz.toDouble(), range.endKHz.toDouble())
+                waterfall.configure(
+                    range.startKHz.toDouble(),
+                    range.endKHz.toDouble(),
+                    range.stepKHz.toDouble()
+                )
+
                 monitor.configureBand(range.startKHz.toDouble(), range.endKHz.toDouble())
                 monitor.reset()
                 miniMap.reset()
@@ -315,6 +320,21 @@ class MainActivity : AppCompatActivity() {
         waterfall.setOnLongClickListener {
             shareWaterfall()
             true
+        }
+
+        waterfall.onTapped = { freq ->
+            if (!SpiritBoxEvents.serviceRunning) {
+                Toast.makeText(this, R.string.scan_not_running, Toast.LENGTH_SHORT).show()
+            } else {
+                SpiritBoxService.tuneTo(this, freq)
+                lastFreq = freq
+                updateBookmarkButton()
+                Toast.makeText(
+                    this,
+                    getString(R.string.waterfall_tuned, WaterfallView.formatKHz(freq)),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
 
         btnTheme.setOnClickListener {

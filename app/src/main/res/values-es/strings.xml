@@ -50,7 +50,8 @@
    <string name="service_resumed">Barrido reanudado</string>
    <string name="share_title">Compartir capturas</string>
    <string name="share_no_file">Aún no hay nada que exportar.</string>
-    <string name="share_waterfall_title">Compartir waterfall</string>
+    <string name="waterfall_tuned">Sintonizado en %1$s</string>
+   <string name="share_waterfall_title">Compartir waterfall</string>
     <string name="fav_prompt">★ Favoritos</string>
     <string name="bookmark_off">☆</string>
    <string name="default_threshold">12</string>

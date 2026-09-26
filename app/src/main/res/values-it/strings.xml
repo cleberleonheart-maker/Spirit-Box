@@ -50,7 +50,8 @@
    <string name="service_resumed">Scansione ripresa</string>
    <string name="share_title">Condividi catture</string>
    <string name="share_no_file">Nessuna cattura da esportare.</string>
-    <string name="share_waterfall_title">Condividi waterfall</string>
+    <string name="waterfall_tuned">Sintonizzato su %1$s</string>
+   <string name="share_waterfall_title">Condividi waterfall</string>
     <string name="fav_prompt">★ Preferiti</string>
     <string name="bookmark_off">☆</string>
    <string name="default_threshold">12</string>
