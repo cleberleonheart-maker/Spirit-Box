@@ -1,6 +1,7 @@
 package com.spiritbox.app.radio
 
 import android.content.Context
+import android.os.SystemClock
 import android.util.Log
 import com.spiritbox.app.R
 import com.spiritbox.app.SpiritBoxEvents
@@ -47,9 +48,39 @@ class SweepEngine(
         private const val TAG = "SpiritBox"
         private const val TICK_MS = 25L
 
+        /** Janela de tempo que vale a passagem: um pico isolado há muito tempo nao
+         * pode somar com os de agora e virar "3 passagens" so porque o app ficou
+         * horas rodando. */
+        const val STREAK_WINDOW_MS = 60_000L
+
+        /** Frequencia nao volta a ser capturada antes disso, para nao encher o
+         * historico de 200 linhas da mesma emissora a cada varredura. */
+        const val CAPTURE_COOLDOWN_MS = 60_000L
+
         fun nextFreq(freqKHz: Double, stepKHz: Int): Double = freqKHz + stepKHz
 
         fun isWithinRange(freqKHz: Double, endKHz: Int): Boolean = freqKHz <= endKHz
+
+        /** Passagens consecutivas da frequencia, contando so as que vieram dentro de
+         * [windowMs]. [lastPassMs] < 0 quando a frequencia ainda nao passou. */
+        fun nextStreak(
+            current: Int,
+            lastPassMs: Long,
+            nowMs: Long,
+            windowMs: Long = STREAK_WINDOW_MS
+        ): Int =
+            if (current > 0 && lastPassMs >= 0 && nowMs - lastPassMs <= windowMs) current + 1 else 1
+
+        fun shouldCapture(
+            passes: Int,
+            requiredPasses: Int,
+            peak: Double,
+            threshold: Double,
+            nowMs: Long,
+            lastCaptureMs: Long,
+            cooldownMs: Long = CAPTURE_COOLDOWN_MS
+        ): Boolean =
+            passes >= requiredPasses && peak >= threshold && nowMs - lastCaptureMs > cooldownMs
 
         fun bandId(r: BandRange): Int {
             val idx = PRESETS.indexOf(r).coerceAtLeast(0)
@@ -76,11 +107,13 @@ class SweepEngine(
     @Volatile
     var hold = false
         set(value) {
-            field = value
-            if (value) {
-                captureStreak.clear()
-                lastCaptureByFreq.remove(currentFreq.toLong())
-            }
+        field = value
+        if (value) {
+            captureStreak.clear()
+            capturePassAt.clear()
+            lastCaptureByFreq.remove(currentFreq.toLong())
+        }
+
         }
 
     @Volatile
@@ -111,10 +144,22 @@ class SweepEngine(
     private var peak = 0.0
     private var lastRmsPushMs = 0L
     private val captureStreak = HashMap<Long, Int>()
+    private val capturePassAt = HashMap<Long, Long>()
     private val lastCaptureByFreq = HashMap<Long, Long>()
+
+    /** Relogio monotono: as fases sao duracoes (settle/hold/gap) e nao instantes de
+     * agenda. Com currentTimeMillis mudar o fuso ou o NTP ajustar a hora no meio da
+     * varredura, o dwell saltava ou ficava preso numa fase. */
+    private fun now(): Long = SystemClock.elapsedRealtime()
 
     fun configureRange(r: BandRange) {
         range = r
+        // Sem isso, trocar de faixa no meio do dwell continuava da frequencia da
+        // banda antiga: a varredura da nova comecava no meio dela (ou dava um pulo
+        // ate o fim, se a antiga estava acima).
+        currentFreq = r.startKHz.toDouble()
+        peak = 0.0
+        phase = Phase.TUNE
     }
 
     fun setDwell(ms: Long) {
@@ -172,40 +217,49 @@ class SweepEngine(
 
     private fun step() {
         val r = range
+        val now = now()
         when (phase) {
             Phase.TUNE -> {
                 val freqNow = currentFreq
                 tuner.tune(freqNow, r)
                 SpiritBoxEvents.pushFreq(freqNow)
                 phase = Phase.SETTLE
-                phaseUntil = System.currentTimeMillis() + settleMs
+                phaseUntil = now + settleMs
             }
             Phase.SETTLE -> {
-                if (System.currentTimeMillis() >= phaseUntil) {
+                if (now >= phaseUntil) {
                     peak = 0.0
                     phase = Phase.HOLD
-                    phaseUntil = System.currentTimeMillis() + dwellMs
+                    phaseUntil = now + dwellMs
                 }
             }
             Phase.HOLD -> {
                 val v = tuner.currentRms
                 if (v > peak) peak = v
                 maybePushMeter()
-                if (System.currentTimeMillis() >= phaseUntil) {
+                if (now >= phaseUntil) {
                     val freqEnd = currentFreq
-                    if (peak >= captureThreshold) {
-                        val key = freqEnd.toLong()
-                        captureStreak[key] = (captureStreak[key] ?: 0) + 1
+                    val key = freqEnd.toLong()
+                    val passes = if (peak >= captureThreshold) {
+                        val s = nextStreak(
+                            captureStreak[key] ?: 0,
+                            capturePassAt[key] ?: -1L,
+                            now
+                        )
+                        captureStreak[key] = s
+                        capturePassAt[key] = now
+                        s
                     } else {
-                        captureStreak.remove(freqEnd.toLong())
+                        captureStreak.remove(key)
+                        capturePassAt.remove(key)
+                        0
                     }
-                    val passes = captureStreak[freqEnd.toLong()] ?: 0
-                    val now = System.currentTimeMillis()
-                    val trackTime = lastCaptureByFreq[freqEnd.toLong()] ?: 0L
-                    if (passes >= requiredPasses && peak >= captureThreshold &&
-                        now - trackTime > 60000
+                    val last = lastCaptureByFreq[key] ?: 0L
+                    if (shouldCapture(
+                            passes, requiredPasses, peak, captureThreshold, now, last
+                        )
                     ) {
-                        lastCaptureByFreq[freqEnd.toLong()] = now
+                        lastCaptureByFreq[key] = now
                         val level = (peak * 100).toInt().coerceIn(0, 100)
                         SpiritBoxEvents.pushCapture(freqEnd, level)
                         try {
@@ -224,7 +278,7 @@ class SweepEngine(
                             phase = Phase.TUNE
                         } else if (sweepGapMs > 0) {
                             phase = Phase.GAP
-                            phaseUntil = System.currentTimeMillis() + sweepGapMs
+                            phaseUntil = now + sweepGapMs
                         } else {
                             currentFreq = r.startKHz.toDouble()
                             phase = Phase.TUNE
@@ -233,7 +287,7 @@ class SweepEngine(
                 }
             }
             Phase.GAP -> {
-                if (System.currentTimeMillis() >= phaseUntil) {
+                if (now >= phaseUntil) {
                     currentFreq = r.startKHz.toDouble()
                     phase = Phase.TUNE
                 }
@@ -242,7 +296,7 @@ class SweepEngine(
     }
 
     private fun maybePushMeter() {
-        val now = System.currentTimeMillis()
+        val now = now()
         if (now - lastRmsPushMs >= 120) {
             lastRmsPushMs = now
             val v = tuner.currentRms
