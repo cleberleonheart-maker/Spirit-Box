@@ -27,8 +27,10 @@ jobs:
       - name: Restore keystore from secret
         run: |
           mkdir -p keystore
-          echo "${{ secrets.SPIRIT_KS_B64 }}" | base64 -d > keystore/spirit.keystore
+          printf '%s' "${{ secrets.SPIRIT_KS_B64 }}" | tr -d '[:space:]' | base64 -d > keystore/spirit.keystore
           printf 'storeFile=keystore/spirit.keystore\nkeyAlias=spirit\n' > keystore.properties
+          keytool -list -v -keystore keystore/spirit.keystore \
+            -storepass "$SPIRIT_KS_PASS" -alias spirit | grep -E 'Owner|SHA256'
 
       - name: Build signed release APK
         run: ./gradlew assembleRelease -PversionName="${GITHUB_REF_NAME#v}" --console=plain
