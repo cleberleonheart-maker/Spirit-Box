@@ -84,7 +84,8 @@ class MainActivity : AppCompatActivity() {
     private var scrollRoot: NestedScrollView? = null
 
     private val monitor = ActivityMonitor()
-    private val emfMeter by lazy { EmfMeter(this) }
+    private val emfMeterLazy = lazy { EmfMeter(this) }
+    private val emfMeter by emfMeterLazy
     private val emfHandler = Handler(Looper.getMainLooper())
     private val mapHandler = Handler(Looper.getMainLooper())
     private var emfRunning = false
@@ -505,6 +506,7 @@ class MainActivity : AppCompatActivity() {
         val stats = dialog.findViewById<TextView>(R.id.emfMapStats)
         map.addPoint(location.latitude, location.longitude, mG)
         updateHotspotStats(stats, map)
+        saveHotspots(map.points(), force = false)
     }
 
     private fun updateHotspotStats(tv: TextView, map: EmfHotspotMapView) {
@@ -555,7 +557,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun hotspotFile(): File = File(filesDir, "emf_hotspots.json")
 
-    private fun saveHotspots(list: List<EmfHotspotMapView.Point>) {
+    private var lastHotspotSave = 0L
+
+    private fun saveHotspots(list: List<EmfHotspotMapView.Point>, force: Boolean = true) {
+        if (!force && System.currentTimeMillis() - lastHotspotSave < 3000L) return
         try {
             val arr = JSONArray()
             list.forEach { p ->
@@ -569,7 +574,13 @@ class MainActivity : AppCompatActivity() {
                 )
             }
             val obj = JSONObject().put("points", arr)
-            FileOutputStream(hotspotFile()).write(obj.toString().toByteArray())
+            val tmp = File(filesDir, "emf_hotspots.json.tmp")
+            FileOutputStream(tmp).use { it.write(obj.toString().toByteArray()) }
+            if (!tmp.renameTo(hotspotFile())) {
+                hotspotFile().writeText(tmp.readText())
+                tmp.delete()
+            }
+            lastHotspotSave = System.currentTimeMillis()
         } catch (_: Exception) {
         }
     }
@@ -653,8 +664,10 @@ class MainActivity : AppCompatActivity() {
             emfRunning = false
             emfHandler.removeCallbacks(emfRunnable)
         }
-        emfMeter.stop()
+        if (emfMeterLazy.isInitialized()) emfMeter.stop()
         stopLocationUpdates()
+        hotspotDialog?.findViewById<EmfHotspotMapView>(R.id.emfMap)
+            ?.let { saveHotspots(it.points()) }
     }
 
     private fun loadPrefs() {
