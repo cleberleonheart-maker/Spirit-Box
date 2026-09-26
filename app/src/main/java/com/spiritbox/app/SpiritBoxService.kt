@@ -365,7 +365,7 @@ class SpiritBoxService : Service() {
             val c = WebSdrClient(
                 this,
                 at,
-                { SpiritBoxEvents.pushStatus(it) },
+                { text -> pushWsStatus(text) },
                 { rms ->
                     sdrTuner?.setRms(rms)
                     SpiritBoxEvents.pushRms(rms)
@@ -430,6 +430,25 @@ class SpiritBoxService : Service() {
             setReferenceCounted(false)
             acquire(WAKELOCK_TIMEOUT_MS)
         }
+    }
+
+    /** Doze e o unico cenario em que o servico esta de pe, com wakelock e CPU
+     * acordada, e mesmo assim o socket nao conecta: o sistema suspende a rede do
+     * app. Nao adianta reconectar em loop, e o usuario so via "nao conecta" sem
+     * explicacao. Detectamos o caso e dizemos a causa e o que fazer. */
+    private fun isDozeRestricted(): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return false
+        val pm = getSystemService(Context.POWER_SERVICE) as? PowerManager ?: return false
+        return !pm.isIgnoringBatteryOptimizations(packageName)
+    }
+
+    private fun pushWsStatus(text: String) {
+        val c = client
+        if (c != null && !c.connected && isDozeRestricted()) {
+            SpiritBoxEvents.pushStatus(getString(R.string.status_battery_blocked))
+            return
+        }
+        SpiritBoxEvents.pushStatus(text)
     }
 
     private fun releaseWakeLock() {

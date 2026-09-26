@@ -15,6 +15,7 @@
    <string name="action_stop">停止</string>
    <string name="notif_denied">通知の許可が拒否されました。アプリは動作を続けますが、スキャンが制限される可能性があります。</string>
    <string name="status_starting">開始中…</string>
+   <string name="status_battery_blocked">バッテリー最適化中: 接続できません。電池の制限を「なし」に設定してください。</string>
    <string name="status_fm_available">ローカルFM利用可能</string>
    <string name="status_fm_unavailable">ローカルFM利用不可</string>
    <string name="status_stopped">スキャン停止</string>

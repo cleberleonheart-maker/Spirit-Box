@@ -15,6 +15,7 @@
    <string name="action_stop">Stopp</string>
    <string name="notif_denied">Benachrichtigungsberechtigung verweigert. Die App läuft weiter, aber das System kann die Suche einschränken.</string>
    <string name="status_starting">Starte…</string>
+   <string name="status_battery_blocked">Akku optimiert: die App kann sich nicht verbinden. Setze die Energieeinschränkung auf „Keine“.</string>
    <string name="status_fm_available">Lokales FM verfügbar</string>
    <string name="status_fm_unavailable">Lokales FM nicht verfügbar</string>
    <string name="status_stopped">Suche gestoppt</string>

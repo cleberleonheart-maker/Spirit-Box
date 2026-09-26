@@ -15,6 +15,7 @@
    <string name="action_stop">Ferma</string>
    <string name="notif_denied">Permesso notifiche negato. L\'app continuerà, ma la scansione potrebbe essere limitata dal sistema.</string>
    <string name="status_starting">Avvio…</string>
+   <string name="status_battery_blocked">Batteria ottimizzata: l\'app non può connettersi. Imposta la restrizione energetica su «Nessuna».</string>
    <string name="status_fm_available">FM locale disponibile</string>
    <string name="status_fm_unavailable">FM locale non disponibile</string>
    <string name="status_stopped">Scansione arrestata</string>

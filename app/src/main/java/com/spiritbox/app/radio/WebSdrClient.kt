@@ -172,8 +172,15 @@ class WebSdrClient(
     private fun scheduleReconnect() {
         if (closed.get()) return
         if (!reconnecting.compareAndSet(false, true)) return
-        val delay = (1000L * (retries.get() + 1)).coerceAtMost(10000L)
+        // Backoff exponencial: com o teto de 10s anterior, uma rede bloqueada era
+        // retentada a cada 10s para sempre -- com o servico em foreground e o
+        // wakelock segurando a CPU, isso so gastava bateria. Sob Doze o socket nao
+        // completa de qualquer jeito, entao insistir mais que 1min nao muda o
+        // resultado, so a carga.
+        val tent = retries.get().toInt().coerceAtMost(6)
+        val delay = (1000L shl tent).coerceAtMost(60_000L)
         retries.incrementAndGet()
+
         Thread {
             Thread.sleep(delay)
             if (closed.get()) return@Thread

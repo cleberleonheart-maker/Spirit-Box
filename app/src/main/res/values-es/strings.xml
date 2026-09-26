@@ -15,6 +15,7 @@
    <string name="action_stop">Detener</string>
    <string name="notif_denied">Permiso de notificaciones denegado. La app seguirá funcionando, pero el sistema puede limitar el escaneo.</string>
    <string name="status_starting">Iniciando…</string>
+   <string name="status_battery_blocked">Batería optimizada: la app no puede conectarse. Ajusta la restricción de energía a «Ninguna».</string>
    <string name="status_fm_available">FM local disponible</string>
    <string name="status_fm_unavailable">FM local no disponible</string>
    <string name="status_stopped">Barrido detenido</string>

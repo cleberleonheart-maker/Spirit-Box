@@ -15,6 +15,7 @@
    <string name="action_stop">Stop</string>
    <string name="notif_denied">Notification permission denied. The app will keep running, but scanning may be limited by the system.</string>
    <string name="status_starting">Starting…</string>
+   <string name="status_battery_blocked">Battery optimized: the app cannot connect. Set the energy restriction to \u201cNo restrictions\u201d.</string>
    <string name="status_fm_available">Local FM available</string>
    <string name="status_fm_unavailable">Local FM not available</string>
    <string name="status_stopped">Scanning stopped</string>
