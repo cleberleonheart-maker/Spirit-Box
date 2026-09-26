@@ -108,6 +108,7 @@
     <string name="emf_map_clear">PULISCI</string>
     <string name="emf_map_locked">Attiva la modalità indagine (7 tocchi sullo stato) per la mappa dei punti caldi.</string>
     <string name="emf_map_denied">Posizione negata — mappa dei punti caldi non disponibile.</string>
+    <string name="battery_not_exempt">Batteria ottimizzata: la scansione e la mappa EMF smettono di funzionare. Imposta la restrizione energetica su Nessuna.</string>
     <string name="emf_map_gps_off">Posizione disattivata. Attiva GPS/rete per registrare i punti caldi.</string>
     <string name="emf_map_saved">Punti caldi salvati.</string>
 </resources>

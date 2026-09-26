@@ -30,6 +30,16 @@
   `emf_hotspots.json` (oculto no modo investigação).
 - **Traduções completas** (pt-BR, en, de, es, it, ja) e lint sem erros.
 
+## Em andamento → entregue (v1.9)
+- **Isenção de bateria (Doze) guiada** (v1.9): `batteryExempt()` + oferta da tela de
+  isenção no primeiro uso; em MIUI/HyperOS abre antes a tela de autostart (que não
+  concede isenção) e retoma a tela padrão no `onResume` (`pendingBatteryPrompt`).
+  Toast `battery_not_exempt` (6 idiomas) ao abrir o mapa EMF se a energia estiver
+  restringida — era o motivo de a varredura "travar" sem explicação.
+- **Leitura velha do magnetômetro** (v1.9): `EmfMeter` passa a medir idade da amostra
+  com `SystemClock.elapsedRealtime()` (immune a mudança de relógio) e zera
+  `fieldUv`/`lastSampleElapsed` no `start()`, para não gravar hotspot com leitura velha.
+
 ## Próximas (não implementadas)
 - **Histórico persistente buscável**: leitura do CSV na UI (capturas já recarregam
   ao abrir o app; falta busca/filtro).

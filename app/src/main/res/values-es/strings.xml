@@ -108,6 +108,7 @@
     <string name="emf_map_clear">LIMPIAR</string>
     <string name="emf_map_locked">Activa el modo investigación (7 toques en el estado) para el mapa de hotspots.</string>
     <string name="emf_map_denied">Ubicación denegada — mapa de hotspots no disponible.</string>
+    <string name="battery_not_exempt">Batería optimizada: el barrido y el mapa EMF dejan de funcionar. Ajusta la restricción de energía a Ninguna.</string>
     <string name="emf_map_gps_off">Ubicación desactivada. Activa el GPS/red para registrar hotspots.</string>
     <string name="emf_map_saved">Hotspots guardados.</string>
 </resources>

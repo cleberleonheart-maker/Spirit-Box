@@ -1,10 +1,12 @@
 package com.spiritbox.app
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -89,6 +91,7 @@ class MainActivity : AppCompatActivity() {
     private val emfHandler = Handler(Looper.getMainLooper())
     private val mapHandler = Handler(Looper.getMainLooper())
     private var emfRunning = false
+    private var pendingBatteryPrompt = false
     private var emfValue = 0f
     private var emfTrend = 0f
     private var emfGauge: EmfGaugeView? = null
@@ -465,6 +468,7 @@ class MainActivity : AppCompatActivity() {
         hotspotDialog = dialog
         recordingLocation = false
         btnRecord.text = getString(R.string.emf_map_record)
+        warnBatteryIfRestricted()
 
         fun setRecording(on: Boolean) {
             recordingLocation = on
@@ -907,17 +911,63 @@ class MainActivity : AppCompatActivity() {
         requestIgnoreBatteryOptimizations()
     }
 
+    private fun batteryExempt(): Boolean {
+        val pm = getSystemService(PowerManager::class.java) ?: return true
+        return pm.isIgnoringBatteryOptimizations(packageName)
+    }
+
+    private fun warnBatteryIfRestricted() {
+        if (batteryExempt()) return
+        Toast.makeText(this, R.string.battery_not_exempt, Toast.LENGTH_LONG).show()
+    }
+
     private fun requestIgnoreBatteryOptimizations() {
-        val pm = getSystemService(PowerManager::class.java) ?: return
-        if (pm.isIgnoringBatteryOptimizations(packageName)) return
-        try {
+        if (batteryExempt()) return
+        if (openMiuiAutostart()) {
+            pendingBatteryPrompt = true
+        } else {
+            openDozeSettings()
+        }
+        warnBatteryIfRestricted()
+    }
+
+    /** Autostart do MIUI/HyperOS não concede isenção de Doze; deixamos marcado para
+     * oferecer a tela padrão quando o usuário voltar. */
+    private fun openMiuiAutostart(): Boolean {
+        val vendor = Build.MANUFACTURER.lowercase(Locale.US)
+        val isMiui = vendor.contains("xiaomi") || vendor.contains("redmi") || vendor.contains("poco")
+        if (!isMiui) return false
+        val miui = Intent()
+            .setComponent(
+                ComponentName(
+                    "com.miui.securitycenter",
+                    "com.miui.permcenter.autostart.AutoStartManagementActivity"
+                )
+            )
+            .putExtra("packageName", packageName)
+        return runCatching { startActivity(miui) }.isSuccess
+    }
+
+    /** Isenção de Doze é o que mantém a varredura e o magnetômetro vivos com a tela
+     * apagada. O app é distribuído por GitHub Releases (fora da Play Store), então a
+     * restrição de política do lint não se aplica. */
+    @SuppressLint("BatteryLife")
+    private fun openDozeSettings() {
+        runCatching {
             startActivity(
                 Intent(
                     Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
                     Uri.parse("package:$packageName")
                 )
             )
-        } catch (_: Exception) {
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (pendingBatteryPrompt) {
+            pendingBatteryPrompt = false
+            if (!batteryExempt()) openDozeSettings()
         }
     }
 

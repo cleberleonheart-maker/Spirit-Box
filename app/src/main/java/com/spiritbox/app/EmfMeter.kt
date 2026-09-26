@@ -5,11 +5,13 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.os.SystemClock
 import kotlin.math.abs
 import kotlin.math.sqrt
 
 /** Leitor do magnetômetro. [milliGauss] devolve a variação do campo magnético em mG
- * relativa à linha de base do local; null se o sensor está ausente ou ainda frio. */
+ * relativa à linha de base do local; null se o sensor está ausente, ainda frio ou
+ * parou de entregar amostras (evita gravar hotspot com leitura velha). */
 class EmfMeter(context: Context) {
 
     private val sm = context.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
@@ -20,7 +22,7 @@ class EmfMeter(context: Context) {
 
     private var fieldUv = 0.0
     private var baselineUv = 0.0
-    private var fieldMillis = 0L
+    private var lastSampleElapsed = 0L
 
     private val listener = object : SensorEventListener {
         override fun onSensorChanged(event: SensorEvent?) {
@@ -30,7 +32,7 @@ class EmfMeter(context: Context) {
             val z = event.values[2].toDouble()
             val microT = sqrt(x * x + y * y + z * z)
             fieldUv = microT
-            fieldMillis = System.currentTimeMillis()
+            lastSampleElapsed = SystemClock.elapsedRealtime()
             if (baselineUv <= 0.0) {
                 baselineUv = microT
             } else {
@@ -44,7 +46,11 @@ class EmfMeter(context: Context) {
     fun start() {
         val m = mag
         available = m != null && sm?.registerListener(listener, m, SensorManager.SENSOR_DELAY_NORMAL) == true
-        if (available) baselineUv = 0.0
+        if (available) {
+            baselineUv = 0.0
+            fieldUv = 0.0
+            lastSampleElapsed = 0L
+        }
     }
 
     fun stop() {
@@ -53,7 +59,12 @@ class EmfMeter(context: Context) {
     }
 
     fun milliGauss(): Float? {
-        if (!available || System.currentTimeMillis() - fieldMillis > 2000L) return null
+        if (!available || fieldUv <= 0.0) return null
+        if (SystemClock.elapsedRealtime() - lastSampleElapsed > STALE_MS) return null
         return (abs(fieldUv - baselineUv) * 10.0).toFloat()
+    }
+
+    companion object {
+        private const val STALE_MS = 2000L
     }
 }

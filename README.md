@@ -11,6 +11,7 @@ Aplicativo Android para varredura de frequências via WebSDR, com waterfall ao v
 - Histórico de capturas persistido em CSV e espelhado em `Download/SpiritBox/`.
 - Clipes WAV dos últimos 8 s (modo SDR, API >= 29) salvos ao apertar **Salvar**.
 - Notificação com ações (Salvar, Hold, Mudo, Parar) e auto-check de atualização via GitHub Releases.
+- Aviso de bateria otimizada: com Doze ativo a varredura e o mapa EMF param; o app oferece a isenção (e a tela de autostart em MIUI/HyperOS) e avisa ao abrir o mapa caso a energia esteja restringida.
 - Modo FM experimental (rádio FM local) com aviso de indisponibilidade.
 
 ## Build

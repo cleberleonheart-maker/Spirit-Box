@@ -108,6 +108,7 @@
     <string name="emf_map_clear">CLEAR</string>
     <string name="emf_map_locked">Enable investigation mode (7 taps on status) to use the hotspots map.</string>
     <string name="emf_map_denied">Location denied — hotspots map unavailable.</string>
+    <string name="battery_not_exempt">Battery optimized: scanning and the EMF map stop working. Set the energy restriction to None.</string>
     <string name="emf_map_gps_off">Location disabled. Turn on GPS/network to record hotspots.</string>
     <string name="emf_map_saved">Hotspots saved.</string>
 </resources>
