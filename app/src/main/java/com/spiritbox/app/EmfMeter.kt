@@ -43,10 +43,20 @@ class EmfMeter(context: Context) {
         override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
     }
 
+    /** Ver [SensorLease]: o dismiss do Dialog chega atrasado pela fila do
+     * Looper e chegava desregistrando o sensor que o mapa acabara de
+     * registrar. */
+    private val lease = SensorLease()
+    private var registered = false
+
     fun start() {
+        if (!lease.acquire()) return
         val m = mag
-        available = m != null && sm?.registerListener(listener, m, SensorManager.SENSOR_DELAY_NORMAL) == true
-        if (available) {
+        val ok = m != null &&
+            sm?.registerListener(listener, m, SensorManager.SENSOR_DELAY_NORMAL) == true
+        registered = ok
+        available = ok
+        if (ok) {
             baselineUv = 0.0
             fieldUv = 0.0
             lastSampleElapsed = 0L
@@ -54,7 +64,18 @@ class EmfMeter(context: Context) {
     }
 
     fun stop() {
-        sm?.unregisterListener(listener)
+        if (!lease.release()) return
+        if (registered) sm?.unregisterListener(listener)
+        registered = false
+        available = false
+    }
+
+    /** Solta tudo de uma vez, para quando a Activity vai embora e nenhum
+     * dismiss pendente pode ser esperado. */
+    fun stopAll() {
+        lease.releaseAll()
+        if (registered) sm?.unregisterListener(listener)
+        registered = false
         available = false
     }
 

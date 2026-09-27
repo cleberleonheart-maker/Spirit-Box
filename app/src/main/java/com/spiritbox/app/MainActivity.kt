@@ -845,7 +845,7 @@ class MainActivity : AppCompatActivity() {
             emfRunning = false
             emfHandler.removeCallbacks(emfRunnable)
         }
-        if (emfMeterLazy.isInitialized()) emfMeter.stop()
+        if (emfMeterLazy.isInitialized()) emfMeter.stopAll()
         stopLocationUpdates()
         // Nao ha mais nada a gravar aqui: cada ponto ja foi para o arquivo em
         // append no pushHotspot, entao o onStop nao corre o risco de perder o
