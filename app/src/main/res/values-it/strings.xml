@@ -121,4 +121,5 @@
     <string name="emf_status_sensor_blocked">La posizione è corretta, ma il magnetometro non restituisce letture. Se la batteria è ottimizzata, il sistema trattiene il sensore.</string>
     <string name="emf_status_no_magnetometer">Questo dispositivo non ha magnetometro: la mappa dei punti caldi non funziona qui.</string>
     <string name="emf_status_recording">Registrazione · %1$d punti</string>
+    <string name="emf_status_uncalibrated">Uso del sensore non calibrato (il dispositivo non espone quello calibrato). Le letture possono variare di più con l\'orientamento.</string>
 </resources>

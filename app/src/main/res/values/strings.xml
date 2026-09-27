@@ -119,6 +119,7 @@
     <string name="emf_status_provider_failed">Falha ao registrar GPS/rede: %1$s</string>
     <string name="emf_status_waiting_fix">Aguardando fix de GPS… (faça o sinal ficar visível)</string>
     <string name="emf_status_sensor_blocked">Localização ok, mas o magnetômetro não entrega leitura. Se a bateria estiver otimizada, o sistema segura o sensor.</string>
-    <string name="emf_status_no_magnetometer">Este aparelho não tem magnetômetro — o mapa de hotspots não funciona aqui.</string>
+    <string name="emf_status_no_magnetometer">Este aparelho não expõe magnetômetro — o mapa de hotspots não funciona aqui.</string>
+    <string name="emf_status_uncalibrated">Usando o sensor sem calibração (o aparelho não expõe o calibrado). Leituras podem variar mais com a orientação.</string>
     <string name="emf_status_recording">Gravando · %1$d pontos</string>
 </resources>

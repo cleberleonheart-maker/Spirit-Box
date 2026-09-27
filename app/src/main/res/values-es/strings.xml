@@ -121,4 +121,5 @@
     <string name="emf_status_sensor_blocked">La ubicación está bien, pero el magnetómetro no devuelve lectura. Si la batería está optimizada, el sistema retiene el sensor.</string>
     <string name="emf_status_no_magnetometer">Este dispositivo no tiene magnetómetro: el mapa de hotspots no funciona aquí.</string>
     <string name="emf_status_recording">Grabando · %1$d puntos</string>
+    <string name="emf_status_uncalibrated">Usando el sensor sin calibrar (el dispositivo no expone el calibrado). Las lecturas pueden variar más con la orientación.</string>
 </resources>

@@ -523,6 +523,7 @@ class MainActivity : AppCompatActivity() {
                 !emfMeter.available -> getString(R.string.emf_status_no_magnetometer)
                 emfMeter.milliGauss() == null ->
                     getString(R.string.emf_status_sensor_blocked)
+                emfMeter.uncalibratedOnly -> getString(R.string.emf_status_uncalibrated)
                 else -> getString(R.string.emf_status_recording, map.points().size)
             }
             status.text = text

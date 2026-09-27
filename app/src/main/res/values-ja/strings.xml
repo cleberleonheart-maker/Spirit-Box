@@ -121,4 +121,5 @@
     <string name="emf_status_sensor_blocked">位置情報は正常ですが、磁気センサーが値を返しません。バッテリーが最適化されている場合、システムがセンサーを停止させます。</string>
     <string name="emf_status_no_magnetometer">この端末には磁気センサーがありません。ホットスポットマップは使用できません。</string>
     <string name="emf_status_recording">記録中 · %1$d ポイント</string>
+    <string name="emf_status_uncalibrated">未校正センサーを使用しています（端末が校正済みセンサーを公開していません）。向きによって読み取り値が大きく変わる可能性があります。</string>
 </resources>

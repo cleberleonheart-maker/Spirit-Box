@@ -15,7 +15,19 @@ import kotlin.math.sqrt
 class EmfMeter(context: Context) {
 
     private val sm = context.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
-    private val mag = sm?.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
+
+    /** Alguns aparelhos nao expõem o sensor calibrado e entregam so o
+     * TYPE_MAGNETIC_FIELD_UNCALIBRATED. Pedir apenas o calibrado fazia o app
+     * concluir que nao havia magnetometro em aparelhos que tem, e o mapa
+     * recusava todo ponto. Os dois trazem x, y e z em microteslas, entao o
+     * modulo do campo serve igual. */
+    private val calibrated = sm?.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
+    private val mag = calibrated
+        ?: sm?.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD_UNCALIBRATED)
+    private val magType = mag?.type ?: -1
+
+    /** true quando so o sensor nao calibrado esta disponivel. */
+    val uncalibratedOnly: Boolean get() = calibrated == null && mag != null
 
     var available = false
         private set
@@ -26,7 +38,7 @@ class EmfMeter(context: Context) {
 
     private val listener = object : SensorEventListener {
         override fun onSensorChanged(event: SensorEvent?) {
-            if (event == null || event.sensor.type != Sensor.TYPE_MAGNETIC_FIELD) return
+            if (event == null || event.sensor.type != magType) return
             val x = event.values[0].toDouble()
             val y = event.values[1].toDouble()
             val z = event.values[2].toDouble()
