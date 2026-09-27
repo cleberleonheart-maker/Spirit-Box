@@ -103,6 +103,17 @@ class MainActivity : AppCompatActivity() {
     private var hotspotDialog: Dialog? = null
     private var recordingLocation = false
     private var lastLocation: Location? = null
+
+    /** onStop desliga sensor, localizacao e o loop do medidor. Marca aqui para
+     * o onResume saber que precisa religar, e nao religar em toda volta. */
+    private var emfTornDown = false
+
+    /** Runnables do mapa elevatedos a campo: antes eram locais, entao o onStop
+     * nao conseguia cancelar e o statusTick continuava se repostando a cada
+     * segundo, segurando a Activity e o Dialog. */
+    private var mapStatusTick: Runnable? = null
+    private var mapMap: EmfHotspotMapView? = null
+    private var mapStatusView: TextView? = null
     private var statusTaps = 0
     private var lastStatusTap = 0L
 
@@ -403,6 +414,9 @@ class MainActivity : AppCompatActivity() {
         button.isEnabled = false
         button.text = getString(R.string.check_update_checking)
         UpdateChecker.check(this, force = true) { result ->
+            // A resposta chega ate 20 s depois (timeouts da API) e pode cair com
+            // a Activity ja fechada; show() sem guarda estoura BadTokenException.
+            if (isFinishing || isDestroyed) return@check
             button.isEnabled = true
             button.text = getString(R.string.check_update_now)
             when (result) {
@@ -418,6 +432,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showUpdateDialog(info: UpdateChecker.UpdateInfo) {
+        if (isFinishing || isDestroyed) return
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.check_update_title)
             .setMessage(
@@ -529,6 +544,8 @@ class MainActivity : AppCompatActivity() {
         warnBatteryIfRestricted()
 
         val status = dialog.findViewById<TextView>(R.id.emfMapStatus)
+        mapMap = map
+        mapStatusView = status
 
         /** O mapa vazio era indistinguivel entre quatro causas: sem permissao,
          * sem provedor registrado, sem fix e sem leitura do sensor. Cada uma
@@ -559,9 +576,10 @@ class MainActivity : AppCompatActivity() {
         val statusTick = object : Runnable {
             override fun run() {
                 refreshStatus()
-                if (recordingLocation) emfHandler.postDelayed(this, 1000L)
+                if (recordingLocation && !emfTornDown) emfHandler.postDelayed(this, 1000L)
             }
         }
+        mapStatusTick = statusTick
 
         fun setRecording(on: Boolean) {
             recordingLocation = on
@@ -715,7 +733,11 @@ class MainActivity : AppCompatActivity() {
     private val noSensorCheck = object : Runnable {
         override fun run() {
             if (!recordingLocation) return
-            val map = hotspotDialog?.findViewById<EmfHotspotMapView>(R.id.emfMap) ?: return
+            // Com o app em background o onStop ja desregistrou o sensor; acusar
+            // o magnetometro aqui seria culpa do proprio app.
+            if (emfTornDown) return
+            if (!emfMeterLazy.isInitialized() || !emfMeter.available) return
+            val map = mapMap ?: return
             if (map.points().size > recordStartPoints) return
             Toast.makeText(this@MainActivity, R.string.emf_map_no_sensor, Toast.LENGTH_LONG).show()
         }
@@ -872,7 +894,18 @@ class MainActivity : AppCompatActivity() {
             emfRunning = false
             emfHandler.removeCallbacks(emfRunnable)
         }
+        // Os dois runnables do mapa se repostam sozinhos; sem remover aqui eles
+        // continuavam de tempos em tempos segurando a Activity depois de
+        // destruida.
+        mapStatusTick?.let { emfHandler.removeCallbacks(it) }
+        emfHandler.removeCallbacks(noSensorCheck)
+        val mapUp = hotspotDialog?.isShowing == true
+        val meterUp = emfDialog?.isShowing == true
         if (emfMeterLazy.isInitialized()) emfMeter.stopAll()
+        // O teardown acima e incondicional, entao a flag precisa considerar o
+        // mapa tambem: senao o onResume nao religaria o sensor e ele ficaria
+        // morto ate o dialogo ser fechado e reaberto.
+        emfTornDown = mapUp || meterUp || recordingLocation
         stopLocationUpdates()
         // Nao ha mais nada a gravar aqui: cada ponto ja foi para o arquivo em
         // append no pushHotspot, entao o onStop nao corre o risco de perder o
@@ -1180,6 +1213,29 @@ class MainActivity : AppCompatActivity() {
         if (pendingBatteryPrompt) {
             pendingBatteryPrompt = false
             if (!batteryExempt()) openDozeSettings()
+        }
+        if (!emfTornDown) return
+        emfTornDown = false
+        val mapUp = hotspotDialog?.isShowing == true
+        val meterUp = emfDialog?.isShowing == true
+        if (emfMeterLazy.isInitialized() && (mapUp || meterUp || recordingLocation)) {
+            emfMeter.start()
+        }
+        if (meterUp && !emfRunning) {
+            emfRunning = true
+            emfHandler.post(emfRunnable)
+        }
+        if (recordingLocation) {
+            locationFixSeen = false
+            locationProviderError = null
+            startLocationUpdates()
+            emfHandler.postDelayed(noSensorCheck, 6000L)
+        }
+        if (mapUp) {
+            mapStatusTick?.let {
+                emfHandler.removeCallbacks(it)
+                emfHandler.post(it)
+            }
         }
     }
 

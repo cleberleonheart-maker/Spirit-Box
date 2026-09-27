@@ -136,17 +136,28 @@ object UpdateChecker {
         }
         executor.execute {
             var result: Result = Result.Unavailable
+            var fetched = false
             try {
                 val latest = fetchLatest()
+                fetched = latest != null
                 result = when {
                     latest == null -> Result.Unavailable
                     VersionComparator.isNewer(latest.versionName, currentName) ->
                         Result.Available(latest)
                     else -> Result.UpToDate
                 }
-                Prefs.markUpdateCheck(context)
             } catch (e: Exception) {
                 Log.w(TAG, "Falha na verificação de atualização", e)
+            }
+            // So marca o cooldown quando a consulta de fato respondeu: senao uma
+            // falha de rede burava as 24 h e o usuario ficava o dia inteiro sem
+            // checagem automatica.
+            if (fetched) {
+                try {
+                    Prefs.markUpdateCheck(context)
+                } catch (e: Exception) {
+                    Log.w(TAG, "Falha ao gravar o cooldown", e)
+                }
             }
             val out = result
             Handler(Looper.getMainLooper()).post { onResult(out) }
