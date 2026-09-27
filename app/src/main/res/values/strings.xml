@@ -93,8 +93,10 @@
     <string name="check_update_msg">Há uma nova versão (%1$s) do Spirit Box. O que deseja fazer?</string>
     <string name="check_update_btn">BAIXAR</string>
     <string name="check_update_later">AGORA NÃO</string>
-    <string name="check_update_uptodate" tools:ignore="UnusedResources">Você já está na versão mais recente.</string>
-    <string name="check_update_error" tools:ignore="UnusedResources">Não foi possível verificar as atualizações.</string>
+    <string name="check_update_uptodate">Você já está na versão mais recente.</string>
+    <string name="check_update_error">Não foi possível verificar as atualizações.</string>
+    <string name="check_update_now">VER ATUALIZAÇÃO</string>
+    <string name="check_update_checking">Verificando…</string>
     <string name="btn_theme">TEMA: %1$s</string>
     <string name="theme_system">SISTEMA</string>
     <string name="theme_light">CLARO</string>

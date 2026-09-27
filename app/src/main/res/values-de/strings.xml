@@ -93,8 +93,6 @@
     <string name="check_update_msg">Eine neue Version (%1$s) von Spirit Box ist verfügbar. Möchtest du sie herunterladen?</string>
     <string name="check_update_btn">HERUNTERLADEN</string>
     <string name="check_update_later">SPÄTER</string>
-    <string name="check_update_uptodate">Du hast bereits die neueste Version.</string>
-    <string name="check_update_error">Aktualisierungsprüfung fehlgeschlagen.</string>
     <string name="btn_theme">THEMA: %1$s</string>
     <string name="theme_system">SYSTEM</string>
     <string name="theme_light">HELL</string>
@@ -122,4 +120,8 @@
     <string name="emf_status_no_magnetometer">Dieses Gerät hat kein Magnetometer — die Hotspot-Karte funktioniert hier nicht.</string>
     <string name="emf_status_recording">Zeichnet auf · %1$d Punkte</string>
     <string name="emf_status_uncalibrated">Unkalibrierter Sensor wird verwendet (das Gerät meldet keinen kalibrierten). Die Messwerte können stärker von der Ausrichtung abhängen.</string>
+    <string name="check_update_uptodate">Sie haben bereits die neueste Version.</string>
+    <string name="check_update_error">Updates konnten nicht geprüft werden.</string>
+    <string name="check_update_now">UPDATE PRÜFEN</string>
+    <string name="check_update_checking">Wird geprüft…</string>
 </resources>

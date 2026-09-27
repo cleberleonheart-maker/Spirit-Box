@@ -215,6 +215,8 @@ class MainActivity : AppCompatActivity() {
         listCaptures = findViewById(R.id.listCaptures)
         tvVersion = findViewById(R.id.tvVersion)
         tvVersion.text = getString(R.string.app_version, BuildConfig.VERSION_NAME)
+        findViewById<MaterialButton>(R.id.btnCheckUpdate)
+            .setOnClickListener { checkUpdateOnDemand(it as MaterialButton) }
         scrollRoot = findViewById(R.id.scrollRoot)
         spBand = findViewById(R.id.spBand)
         etDwell = findViewById(R.id.etDwell)
@@ -389,20 +391,44 @@ class MainActivity : AppCompatActivity() {
 
     /** Auto-check de atualização. Respeita o cooldown do Prefs; resultado vira diálogo. */
     private fun spiritCheckUpdatesSilently() {
-        UpdateChecker.check(this) { info ->
-            if (info == null) return@check
-            MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.check_update_title)
-                .setMessage(
-                    getString(R.string.check_update_msg, info.versionName) +
-                        "\n" + getString(R.string.app_version, BuildConfig.VERSION_NAME)
-                )
-                .setPositiveButton(R.string.check_update_btn) { _, _ ->
-                    downloadAndInstallUpdate(info)
-                }
-                .setNegativeButton(R.string.check_update_later, null)
-                .show()
+        UpdateChecker.check(this) { result ->
+            if (result !is UpdateChecker.Result.Available) return@check
+            showUpdateDialog(result.info)
         }
+    }
+
+    /** Consulta a pedido, sem cooldown. Antes nao havia nenhuma forma de forcar
+     * a verificacao, e o automatico era limitado a uma vez por dia. */
+    private fun checkUpdateOnDemand(button: MaterialButton) {
+        button.isEnabled = false
+        button.text = getString(R.string.check_update_checking)
+        UpdateChecker.check(this, force = true) { result ->
+            button.isEnabled = true
+            button.text = getString(R.string.check_update_now)
+            when (result) {
+                is UpdateChecker.Result.Available -> showUpdateDialog(result.info)
+                UpdateChecker.Result.UpToDate -> Toast.makeText(
+                    this, R.string.check_update_uptodate, Toast.LENGTH_LONG
+                ).show()
+                UpdateChecker.Result.Unavailable -> Toast.makeText(
+                    this, R.string.check_update_error, Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
+    private fun showUpdateDialog(info: UpdateChecker.UpdateInfo) {
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.check_update_title)
+            .setMessage(
+                getString(R.string.check_update_msg, info.versionName) +
+                    "\n" + getString(R.string.app_version, BuildConfig.VERSION_NAME)
+            )
+            .setPositiveButton(R.string.check_update_btn) { _, _ ->
+                downloadAndInstallUpdate(info)
+            }
+            .setNegativeButton(R.string.check_update_later, null)
+            .show()
     }
 
     private fun downloadAndInstallUpdate(info: UpdateChecker.UpdateInfo) {

@@ -93,8 +93,6 @@
     <string name="check_update_msg">Hay una nueva versión (%1$s) de Spirit Box. ¿Qué deseas hacer?</string>
     <string name="check_update_btn">DESCARGAR</string>
     <string name="check_update_later">AHORA NO</string>
-    <string name="check_update_uptodate">Ya tienes la última versión.</string>
-    <string name="check_update_error">No se pudo comprobar las actualizaciones.</string>
     <string name="btn_theme">TEMA: %1$s</string>
     <string name="theme_system">SISTEMA</string>
     <string name="theme_light">CLARO</string>
@@ -122,4 +120,8 @@
     <string name="emf_status_no_magnetometer">Este dispositivo no tiene magnetómetro: el mapa de hotspots no funciona aquí.</string>
     <string name="emf_status_recording">Grabando · %1$d puntos</string>
     <string name="emf_status_uncalibrated">Usando el sensor sin calibrar (el dispositivo no expone el calibrado). Las lecturas pueden variar más con la orientación.</string>
+    <string name="check_update_uptodate">Ya estás en la versión más reciente.</string>
+    <string name="check_update_error">No se pudieron comprobar las actualizaciones.</string>
+    <string name="check_update_now">BUSCAR ACTUALIZACIONES</string>
+    <string name="check_update_checking">Comprobando…</string>
 </resources>

@@ -41,6 +41,15 @@ object UpdateChecker {
         val htmlUrl: String
     )
 
+    /** Resultado da consulta. Separa "nao ha nada novo" de "a consulta falhou":
+     * antes os dois chegavam como null e uma falha de rede aparecia como se
+     * o app estivesse atualizado. */
+    sealed class Result {
+        object UpToDate : Result()
+        object Unavailable : Result()
+        data class Available(val info: UpdateInfo) : Result()
+    }
+
     /** Deve rodar via [check] — nunca na main thread. */
     private fun fetchLatest(): UpdateInfo? {
         var conn: HttpURLConnection? = null
@@ -115,26 +124,32 @@ object UpdateChecker {
     fun check(
         context: Context,
         force: Boolean = false,
-        onResult: (UpdateInfo?) -> Unit
+        onResult: (Result) -> Unit
     ) {
         val currentName = BuildConfig.VERSION_NAME
         if (!force) {
             val last = Prefs.lastUpdateCheckAt(context)
-            if (System.currentTimeMillis() - last < COOLDOWN_MS) return
+            if (System.currentTimeMillis() - last < COOLDOWN_MS) {
+                Handler(Looper.getMainLooper()).post { onResult(Result.UpToDate) }
+                return
+            }
         }
         executor.execute {
-            var info: UpdateInfo? = null
+            var result: Result = Result.Unavailable
             try {
                 val latest = fetchLatest()
-                if (latest != null && VersionComparator.isNewer(latest.versionName, currentName)) {
-                    info = latest
+                result = when {
+                    latest == null -> Result.Unavailable
+                    VersionComparator.isNewer(latest.versionName, currentName) ->
+                        Result.Available(latest)
+                    else -> Result.UpToDate
                 }
                 Prefs.markUpdateCheck(context)
             } catch (e: Exception) {
                 Log.w(TAG, "Falha na verificação de atualização", e)
             }
-            val result = info
-            Handler(Looper.getMainLooper()).post { onResult(result) }
+            val out = result
+            Handler(Looper.getMainLooper()).post { onResult(out) }
         }
     }
 }

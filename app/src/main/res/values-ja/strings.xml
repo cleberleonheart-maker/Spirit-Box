@@ -93,8 +93,6 @@
     <string name="check_update_msg">Spirit Box の新しいバージョン（%1$s）が利用できます。どうしますか？</string>
     <string name="check_update_btn">ダウンロード</string>
     <string name="check_update_later">あとで</string>
-    <string name="check_update_uptodate">すでに最新バージョンです。</string>
-    <string name="check_update_error">アップデートを確認できませんでした。</string>
     <string name="btn_theme">テーマ: %1$s</string>
     <string name="theme_system">システム</string>
     <string name="theme_light">ライト</string>
@@ -122,4 +120,8 @@
     <string name="emf_status_no_magnetometer">この端末には磁気センサーがありません。ホットスポットマップは使用できません。</string>
     <string name="emf_status_recording">記録中 · %1$d ポイント</string>
     <string name="emf_status_uncalibrated">未校正センサーを使用しています（端末が校正済みセンサーを公開していません）。向きによって読み取り値が大きく変わる可能性があります。</string>
+    <string name="check_update_uptodate">すでに最新バージョンです。</string>
+    <string name="check_update_error">更新を確認できませんでした。</string>
+    <string name="check_update_now">更新を確認</string>
+    <string name="check_update_checking">確認中…</string>
 </resources>

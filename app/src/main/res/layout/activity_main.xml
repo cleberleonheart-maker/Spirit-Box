@@ -336,6 +336,17 @@
             android:gravity="center"
             android:textColor="@color/text_secondary"
             android:textSize="12sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCheckUpdate"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="6dp"
+            android:text="@string/check_update_now"
+            android:textSize="12sp"
+            app:cornerRadius="20dp" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
