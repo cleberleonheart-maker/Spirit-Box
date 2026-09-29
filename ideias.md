@@ -1,6 +1,8 @@
 # Ideias para o SpiritBox
 
 ## Implementado recentemente
+- **Play/Pause na notificação**: botão que pausa/retoma a varredura e o áudio
+  (mantém a conexão WebSDR viva; a varredura congela e volta de onde parou).
 - **Bookmarks / favoritos**: botão ★ marca/desmarca a frequência atual (persistida
   em Prefs como lista de kHz); spinner "★ Favoritos" sintoniza direto num favorito
   via `ACTION_TUNE` + `SweepEngine.stayOn()`.

@@ -51,6 +51,7 @@ class SpiritBoxService : Service() {
         private const val ACTION_HOLD = "com.spiritbox.app.HOLD"
         private const val ACTION_MUTE = "com.spiritbox.app.MUTE"
         private const val ACTION_NOISE = "com.spiritbox.app.NOISE"
+        private const val ACTION_PAUSE = "com.spiritbox.app.PAUSE"
         private const val ACTION_TUNE = "com.spiritbox.app.TUNE"
         private const val EXTRA_MUTED = "muted"
         private const val EXTRA_NOISE = "noise"
@@ -134,6 +135,14 @@ class SpiritBoxService : Service() {
             )
         }
 
+        fun togglePause(context: Context) {
+            context.startService(
+                Intent(context, SpiritBoxService::class.java).apply {
+                    action = ACTION_PAUSE
+                }
+            )
+        }
+
         fun tuneTo(context: Context, freqKHz: Double) {
             context.startService(
                 Intent(context, SpiritBoxService::class.java).apply {
@@ -175,6 +184,9 @@ class SpiritBoxService : Service() {
     private var lastRms: Double = 0.0
 
     private var lastNotifUpdateMs = 0L
+
+    @Volatile
+    private var paused = false
 
     private val eventsListener = object : SpiritBoxEvents.Listener {
         override fun onFreq(freqKHz: Double) {
@@ -286,6 +298,21 @@ class SpiritBoxService : Service() {
                     )
                 )
             }
+            ACTION_PAUSE -> {
+                val e = engine
+                if (e == null) {
+                    SpiritBoxEvents.pushStatus(getString(R.string.scan_not_running))
+                    stopSelf()
+                } else {
+                    paused = !paused
+                    e.paused = paused
+                    applyMute()
+                    SpiritBoxEvents.pushStatus(
+                        getString(if (paused) R.string.status_paused else R.string.status_resumed)
+                    )
+                    refreshNotificationNow()
+                }
+            }
             ACTION_TUNE -> {
                 val e = engine
                 if (e == null) {
@@ -327,6 +354,7 @@ class SpiritBoxService : Service() {
 
     private fun startScan(mode: String, server: String, rangeIndex: Int, dwell: Long, settle: Long, threshold: Int, gap: Long) {
         if (engine != null) return
+        paused = false
         lastFreq = 0.0
         lastRms = 0.0
         lastNotifUpdateMs = 0L
@@ -404,6 +432,7 @@ class SpiritBoxService : Service() {
         }
         SpiritBoxEvents.serviceRunning = false
         SpiritBoxEvents.holdActive = false
+        paused = false
         Prefs.clearActiveScan(this)
         SpiritBoxEvents.removeListener(eventsListener)
         engine?.stop()
@@ -464,11 +493,16 @@ class SpiritBoxService : Service() {
         val now = System.currentTimeMillis()
         if (engine == null || now - lastNotifUpdateMs < NOTIF_UPDATE_INTERVAL_MS) return
         lastNotifUpdateMs = now
+        refreshNotificationNow()
+    }
+
+    private fun refreshNotificationNow() {
         val freq = lastFreq
-        val text = if (freq > 0) {
-            getString(R.string.notif_scanning_freq, formatFreq(freq))
-        } else {
-            getString(R.string.notif_text_scanning)
+        val text = when {
+            paused && freq > 0 -> getString(R.string.notif_paused_freq, formatFreq(freq))
+            paused -> getString(R.string.notif_paused)
+            freq > 0 -> getString(R.string.notif_scanning_freq, formatFreq(freq))
+            else -> getString(R.string.notif_text_scanning)
         }
         try {
             getSystemService(NotificationManager::class.java)
@@ -487,9 +521,10 @@ class SpiritBoxService : Service() {
     }
 
     private fun applyMute() {
-        val muted = Prefs.muted(this)
+        val track = audioTrack ?: return
+        val silent = Prefs.muted(this) || paused
         try {
-            audioTrack?.setVolume(if (muted) 0f else 1f)
+            track.setVolume(if (silent) 0f else 1f)
         } catch (_: Exception) {
         }
     }
@@ -714,6 +749,11 @@ class SpiritBoxService : Service() {
             },
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
+        val playPausePi = PendingIntent.getService(
+            this, 4,
+            Intent(this, SpiritBoxService::class.java).apply { action = ACTION_PAUSE },
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
         val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Notification.Builder(this, CHANNEL_ID)
         } else {
@@ -740,6 +780,13 @@ class SpiritBoxService : Service() {
                     null,
                     getString(if (Prefs.muted(this)) R.string.btn_unmute else R.string.btn_mute),
                     mutePi
+                ).build()
+            )
+            .addAction(
+                Notification.Action.Builder(
+                    null,
+                    getString(if (paused) R.string.btn_play else R.string.btn_pause),
+                    playPausePi
                 ).build()
             )
             .addAction(

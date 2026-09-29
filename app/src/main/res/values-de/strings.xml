@@ -76,6 +76,12 @@
    <string name="btn_unmute">SOUND</string>
    <string name="status_muted">Ton aus</string>
    <string name="status_unmuted">Ton an</string>
+    <string name="btn_pause">PAUSE</string>
+    <string name="btn_play">WEITER</string>
+    <string name="status_paused">Suche angehalten</string>
+    <string name="status_resumed">Suche fortgesetzt</string>
+    <string name="notif_paused">Suche angehalten</string>
+    <string name="notif_paused_freq">Angehalten bei %1$s</string>
    <string name="switch_noise">Rauschunterdrückung</string>
    <string name="status_noise_on">Rauschfilter aktiviert</string>
    <string name="status_noise_off">Rauschfilter deaktiviert</string>

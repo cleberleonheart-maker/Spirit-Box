@@ -76,6 +76,12 @@
    <string name="btn_unmute">サウンド</string>
    <string name="status_muted">サウンドオフ</string>
    <string name="status_unmuted">サウンドオン</string>
+    <string name="btn_pause">一時停止</string>
+    <string name="btn_play">再開</string>
+    <string name="status_paused">スキャンを一時停止しました</string>
+    <string name="status_resumed">スキャンを再開しました</string>
+    <string name="notif_paused">スキャン一時停止中</string>
+    <string name="notif_paused_freq">%1$s で一時停止</string>
    <string name="switch_noise">ノイズ除去</string>
    <string name="status_noise_on">ノイズフィルター有効</string>
    <string name="status_noise_off">ノイズフィルター無効</string>

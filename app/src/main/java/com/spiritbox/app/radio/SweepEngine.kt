@@ -117,6 +117,9 @@ class SweepEngine(
         }
 
     @Volatile
+    var paused = false
+
+    @Volatile
     var requiredPasses: Int = 1
 
     @Volatile
@@ -228,6 +231,7 @@ class SweepEngine(
 
     private fun tick() {
         if (!running) return
+        if (paused) return
         try {
             step()
         } catch (e: Exception) {

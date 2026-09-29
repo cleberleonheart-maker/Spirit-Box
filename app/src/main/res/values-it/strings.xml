@@ -76,6 +76,12 @@
    <string name="btn_unmute">AUDIO</string>
    <string name="status_muted">Audio disattivato</string>
    <string name="status_unmuted">Audio attivato</string>
+    <string name="btn_pause">PAUSA</string>
+    <string name="btn_play">RIPRENDI</string>
+    <string name="status_paused">Scansione in pausa</string>
+    <string name="status_resumed">Scansione ripresa</string>
+    <string name="notif_paused">Scansione in pausa</string>
+    <string name="notif_paused_freq">In pausa su %1$s</string>
    <string name="switch_noise">Riduzione del rumore</string>
    <string name="status_noise_on">Filtro antirumore attivato</string>
    <string name="status_noise_off">Filtro antirumore disattivato</string>

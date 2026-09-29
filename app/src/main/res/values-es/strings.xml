@@ -76,6 +76,12 @@
    <string name="btn_unmute">SONIDO</string>
    <string name="status_muted">Sonido desactivado</string>
    <string name="status_unmuted">Sonido activado</string>
+    <string name="btn_pause">PAUSA</string>
+    <string name="btn_play">REANUDAR</string>
+    <string name="status_paused">Barrido en pausa</string>
+    <string name="status_resumed">Barrido reanudado</string>
+    <string name="notif_paused">Barrido en pausa</string>
+    <string name="notif_paused_freq">En pausa en %1$s</string>
    <string name="switch_noise">Reducción de ruido</string>
    <string name="status_noise_on">Filtro de ruido activado</string>
    <string name="status_noise_off">Filtro de ruido desactivado</string>

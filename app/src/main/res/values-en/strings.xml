@@ -77,6 +77,12 @@
    <string name="btn_unmute">SOUND</string>
 <string name="status_muted">Sound off</string>
     <string name="status_unmuted">Sound on</string>
+    <string name="btn_pause">PAUSE</string>
+    <string name="btn_play">RESUME</string>
+    <string name="status_paused">Scanning paused</string>
+    <string name="status_resumed">Scanning resumed</string>
+    <string name="notif_paused">Scanning paused</string>
+    <string name="notif_paused_freq">Paused at %1$s</string>
     <string name="status_noise_on">Noise filter on</string>
     <string name="status_noise_off">Noise filter off</string>
     <string name="update_downloading">Downloading update…</string>
