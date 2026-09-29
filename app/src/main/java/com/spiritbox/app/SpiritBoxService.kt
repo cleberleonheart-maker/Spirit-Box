@@ -304,8 +304,14 @@ class SpiritBoxService : Service() {
                     SpiritBoxEvents.pushStatus(getString(R.string.scan_not_running))
                     stopSelf()
                 } else {
-                    paused = !paused
+                    val frozen = paused || e.hold
+                    paused = !frozen
                     e.paused = paused
+                    if (!paused && e.hold) {
+                        e.hold = false
+                        SpiritBoxEvents.holdActive = false
+                        SpiritBoxEvents.pushHoldChanged(false)
+                    }
                     applyMute()
                     SpiritBoxEvents.pushStatus(
                         getString(if (paused) R.string.status_paused else R.string.status_resumed)
@@ -496,11 +502,17 @@ class SpiritBoxService : Service() {
         refreshNotificationNow()
     }
 
+    private fun isFrozen(): Boolean {
+        val e = engine ?: return paused
+        return paused || e.hold
+    }
+
     private fun refreshNotificationNow() {
         val freq = lastFreq
+        val frozen = isFrozen()
         val text = when {
-            paused && freq > 0 -> getString(R.string.notif_paused_freq, formatFreq(freq))
-            paused -> getString(R.string.notif_paused)
+            frozen && freq > 0 -> getString(R.string.notif_paused_freq, formatFreq(freq))
+            frozen -> getString(R.string.notif_paused)
             freq > 0 -> getString(R.string.notif_scanning_freq, formatFreq(freq))
             else -> getString(R.string.notif_text_scanning)
         }
@@ -736,19 +748,6 @@ class SpiritBoxService : Service() {
             Intent(this, SpiritBoxService::class.java).apply { action = ACTION_CAPTURE },
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
-        val holdPi = PendingIntent.getService(
-            this, 2,
-            Intent(this, SpiritBoxService::class.java).apply { action = ACTION_HOLD },
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
-        val mutePi = PendingIntent.getService(
-            this, 3,
-            Intent(this, SpiritBoxService::class.java).apply {
-                action = ACTION_MUTE
-                putExtra(EXTRA_MUTED, !Prefs.muted(this@SpiritBoxService))
-            },
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
         val playPausePi = PendingIntent.getService(
             this, 4,
             Intent(this, SpiritBoxService::class.java).apply { action = ACTION_PAUSE },
@@ -771,21 +770,7 @@ class SpiritBoxService : Service() {
             .addAction(
                 Notification.Action.Builder(
                     null,
-                    getString(if (SpiritBoxEvents.holdActive) R.string.btn_release else R.string.btn_hold),
-                    holdPi
-                ).build()
-            )
-            .addAction(
-                Notification.Action.Builder(
-                    null,
-                    getString(if (Prefs.muted(this)) R.string.btn_unmute else R.string.btn_mute),
-                    mutePi
-                ).build()
-            )
-            .addAction(
-                Notification.Action.Builder(
-                    null,
-                    getString(if (paused) R.string.btn_play else R.string.btn_pause),
+                    getString(if (isFrozen()) R.string.btn_play else R.string.btn_pause),
                     playPausePi
                 ).build()
             )
