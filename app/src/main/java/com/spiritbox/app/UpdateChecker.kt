@@ -131,41 +131,52 @@ object UpdateChecker {
      * Baixa o APK da release mais recente para o cache do app.
      *
      * Tenta a URL da tag detectada e, se falhar, o atalho `latest/download`;
-     * cada URL leva 2 tentativas. Se nada passa (rede bloqueando o CDN do
-     * `release-assets.githubusercontent.com`), entrega null — a activity entao
-     * oferece abrir a pagina de releases no navegador.
+     * cada URL leva 2 tentativas. Se nada passa, entrega o motivo da falha
+     * (HTTP ou excecao) junto com null — a activity mostra o motivo e oferece
+     * abrir a pagina de releases no navegador.
      *
      * @param onProgress entregue na main thread com uma mensagem de progresso.
-     * @param onResult entregue na main thread com o arquivo baixado, ou null.
+     * @param onResult entregue na main thread: (arquivo, null) ou (null, motivo).
      */
     fun downloadLatest(
         context: Context,
         info: UpdateInfo,
         onProgress: (String) -> Unit,
-        onResult: (File?) -> Unit
+        onResult: (File?, String?) -> Unit
     ) {
         executor.execute {
             var file: File? = null
+            var erro: String? = null
             try {
                 onProgress(context.getString(R.string.update_downloading))
                 val target = File(context.cacheDir, "spiritbox-update.apk")
-                if (downloadWithFallback(info, target)) file = target else target.delete()
+                val motivo = downloadWithFallback(info, target)
+                if (motivo == null) file = target else {
+                    erro = motivo
+                    target.delete()
+                }
             } catch (e: Exception) {
                 Log.w(TAG, "Falha no download da atualização", e)
+                erro = "${e.javaClass.simpleName}: ${e.message}"
             }
-            val result = file
-            Handler(Looper.getMainLooper()).post { onResult(result) }
+            val f = file
+            val err = erro
+            Handler(Looper.getMainLooper()).post { onResult(f, err) }
         }
     }
 
-    /** Tenta a URL da tag detectada e o atalho `latest/download`, 2x cada. */
-    private fun downloadWithFallback(info: UpdateInfo, target: File): Boolean {
+    /** Tenta a URL da tag detectada e o atalho `latest/download`, 2x cada;
+     *  devolve null em sucesso ou o motivo acumulado das falhas. */
+    private fun downloadWithFallback(info: UpdateInfo, target: File): String? {
+        val motivos = mutableListOf<String>()
         for (url in listOf(info.apkUrl, LATEST_APK)) {
             repeat(2) {
-                if (downloadToFile(url, target)) return true
+                val motivo = downloadToFile(url, target)
+                if (motivo == null) return null
+                motivos += motivo
             }
         }
-        return false
+        return motivos.distinct().joinToString("; ")
     }
 
     /**
@@ -176,7 +187,7 @@ object UpdateChecker {
      * rede de trava. So aceita 2xx com tamanho plausivel, para nao gravar uma
      * pagina de erro no lugar do APK.
      */
-    private fun downloadToFile(url: String, target: File): Boolean {
+    private fun downloadToFile(url: String, target: File): String? {
         var current: URL? = URL(url)
         var hops = 0
         while (current != null && hops <= MAX_REDIRECTS) {
@@ -200,14 +211,15 @@ object UpdateChecker {
                         if (!ok) {
                             Log.w(TAG, "Download APK: tamanho inesperado ($got, esperado $expected)")
                             target.delete()
+                            return "tamanho inesperado ($got de $expected) em ${current.host}"
                         }
-                        return ok
+                        return null
                     }
                     301, 302, 303, 307, 308 -> {
                         val loc = conn.getHeaderField("Location")
                         if (loc == null) {
                             Log.w(TAG, "Download APK: HTTP $code sem Location")
-                            return false
+                            return "HTTP $code sem Location em ${current.host}"
                         }
                         Log.i(TAG, "Download APK: redirect $code -> $loc")
                         current = URL(current, loc)
@@ -215,18 +227,18 @@ object UpdateChecker {
                     }
                     else -> {
                         Log.w(TAG, "Download APK: HTTP $code em $current")
-                        return false
+                        return "HTTP $code em ${current.host}"
                     }
                 }
             } catch (e: Exception) {
                 Log.w(TAG, "Download APK falhou em $current", e)
-                return false
+                return "${e.javaClass.simpleName}: ${e.message} em ${current.host}"
             } finally {
                 conn?.disconnect()
             }
         }
         Log.w(TAG, "Download APK: excedeu $MAX_REDIRECTS redirects")
-        return false
+        return "excedeu $MAX_REDIRECTS redirects"
     }
 
     /**

@@ -451,9 +451,9 @@ class MainActivity : AppCompatActivity() {
             this,
             info,
             { msg -> Toast.makeText(this, msg, Toast.LENGTH_SHORT).show() },
-            { file ->
+            { file, erro ->
                 if (file == null) {
-                    showDownloadFailedDialog()
+                    showDownloadFailedDialog(erro)
                 } else {
                     installApk(file)
                 }
@@ -461,14 +461,15 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    /** O download falhou (rede bloqueando o CDN do GitHub, timeout): em vez de
-     *  so avisar, oferece abrir a pagina de releases — la o usuario baixa o
-     *  mesmo APK pelo navegador e instala por cima. */
-    private fun showDownloadFailedDialog() {
+    /** O download falhou (rede bloqueando o CDN, TLS, DNS, timeout): mostra o
+     *  motivo exato para o usuario reportar e oferece abrir a pagina de
+     *  releases — la ele baixa o mesmo APK pelo navegador e instala por cima. */
+    private fun showDownloadFailedDialog(erro: String?) {
         if (isFinishing || isDestroyed) return
+        val detalhe = if (erro.isNullOrBlank()) "" else "\n\n$erro"
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.update_download_failed_title)
-            .setMessage(R.string.update_download_failed)
+            .setMessage(getString(R.string.update_download_failed) + detalhe)
             .setPositiveButton(R.string.update_open_browser) { _, _ ->
                 try {
                     startActivity(
