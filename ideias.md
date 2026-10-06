@@ -11,6 +11,11 @@
   bloqueado).
 - **Diagnóstico do download (v1.20)**: o diálogo de falha mostra o motivo exato
   (HTTP ou exceção + host) para o usuário reportar em vez de um aviso genérico.
+- **Correção do download interno (v1.22)**: `onProgress` rodava na thread do
+  executor e o Toast estourava `NullPointerException: Can't toast on a thread
+  that has not called Looper.prepare()` antes da primeira conexão — desde a
+  v1.4 nenhum download pelo app chegou à rede. O aviso agora vai para a main
+  thread; o motivo só apareceu na v1.20, que passou a exibir o erro.
 - **Play/Pause na notificação**: botão que pausa/retoma a varredura e o áudio
   (mantém a conexão WebSDR viva; a varredura congela e volta de onde parou).
 - **Bookmarks / favoritos**: botão ★ marca/desmarca a frequência atual (persistida

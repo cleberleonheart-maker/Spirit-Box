@@ -148,7 +148,12 @@ object UpdateChecker {
             var file: File? = null
             var erro: String? = null
             try {
-                onProgress(context.getString(R.string.update_downloading))
+                // Toast so funciona na main thread. onProgress era chamado aqui
+                // dentro do executor: o NPE ("Can't toast on a thread that has
+                // not called Looper.prepare()") derrubava o try inteiro antes da
+                // primeira conexao — por isso o download "falhava na hora".
+                val aviso = context.getString(R.string.update_downloading)
+                Handler(Looper.getMainLooper()).post { onProgress(aviso) }
                 val target = File(context.cacheDir, "spiritbox-update.apk")
                 val motivo = downloadWithFallback(info, target)
                 if (motivo == null) file = target else {
