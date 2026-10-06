@@ -62,7 +62,7 @@ android {
         // o versionCode sai do versionName pela mesma fórmula da tag, e não de um
         // contador manual: com um contador baixo (era 9) nenhum build local conseguia
         // atualizar por cima de uma release da CI, que já vai para 10800+.
-        def nome = project.findProperty('versionName') as String ?: '1.17'
+        def nome = project.findProperty('versionName') as String ?: '1.19'
         versionName nome
         versionCode ((project.findProperty('versionCode') as String ?: versionCodeFrom(nome)).toInteger())
     }

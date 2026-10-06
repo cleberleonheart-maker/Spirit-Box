@@ -453,12 +453,34 @@ class MainActivity : AppCompatActivity() {
             { msg -> Toast.makeText(this, msg, Toast.LENGTH_SHORT).show() },
             { file ->
                 if (file == null) {
-                    Toast.makeText(this, R.string.update_download_failed, Toast.LENGTH_LONG).show()
+                    showDownloadFailedDialog()
                 } else {
                     installApk(file)
                 }
             }
         )
+    }
+
+    /** O download falhou (rede bloqueando o CDN do GitHub, timeout): em vez de
+     *  so avisar, oferece abrir a pagina de releases — la o usuario baixa o
+     *  mesmo APK pelo navegador e instala por cima. */
+    private fun showDownloadFailedDialog() {
+        if (isFinishing || isDestroyed) return
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.update_download_failed_title)
+            .setMessage(R.string.update_download_failed)
+            .setPositiveButton(R.string.update_open_browser) { _, _ ->
+                try {
+                    startActivity(
+                        Intent(Intent.ACTION_VIEW, Uri.parse(UpdateChecker.RELEASES_PAGE))
+                    )
+                } catch (e: Exception) {
+                    Log.w("SpiritBox", "Falha ao abrir pagina de releases", e)
+                    Toast.makeText(this, R.string.update_download_failed, Toast.LENGTH_LONG).show()
+                }
+            }
+            .setNegativeButton(R.string.check_update_later, null)
+            .show()
     }
 
     private fun installApk(file: File) {

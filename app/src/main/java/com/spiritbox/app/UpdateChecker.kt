@@ -29,6 +29,9 @@ object UpdateChecker {
     private const val LATEST_REDIRECT = "https://github.com/$REPO/releases/latest"
     const val RELEASES_PAGE = "https://github.com/$REPO/releases"
     private const val APK_NAME = "app-release.apk"
+    private const val LATEST_APK = "https://github.com/$REPO/releases/latest/download/$APK_NAME"
+    private const val MAX_REDIRECTS = 5
+    private const val MIN_APK_BYTES = 50_000L
 
     private const val COOLDOWN_MS = 24L * 60 * 60 * 1000 // 1 consulta automática por dia
 
@@ -126,6 +129,12 @@ object UpdateChecker {
 
     /**
      * Baixa o APK da release mais recente para o cache do app.
+     *
+     * Tenta a URL da tag detectada e, se falhar, o atalho `latest/download`;
+     * cada URL leva 2 tentativas. Se nada passa (rede bloqueando o CDN do
+     * `release-assets.githubusercontent.com`), entrega null — a activity entao
+     * oferece abrir a pagina de releases no navegador.
+     *
      * @param onProgress entregue na main thread com uma mensagem de progresso.
      * @param onResult entregue na main thread com o arquivo baixado, ou null.
      */
@@ -140,26 +149,84 @@ object UpdateChecker {
             try {
                 onProgress(context.getString(R.string.update_downloading))
                 val target = File(context.cacheDir, "spiritbox-update.apk")
-                val conn = URL(info.apkUrl).openConnection() as HttpURLConnection
-                conn.instanceFollowRedirects = true
-                conn.connectTimeout = 15_000
-                conn.readTimeout = 30_000
-                conn.setRequestProperty("User-Agent", "SpiritBox-Android")
-                if (conn.responseCode in 200..299) {
-                    conn.inputStream.use { input ->
-                        target.outputStream().use { out -> input.copyTo(out) }
-                    }
-                    file = target
-                } else {
-                    Log.w(TAG, "Download APK: HTTP ${conn.responseCode}")
-                }
-                conn.disconnect()
+                if (downloadWithFallback(info, target)) file = target else target.delete()
             } catch (e: Exception) {
                 Log.w(TAG, "Falha no download da atualização", e)
             }
             val result = file
             Handler(Looper.getMainLooper()).post { onResult(result) }
         }
+    }
+
+    /** Tenta a URL da tag detectada e o atalho `latest/download`, 2x cada. */
+    private fun downloadWithFallback(info: UpdateInfo, target: File): Boolean {
+        for (url in listOf(info.apkUrl, LATEST_APK)) {
+            repeat(2) {
+                if (downloadToFile(url, target)) return true
+            }
+        }
+        return false
+    }
+
+    /**
+     * Baixa [url] para [target] seguindo os redirects na mao (ate
+     * [MAX_REDIRECTS]), porque nem todo Android/device segue o salto de
+     * `github.com` para o `release-assets.githubusercontent.com` so com
+     * `instanceFollowRedirects`. Cada salto e logado para dar pista de onde a
+     * rede de trava. So aceita 2xx com tamanho plausivel, para nao gravar uma
+     * pagina de erro no lugar do APK.
+     */
+    private fun downloadToFile(url: String, target: File): Boolean {
+        var current: URL? = URL(url)
+        var hops = 0
+        while (current != null && hops <= MAX_REDIRECTS) {
+            var conn: HttpURLConnection? = null
+            try {
+                conn = (current.openConnection() as HttpURLConnection).apply {
+                    instanceFollowRedirects = false
+                    connectTimeout = 30_000
+                    readTimeout = 60_000
+                    setRequestProperty("User-Agent", "SpiritBox-Android")
+                }
+                when (val code = conn.responseCode) {
+                    in 200..299 -> {
+                        val expected = conn.contentLength.toLong() // -1 quando a rede esconde
+                        target.delete()
+                        conn.inputStream.use { input ->
+                            target.outputStream().use { out -> input.copyTo(out) }
+                        }
+                        val got = target.length()
+                        val ok = got >= MIN_APK_BYTES && (expected <= 0 || got == expected)
+                        if (!ok) {
+                            Log.w(TAG, "Download APK: tamanho inesperado ($got, esperado $expected)")
+                            target.delete()
+                        }
+                        return ok
+                    }
+                    301, 302, 303, 307, 308 -> {
+                        val loc = conn.getHeaderField("Location")
+                        if (loc == null) {
+                            Log.w(TAG, "Download APK: HTTP $code sem Location")
+                            return false
+                        }
+                        Log.i(TAG, "Download APK: redirect $code -> $loc")
+                        current = URL(current, loc)
+                        hops++
+                    }
+                    else -> {
+                        Log.w(TAG, "Download APK: HTTP $code em $current")
+                        return false
+                    }
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "Download APK falhou em $current", e)
+                return false
+            } finally {
+                conn?.disconnect()
+            }
+        }
+        Log.w(TAG, "Download APK: excedeu $MAX_REDIRECTS redirects")
+        return false
     }
 
     /**

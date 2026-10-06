@@ -86,7 +86,9 @@
    <string name="status_noise_on">ノイズフィルター有効</string>
    <string name="status_noise_off">ノイズフィルター無効</string>
    <string name="update_downloading">アップデートをダウンロード中…</string>
-    <string name="update_download_failed">アップデートをダウンロードできませんでした</string>
+     <string name="update_download_failed">アップデートをダウンロードできませんでした</string>
+     <string name="update_download_failed_title">ダウンロード失敗</string>
+     <string name="update_open_browser">ブラウザで開く</string>
     <string name="update_install_failed">アップデートをインストールできませんでした</string>
     <string name="update_install_denied">インストールがブロックされました。不明なソースからのインストールを許可するか、前のバージョン（署名が異なります）をアンインストールしてください。</string>
     <string name="app_version">バージョン %1$s</string>
