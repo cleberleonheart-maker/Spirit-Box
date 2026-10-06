@@ -10,6 +10,7 @@
    <string name="btn_start">INICIAR</string>
    <string name="btn_stop">DETENER</string>
    <string name="title_captures">Señales capturadas</string>
+   <string name="history_search_hint">Buscar en el historial (frecuencia, banda, fecha…)</string>
    <string name="notif_channel">Barrido</string>
    <string name="notif_text_scanning">Escaneando frecuencias…</string>
    <string name="action_stop">Detener</string>

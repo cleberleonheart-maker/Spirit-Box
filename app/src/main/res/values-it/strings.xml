@@ -10,6 +10,7 @@
    <string name="btn_start">AVVIA</string>
    <string name="btn_stop">FERMA</string>
    <string name="title_captures">Segnali catturati</string>
+   <string name="history_search_hint">Cerca nello storico (frequenza, banda, data…)</string>
    <string name="notif_channel">Scansione</string>
    <string name="notif_text_scanning">Scansione delle frequenze…</string>
    <string name="action_stop">Ferma</string>

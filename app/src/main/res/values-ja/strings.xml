@@ -10,6 +10,7 @@
    <string name="btn_start">開始</string>
    <string name="btn_stop">停止</string>
    <string name="title_captures">捕捉した信号</string>
+   <string name="history_search_hint">履歴を検索（周波数・バンド・日付）</string>
    <string name="notif_channel">スキャン</string>
    <string name="notif_text_scanning">周波数をスキャン中…</string>
    <string name="action_stop">停止</string>

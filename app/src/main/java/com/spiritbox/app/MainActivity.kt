@@ -21,6 +21,8 @@ import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
 import android.provider.Settings
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.View
 import android.view.WindowManager
@@ -56,6 +58,12 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val THEME_MODES = 3
+
+        /** Linhas lidas do CSV; a busca cobre todas elas. */
+        private const val MAX_HISTORY = 1000
+
+        /** Linhas mostradas sem busca ativa — mantém a lista curta como antes. */
+        private const val MAX_VISIBLE = 200
     }
 
     private lateinit var tvFreq: TextView
@@ -64,6 +72,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var waterfall: WaterfallView
     private lateinit var btnToggle: MaterialButton
     private lateinit var etServer: EditText
+    private lateinit var etCaptureSearch: EditText
     private lateinit var swFm: MaterialSwitch
     private lateinit var swAlerts: MaterialSwitch
     private lateinit var swNoise: MaterialSwitch
@@ -145,12 +154,25 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-    private val captures = ArrayList<String>()
     private lateinit var adapter: ArrayAdapter<String>
 
-    private class CaptureEntry(val freqKHz: Double, val level: Int, val time: Long)
+    private class CaptureEntry(
+        val freqKHz: Double,
+        val level: Int,
+        val time: Long,
+        val modo: String? = null,
+        val banda: String? = null,
+        val servidor: String? = null
+    )
 
+    /** Histórico completo (cap. MAX_HISTORY); é o que a busca varre. */
     private val captureEntries = ArrayList<CaptureEntry>()
+
+    /** Subconjunto filtrado exibido no adapter. */
+    private val visibleCaptures = ArrayList<String>()
+    private val visibleEntries = ArrayList<CaptureEntry>()
+    private var captureQuery: String = ""
+    private val searchDate = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US)
     private var lastFreq: Double = 0.0
 
     private val notifPermission =
@@ -172,16 +194,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         override fun onCapture(freqKHz: Double, level: Int) {
-            adapter.add("${formatFreq(freqKHz)}  ·  nível $level%")
-            captureEntries.add(CaptureEntry(freqKHz, level, System.currentTimeMillis()))
+            addCapture(CaptureEntry(freqKHz, level, System.currentTimeMillis()))
             waterfall.markCapture(freqKHz)
             monitor.onCapture(freqKHz, level)
-            if (adapter.count > 200) {
-                adapter.remove(adapter.getItem(0))
-                if (captureEntries.isNotEmpty()) captureEntries.removeAt(0)
-            }
-            listCaptures.smoothScrollToPosition(adapter.count - 1)
-            followCapturesIfNearBottom()
         }
 
         override fun onRms(rms: Double) {
@@ -255,11 +270,20 @@ class MainActivity : AppCompatActivity() {
 
         loadPrefs()
 
-        adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, captures)
+        adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, visibleCaptures)
         listCaptures.adapter = adapter
         listCaptures.setOnItemClickListener { _, _, position, _ ->
-            captureEntries.getOrNull(position)?.let { showCaptureDetail(it) }
+            visibleEntries.getOrNull(position)?.let { showCaptureDetail(it) }
         }
+        etCaptureSearch = findViewById(R.id.etCaptureSearch)
+        etCaptureSearch.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                captureQuery = s?.toString().orEmpty()
+                rebuildVisible()
+            }
+        })
         loadPersistedCaptures()
 
         updateToggle()
@@ -989,19 +1013,66 @@ class MainActivity : AppCompatActivity() {
                 val time = parseIsoUtc(cols[0]) ?: continue
                 val freqKHz = parseFreqToKHz(cols[1]) ?: continue
                 val level = parseLevel(cols[2]) ?: continue
-                adapter.add("${formatFreq(freqKHz)}  ·  nível $level%")
-                captureEntries.add(CaptureEntry(freqKHz, level, time))
+                captureEntries.add(
+                    CaptureEntry(
+                        freqKHz, level, time,
+                        modo = cols.getOrNull(3)?.takeIf { it.isNotBlank() },
+                        banda = cols.getOrNull(4)?.takeIf { it.isNotBlank() },
+                        servidor = cols.getOrNull(5)?.takeIf { it.isNotBlank() }
+                    )
+                )
             }
-            while (adapter.count > 200) {
-                adapter.remove(adapter.getItem(0))
-                if (captureEntries.isNotEmpty()) captureEntries.removeAt(0)
-            }
-            if (adapter.count > 0) {
-                listCaptures.smoothScrollToPosition(adapter.count - 1)
+            while (captureEntries.size > MAX_HISTORY) captureEntries.removeAt(0)
+            rebuildVisible()
+            if (visibleCaptures.isNotEmpty()) {
+                listCaptures.smoothScrollToPosition(visibleCaptures.size - 1)
             }
         } catch (e: Exception) {
             // CSV corrompido ou ilegível: segue sem histórico
         }
+    }
+
+    /** Guarda a captura no histórico completo e reconstrói o que está visível. */
+    private fun addCapture(entry: CaptureEntry) {
+        captureEntries.add(entry)
+        while (captureEntries.size > MAX_HISTORY) captureEntries.removeAt(0)
+        rebuildVisible()
+        // Só rola se a captura nova entrou no filtro atual (sem busca, sempre entra).
+        if (visibleEntries.lastOrNull() === captureEntries.lastOrNull() && visibleCaptures.isNotEmpty()) {
+            listCaptures.smoothScrollToPosition(visibleCaptures.size - 1)
+            followCapturesIfNearBottom()
+        }
+    }
+
+    private fun captureLabel(entry: CaptureEntry): String =
+        "${formatFreq(entry.freqKHz)}  ·  nível ${entry.level}%"
+
+    /** Texto que a busca varre: inclui banda, modo e servidor quando o CSV os tem. */
+    private fun captureHaystack(entry: CaptureEntry): String = buildString {
+        append(captureLabel(entry))
+        append("  ")
+        append(searchDate.format(Date(entry.time)))
+        entry.banda?.let { append("  ").append(it) }
+        entry.modo?.let { append("  ").append(it) }
+        entry.servidor?.let { append("  ").append(it) }
+    }
+
+    /** Reconstrói [visibleCaptures]/[visibleEntries] conforme [captureQuery]. */
+    private fun rebuildVisible() {
+        visibleCaptures.clear()
+        visibleEntries.clear()
+        if (captureQuery.isBlank()) {
+            val start = (captureEntries.size - MAX_VISIBLE).coerceAtLeast(0)
+            for (i in start until captureEntries.size) visibleEntries.add(captureEntries[i])
+        } else {
+            for (entry in captureEntries) {
+                if (CaptureFilter.matches(captureHaystack(entry), captureQuery)) {
+                    visibleEntries.add(entry)
+                }
+            }
+        }
+        for (entry in visibleEntries) visibleCaptures.add(captureLabel(entry))
+        adapter.notifyDataSetChanged()
     }
 
     private fun parseCsvLine(line: String): List<String> {

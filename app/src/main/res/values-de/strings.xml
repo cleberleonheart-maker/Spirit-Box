@@ -10,6 +10,7 @@
    <string name="btn_start">START</string>
    <string name="btn_stop">STOPP</string>
    <string name="title_captures">Erfasste Signale</string>
+   <string name="history_search_hint">Verlauf durchsuchen (Frequenz, Band, Datum…)</string>
    <string name="notif_channel">Suche</string>
    <string name="notif_text_scanning">Frequenzen werden gescannt…</string>
    <string name="action_stop">Stopp</string>

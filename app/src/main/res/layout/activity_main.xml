@@ -318,6 +318,19 @@
             android:textColor="@color/text_secondary"
             android:textSize="13sp" />
 
+        <EditText
+            android:id="@+id/etCaptureSearch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:hint="@string/history_search_hint"
+            android:importantForAutofill="no"
+            android:inputType="text"
+            android:maxLines="1"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_secondary"
+            android:textSize="14sp" />
+
         <ListView
             android:id="@+id/listCaptures"
             android:layout_width="match_parent"

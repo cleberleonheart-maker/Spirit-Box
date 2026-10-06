@@ -10,6 +10,7 @@
    <string name="btn_start">INICIAR</string>
    <string name="btn_stop">PARAR</string>
    <string name="title_captures">Sinais capturados</string>
+   <string name="history_search_hint">Buscar no histórico (frequência, banda, data…)</string>
    <string name="notif_channel">Varredura</string>
    <string name="notif_text_scanning">Varrendo frequências…</string>
    <string name="action_stop">Parar</string>

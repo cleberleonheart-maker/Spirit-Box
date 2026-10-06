@@ -11,6 +11,12 @@
   bloqueado).
 - **Diagnóstico do download (v1.20)**: o diálogo de falha mostra o motivo exato
   (HTTP ou exceção + host) para o usuário reportar em vez de um aviso genérico.
+- **Histórico persistente buscável** (v1.24): campo de busca acima da lista.
+  Carrega até 1000 linhas do CSV (antes 200) e filtra por frequência, nível,
+  data, banda, modo ou servidor — sem busca mostra as 200 últimas. A partir de
+  `CaptureFilter` (puro, testado): vários tokens precisam todos bater, acentos
+  são ignorados ("nivel" acha "nível") e número sem separador acha a frequência
+  formatada ("1760" acha "1.760 MHz").
 - **Correção do download interno (v1.22)**: `onProgress` rodava na thread do
   executor e o Toast estourava `NullPointerException: Can't toast on a thread
   that has not called Looper.prepare()` antes da primeira conexão — desde a
@@ -89,8 +95,6 @@
   amostras (antes disso é o limiar do usuário).
 
 ## Próximas (não implementadas)
-- **Histórico persistente buscável**: leitura do CSV na UI (capturas já recarregam
-  ao abrir o app; falta busca/filtro).
 - **Widget de notificação com play/pause**.
 - **Remover modo FM stub** ou marcá-lo experimental.
 - **Bookmarks exportados/importados**: salvar lista de favoritos como arquivo.
