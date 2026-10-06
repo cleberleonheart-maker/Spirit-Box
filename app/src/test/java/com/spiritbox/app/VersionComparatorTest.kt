@@ -26,4 +26,19 @@ class VersionComparatorTest {
         assertFalse(VersionComparator.isNewer("v0.9.9", "1.0"))
         assertTrue(VersionComparator.isNewer("v1.1", "1.0.9"))
     }
+
+    @Test
+    fun `isNewer compara por numero e nao por texto`() {
+        assertTrue(VersionComparator.isNewer("1.10", "1.9"))
+        assertFalse(VersionComparator.isNewer("1.9", "1.10"))
+        assertTrue(VersionComparator.isNewer("2.0", "1.99.99"))
+        assertFalse(VersionComparator.isNewer("1.9", "1.10"))
+    }
+
+    @Test
+    fun `isNewer entende patch zero como mesma versao`() {
+        assertFalse(VersionComparator.isNewer("1.0.0", "1.0"))
+        assertFalse(VersionComparator.isNewer("1.0", "1.0.0"))
+        assertTrue(VersionComparator.isNewer("1.0.1", "1.0.0"))
+    }
 }
