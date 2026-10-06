@@ -1,6 +1,16 @@
 # Ideias para o SpiritBox
 
 ## Implementado recentemente
+- **Update check sem API (v1.18)**: descobre a última release com `HEAD` em
+  `github.com/.../releases/latest` lendo o header `Location` — contorna redes
+  onde `api.github.com` responde 404/301 e o auto-check sempre falhava.
+- **Download de update reforçado (v1.19)**: redirect manual (até 5 saltos,
+  cada um logado), URL da tag + fallback `latest/download`, 2 tentativas cada,
+  timeouts 30/60 s e validação do tamanho do arquivo. Se nada passa, diálogo
+  **ABRIR NO NAVEGADOR** leva à página de releases (mesmo APK, contorna CDN
+  bloqueado).
+- **Diagnóstico do download (v1.20)**: o diálogo de falha mostra o motivo exato
+  (HTTP ou exceção + host) para o usuário reportar em vez de um aviso genérico.
 - **Play/Pause na notificação**: botão que pausa/retoma a varredura e o áudio
   (mantém a conexão WebSDR viva; a varredura congela e volta de onde parou).
 - **Bookmarks / favoritos**: botão ★ marca/desmarca a frequência atual (persistida
