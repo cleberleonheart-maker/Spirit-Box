@@ -449,6 +449,7 @@ class MainActivity : AppCompatActivity() {
     private fun downloadAndInstallUpdate(info: UpdateChecker.UpdateInfo) {
         UpdateChecker.downloadLatest(
             this,
+            info,
             { msg -> Toast.makeText(this, msg, Toast.LENGTH_SHORT).show() },
             { file ->
                 if (file == null) {

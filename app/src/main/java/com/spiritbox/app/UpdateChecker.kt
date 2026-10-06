@@ -26,8 +26,9 @@ object UpdateChecker {
     private const val TAG = "SpiritBox"
     private const val REPO = "cleberleonheart-maker/Spirit-Box"
     private const val LATEST_API = "https://api.github.com/repos/$REPO/releases/latest"
+    private const val LATEST_REDIRECT = "https://github.com/$REPO/releases/latest"
     const val RELEASES_PAGE = "https://github.com/$REPO/releases"
-    private const val LATEST_APK = "https://github.com/$REPO/releases/latest/download/app-release.apk"
+    private const val APK_NAME = "app-release.apk"
 
     private const val COOLDOWN_MS = 24L * 60 * 60 * 1000 // 1 consulta automática por dia
 
@@ -38,7 +39,8 @@ object UpdateChecker {
     data class UpdateInfo(
         val tag: String,
         val versionName: String,
-        val htmlUrl: String
+        val htmlUrl: String,
+        val apkUrl: String
     )
 
     /** Resultado da consulta. Separa "nao ha nada novo" de "a consulta falhou":
@@ -50,8 +52,46 @@ object UpdateChecker {
         data class Available(val info: UpdateInfo) : Result()
     }
 
+    /**
+     * Descobre a ultima release sem depender da API do GitHub.
+     *
+     * Head a `github.com/.../releases/latest` e le a tag do header Location.
+     * Motivo: em varias redes (celular, wifi domestico) o `api.github.com` e
+     * interceptado/redirect e devolve 404, deixando o auto-check sempre em
+     * falha — o utilizador nunca via aviso de update. O `github.com` e
+     * redirecionado corretamente para `/releases/tag/vX.Y.Z`.
+     */
+    private fun fetchLatestFromRedirect(): UpdateInfo? {
+        var conn: HttpURLConnection? = null
+        return try {
+            conn = (URL(LATEST_REDIRECT).openConnection() as HttpURLConnection).apply {
+                requestMethod = "HEAD"
+                instanceFollowRedirects = false
+                setRequestProperty("User-Agent", "SpiritBox-Android")
+                connectTimeout = 10_000
+                readTimeout = 10_000
+            }
+            val loc = conn.getHeaderField("Location").orEmpty()
+            val tag = Regex("/releases/tag/([^/?#]+)").find(loc)?.groupValues?.get(1)
+                ?: return null
+            val name = tag.trimStart('v', 'V')
+            UpdateInfo(
+                tag = tag,
+                versionName = name,
+                htmlUrl = "https://github.com/$REPO/releases/tag/$tag",
+                apkUrl = "https://github.com/$REPO/releases/download/$tag/$APK_NAME"
+            )
+        } catch (e: Exception) {
+            Log.w(TAG, "Falha ao verificar atualização (redirect)", e)
+            null
+        } finally {
+            conn?.disconnect()
+        }
+    }
+
     /** Deve rodar via [check] — nunca na main thread. */
     private fun fetchLatest(): UpdateInfo? {
+        fetchLatestFromRedirect()?.let { return it }
         var conn: HttpURLConnection? = null
         return try {
             conn = (URL(LATEST_API).openConnection() as HttpURLConnection).apply {
@@ -70,7 +110,12 @@ object UpdateChecker {
             val tag = json.optString("tag_name").ifBlank { return null }
             val html = json.optString("html_url").ifBlank { return null }
             val name = tag.trimStart('v', 'V')
-            UpdateInfo(tag, name, html)
+            UpdateInfo(
+                tag = tag,
+                versionName = name,
+                htmlUrl = html,
+                apkUrl = "https://github.com/$REPO/releases/download/$tag/$APK_NAME"
+            )
         } catch (e: Exception) {
             Log.w(TAG, "Falha ao verificar atualização", e)
             null
@@ -86,6 +131,7 @@ object UpdateChecker {
      */
     fun downloadLatest(
         context: Context,
+        info: UpdateInfo,
         onProgress: (String) -> Unit,
         onResult: (File?) -> Unit
     ) {
@@ -94,7 +140,7 @@ object UpdateChecker {
             try {
                 onProgress(context.getString(R.string.update_downloading))
                 val target = File(context.cacheDir, "spiritbox-update.apk")
-                val conn = URL(LATEST_APK).openConnection() as HttpURLConnection
+                val conn = URL(info.apkUrl).openConnection() as HttpURLConnection
                 conn.instanceFollowRedirects = true
                 conn.connectTimeout = 15_000
                 conn.readTimeout = 30_000
