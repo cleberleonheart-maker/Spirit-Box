@@ -349,6 +349,15 @@
             android:textColorHint="@color/text_secondary"
             android:textSize="14sp" />
 
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/swGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/switch_group"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp" />
+
         <ListView
             android:id="@+id/listCaptures"
             android:layout_width="match_parent"

@@ -43,6 +43,14 @@
    <string name="capture_detail_level">Level: %1$d dB</string>
    <string name="capture_level_db">level %1$d dB</string>
    <string name="capture_detail_time">Date: %1$s</string>
+   <string name="switch_group">Group by frequency</string>
+   <string name="group_count">%1$d×</string>
+   <string name="group_max_db">max %1$d dB</string>
+   <string name="group_detail_title">Grouped frequency</string>
+   <string name="group_detail_count">Sightings: %1$d</string>
+   <string name="group_detail_max">Max level: %1$d dB</string>
+   <string name="group_detail_first">First: %1$s</string>
+   <string name="group_detail_last">Last: %1$s</string>
    <string name="btn_copy_freq">Copy frequency</string>
    <string name="copied">Frequency copied</string>
    <string name="scan_not_running">Start scanning before saving.</string>

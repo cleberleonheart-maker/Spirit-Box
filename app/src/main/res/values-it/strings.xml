@@ -43,6 +43,14 @@
    <string name="capture_detail_level">Livello: %1$d dB</string>
    <string name="capture_level_db">livello %1$d dB</string>
    <string name="capture_detail_time">Data: %1$s</string>
+   <string name="switch_group">Raggruppa per frequenza</string>
+   <string name="group_count">%1$d×</string>
+   <string name="group_max_db">max %1$d dB</string>
+   <string name="group_detail_title">Frequenza raggruppata</string>
+   <string name="group_detail_count">Avvistamenti: %1$d</string>
+   <string name="group_detail_max">Livello massimo: %1$d dB</string>
+   <string name="group_detail_first">Prima: %1$s</string>
+   <string name="group_detail_last">Ultima: %1$s</string>
    <string name="btn_copy_freq">Copia frequenza</string>
    <string name="copied">Frequenza copiata</string>
    <string name="scan_not_running">Avvia la scansione prima di salvare.</string>

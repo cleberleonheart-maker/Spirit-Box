@@ -43,6 +43,14 @@
    <string name="capture_detail_level">Nivel: %1$d dB</string>
    <string name="capture_level_db">nivel %1$d dB</string>
    <string name="capture_detail_time">Fecha: %1$s</string>
+   <string name="switch_group">Agrupar por frecuencia</string>
+   <string name="group_count">%1$d×</string>
+   <string name="group_max_db">máx %1$d dB</string>
+   <string name="group_detail_title">Frecuencia agrupada</string>
+   <string name="group_detail_count">Avistamientos: %1$d</string>
+   <string name="group_detail_max">Nivel máximo: %1$d dB</string>
+   <string name="group_detail_first">Primera: %1$s</string>
+   <string name="group_detail_last">Última: %1$s</string>
    <string name="btn_copy_freq">Copiar frecuencia</string>
    <string name="copied">Frecuencia copiada</string>
    <string name="scan_not_running">Inicia el barrido antes de guardar.</string>

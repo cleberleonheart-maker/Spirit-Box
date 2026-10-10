@@ -43,6 +43,14 @@
    <string name="capture_detail_level">レベル: %1$d dB</string>
    <string name="capture_level_db">レベル %1$d dB</string>
    <string name="capture_detail_time">日時: %1$s</string>
+   <string name="switch_group">周波数でグループ化</string>
+   <string name="group_count">%1$d回</string>
+   <string name="group_max_db">最大 %1$d dB</string>
+   <string name="group_detail_title">グループ化した周波数</string>
+   <string name="group_detail_count">受信回数: %1$d</string>
+   <string name="group_detail_max">最大レベル: %1$d dB</string>
+   <string name="group_detail_first">最初: %1$s</string>
+   <string name="group_detail_last">最後: %1$s</string>
    <string name="btn_copy_freq">周波数をコピー</string>
    <string name="copied">周波数をコピーしました</string>
    <string name="scan_not_running">保存する前にスキャンを開始してください。</string>

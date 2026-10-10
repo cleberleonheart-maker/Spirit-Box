@@ -78,6 +78,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var swNoise: MaterialSwitch
     private lateinit var swEvp: MaterialSwitch
     private lateinit var swWatch: MaterialSwitch
+    private lateinit var swGroup: MaterialSwitch
     private lateinit var spBand: Spinner
     private lateinit var etDwell: EditText
     private lateinit var etSettle: EditText
@@ -177,6 +178,9 @@ class MainActivity : AppCompatActivity() {
     /** Subconjunto filtrado exibido no adapter. */
     private val visibleCaptures = ArrayList<String>()
     private val visibleEntries = ArrayList<CaptureEntry>()
+    /** Quando [groupHistory] ligado, uma linha por frequência (paralela à lista). */
+    private val visibleGroups = ArrayList<FrequencyGroup>()
+    private var groupHistory: Boolean = false
     private var captureQuery: String = ""
     private val searchDate = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US)
     private var lastFreq: Double = 0.0
@@ -259,6 +263,7 @@ class MainActivity : AppCompatActivity() {
         swNoise = findViewById(R.id.swNoise)
         swEvp = findViewById(R.id.swEvp)
         swWatch = findViewById(R.id.swWatch)
+        swGroup = findViewById(R.id.swGroup)
         listCaptures = findViewById(R.id.listCaptures)
         tvVersion = findViewById(R.id.tvVersion)
         tvVersion.text = getString(R.string.app_version, BuildConfig.VERSION_NAME)
@@ -294,7 +299,11 @@ class MainActivity : AppCompatActivity() {
         adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, visibleCaptures)
         listCaptures.adapter = adapter
         listCaptures.setOnItemClickListener { _, _, position, _ ->
-            visibleEntries.getOrNull(position)?.let { showCaptureDetail(it) }
+            if (groupHistory) {
+                visibleGroups.getOrNull(position)?.let { showGroupDetail(it) }
+            } else {
+                visibleEntries.getOrNull(position)?.let { showCaptureDetail(it) }
+            }
         }
         etCaptureSearch = findViewById(R.id.etCaptureSearch)
         etCaptureSearch.addTextChangedListener(object : TextWatcher {
@@ -389,6 +398,12 @@ class MainActivity : AppCompatActivity() {
 
         swWatch.setOnCheckedChangeListener { _, checked ->
             Prefs.saveWatchFavorites(this, checked)
+        }
+
+        swGroup.setOnCheckedChangeListener { _, checked ->
+            groupHistory = checked
+            Prefs.saveGroupHistory(this, checked)
+            rebuildVisible()
         }
 
         btnShare.setOnClickListener { shareCaptures() }
@@ -1055,6 +1070,8 @@ class MainActivity : AppCompatActivity() {
         swNoise.isChecked = Prefs.noiseReduction(this)
         swEvp.isChecked = Prefs.evpEnabled(this)
         swWatch.isChecked = Prefs.watchFavorites(this)
+        swGroup.isChecked = Prefs.groupHistory(this)
+        groupHistory = swGroup.isChecked
         spBand.setSelection(Prefs.rangeIndex(this).coerceIn(0, SweepEngine.PRESETS.size - 1))
         etDwell.setText(Prefs.dwell(this).toString())
         etSettle.setText(Prefs.settle(this).toString())
@@ -1076,6 +1093,7 @@ class MainActivity : AppCompatActivity() {
         Prefs.saveNoiseReduction(this, swNoise.isChecked)
         Prefs.saveEvpEnabled(this, swEvp.isChecked)
         Prefs.saveWatchFavorites(this, swWatch.isChecked)
+        Prefs.saveGroupHistory(this, swGroup.isChecked)
     }
 
     private fun followCapturesIfNearBottom() {
@@ -1142,23 +1160,40 @@ class MainActivity : AppCompatActivity() {
         entry.servidor?.let { append("  ").append(it) }
     }
 
-    /** Reconstrói [visibleCaptures]/[visibleEntries] conforme [captureQuery]. */
+    /** Reconstrói as linhas visíveis conforme [captureQuery] e [groupHistory]. */
     private fun rebuildVisible() {
         visibleCaptures.clear()
         visibleEntries.clear()
+        visibleGroups.clear()
+        val source = ArrayList<CaptureEntry>()
         if (captureQuery.isBlank()) {
             val start = (captureEntries.size - MAX_VISIBLE).coerceAtLeast(0)
-            for (i in start until captureEntries.size) visibleEntries.add(captureEntries[i])
+            for (i in start until captureEntries.size) source.add(captureEntries[i])
         } else {
             for (entry in captureEntries) {
                 if (CaptureFilter.matches(captureHaystack(entry), captureQuery)) {
-                    visibleEntries.add(entry)
+                    source.add(entry)
                 }
             }
         }
-        for (entry in visibleEntries) visibleCaptures.add(captureLabel(entry))
+        if (groupHistory) {
+            val groups = CaptureGroups.group(source.map { Sighting(it.freqKHz, it.level, it.time) })
+            for (g in groups) {
+                visibleGroups.add(g)
+                visibleCaptures.add(groupLabel(g))
+            }
+        } else {
+            visibleEntries.addAll(source)
+            for (entry in visibleEntries) visibleCaptures.add(captureLabel(entry))
+        }
         adapter.notifyDataSetChanged()
     }
+
+    /** Linha de uma frequência agrupada: frequência, nº de avistamentos e nível máximo. */
+    private fun groupLabel(group: FrequencyGroup): String =
+        "${formatFreq(group.freqKHz)}  ·  " +
+            "${getString(R.string.group_count, group.count)}  ·  " +
+            getString(R.string.group_max_db, group.maxLevel)
 
     private fun parseCsvLine(line: String): List<String> {
         val result = ArrayList<String>()
@@ -1227,6 +1262,27 @@ class MainActivity : AppCompatActivity() {
             .toString()
         AlertDialog.Builder(this)
             .setTitle(R.string.capture_detail_title)
+            .setMessage(message)
+            .setPositiveButton(R.string.btn_copy_freq) { _, _ ->
+                copyToClipboard(freq)
+                Toast.makeText(this, R.string.copied, Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun showGroupDetail(group: FrequencyGroup) {
+        val fmt = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
+        val freq = formatFreq(group.freqKHz)
+        val message = StringBuilder()
+            .append(getString(R.string.capture_detail_freq, freq)).append('\n')
+            .append(getString(R.string.group_detail_count, group.count)).append('\n')
+            .append(getString(R.string.group_detail_max, group.maxLevel)).append('\n')
+            .append(getString(R.string.group_detail_first, fmt.format(Date(group.firstTime)))).append('\n')
+            .append(getString(R.string.group_detail_last, fmt.format(Date(group.lastTime))))
+            .toString()
+        AlertDialog.Builder(this)
+            .setTitle(R.string.group_detail_title)
             .setMessage(message)
             .setPositiveButton(R.string.btn_copy_freq) { _, _ ->
                 copyToClipboard(freq)

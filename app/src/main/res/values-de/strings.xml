@@ -43,6 +43,14 @@
    <string name="capture_detail_level">Pegel: %1$d dB</string>
    <string name="capture_level_db">Pegel %1$d dB</string>
    <string name="capture_detail_time">Datum: %1$s</string>
+   <string name="switch_group">Nach Frequenz gruppieren</string>
+   <string name="group_count">%1$d×</string>
+   <string name="group_max_db">max. %1$d dB</string>
+   <string name="group_detail_title">Gruppierte Frequenz</string>
+   <string name="group_detail_count">Sichtungen: %1$d</string>
+   <string name="group_detail_max">Höchster Pegel: %1$d dB</string>
+   <string name="group_detail_first">Erste: %1$s</string>
+   <string name="group_detail_last">Letzte: %1$s</string>
    <string name="btn_copy_freq">Frequenz kopieren</string>
    <string name="copied">Frequenz kopiert</string>
    <string name="scan_not_running">Suche vor dem Speichern starten.</string>

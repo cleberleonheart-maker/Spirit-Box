@@ -1,6 +1,11 @@
 # Ideias para o SpiritBox
 
 ## Implementado recentemente
+- **Dedup por frequência** (v1.29): toggle "Agrupar por frequência" no histórico.
+  Ligado, a lista mostra uma linha por frequência (tolerância de 1 kHz) com nº de
+  avistamentos e **nível máximo** em dB; tocar abre um detalhe com a primeira e a
+  última captura. A busca vale igual — filtra e depois agrupa. Lógica pura
+  (`CaptureGroups`, testada). A escolha fica salva entre sessões.
 - **Nível em SNR (dB)** (v1.28): as capturas passam a mostrar **dB acima do piso
   de ruído** em vez de %. O cálculo (20·log10 do pico sobre o piso medido) é puro
   (`Snr`, testado); quando ainda não há piso (poucas amostras) usa o limiar do
