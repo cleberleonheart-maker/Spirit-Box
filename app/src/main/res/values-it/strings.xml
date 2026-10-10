@@ -133,4 +133,13 @@
     <string name="check_update_error">Impossibile controllare gli aggiornamenti.</string>
     <string name="check_update_now">CERCA AGGIORNAMENTI</string>
     <string name="check_update_checking">Controllo in corso…</string>
+    <string name="switch_evp">Registra EVP (microfono)</string>
+    <string name="status_evp_on">Registrazione EVP avviata</string>
+    <string name="status_evp_off">Registrazione EVP fermata</string>
+    <string name="evp_no_permission">Permesso microfono negato — registrazione EVP non disponibile.</string>
+    <string name="evp_start_failed">Impossibile avviare la registrazione del microfono.</string>
+    <string name="evp_saved">Registrazione EVP salvata in Downloads/SpiritBox.</string>
+    <string name="emf_corr_title">Correlazione radio + EMF (finestra di 5 s)</string>
+    <string name="emf_corr_status">%1$d eventi combinati</string>
+    <string name="emf_corr_no_sensor">Nessuna lettura del magnetometro</string>
 </resources>

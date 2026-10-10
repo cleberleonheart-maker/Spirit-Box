@@ -133,4 +133,13 @@
     <string name="check_update_error">Could not check for updates.</string>
     <string name="check_update_now">CHECK FOR UPDATES</string>
     <string name="check_update_checking">Checking…</string>
+    <string name="switch_evp">Record EVP (microphone)</string>
+    <string name="status_evp_on">EVP recording started</string>
+    <string name="status_evp_off">EVP recording stopped</string>
+    <string name="evp_no_permission">Microphone permission denied — EVP recording unavailable.</string>
+    <string name="evp_start_failed">Could not start microphone recording.</string>
+    <string name="evp_saved">EVP recording saved to Downloads/SpiritBox.</string>
+    <string name="emf_corr_title">Radio + EMF correlation (5 s window)</string>
+    <string name="emf_corr_status">%1$d combined events</string>
+    <string name="emf_corr_no_sensor">No magnetometer reading</string>
 </resources>

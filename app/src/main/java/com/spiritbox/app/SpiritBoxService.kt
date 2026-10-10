@@ -1,5 +1,7 @@
 package com.spiritbox.app
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -8,6 +10,7 @@ import android.app.Service
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.media.AudioAttributes
 import android.media.AudioFormat
@@ -25,6 +28,7 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.provider.MediaStore
 import android.util.Log
+import androidx.core.content.ContextCompat
 import com.spiritbox.app.radio.FmSweepTuner
 import com.spiritbox.app.radio.FmTuner
 import com.spiritbox.app.radio.SweepEngine
@@ -53,8 +57,10 @@ class SpiritBoxService : Service() {
         private const val ACTION_NOISE = "com.spiritbox.app.NOISE"
         private const val ACTION_PAUSE = "com.spiritbox.app.PAUSE"
         private const val ACTION_TUNE = "com.spiritbox.app.TUNE"
+        private const val ACTION_EVP = "com.spiritbox.app.EVP"
         private const val EXTRA_MUTED = "muted"
         private const val EXTRA_NOISE = "noise"
+        private const val EXTRA_EVP = "evp"
         private const val EXTRA_FREQ = "freq"
         private const val EXTRA_MODE = "mode"
         private const val EXTRA_SERVER = "server"
@@ -152,6 +158,15 @@ class SpiritBoxService : Service() {
             )
         }
 
+        fun setEvp(context: Context, enabled: Boolean) {
+            context.startService(
+                Intent(context, SpiritBoxService::class.java).apply {
+                    action = ACTION_EVP
+                    putExtra(EXTRA_EVP, enabled)
+                }
+            )
+        }
+
         fun stop(context: Context) {
             context.startService(
                 Intent(context, SpiritBoxService::class.java).apply {
@@ -176,6 +191,7 @@ class SpiritBoxService : Service() {
     private var captureLog: File? = null
     private var wakeLock: PowerManager.WakeLock? = null
     private var clipRecorder: AudioClipRecorder? = null
+    private var evp: EvpRecorder? = null
 
     @Volatile
     private var lastFreq: Double = 0.0
@@ -240,12 +256,7 @@ class SpiritBoxService : Service() {
                     this,
                     Prefs.ScanState(mode, server, rangeIndex, dwell, threshold, settle, gap)
                 )
-                val notif = buildNotification(getString(R.string.notif_text_scanning))
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    startForeground(NOTIF_ID, notif, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
-                } else {
-                    startForeground(NOTIF_ID, notif)
-                }
+                promoteForeground(getString(R.string.notif_text_scanning))
                 startScan(mode, server, rangeIndex, dwell, settle, threshold, gap)
             }
             ACTION_CAPTURE -> {
@@ -329,6 +340,19 @@ class SpiritBoxService : Service() {
                     if (freq > 0) e.stayOn(freq)
                 }
             }
+            ACTION_EVP -> {
+                val enabled = intent.getBooleanExtra(EXTRA_EVP, Prefs.evpEnabled(this))
+                Prefs.saveEvpEnabled(this, enabled)
+                if (engine != null) {
+                    if (enabled) {
+                        startEvp()
+                        promoteForeground(currentNotificationText())
+                    } else {
+                        stopEvp(save = true)
+                        promoteForeground(currentNotificationText())
+                    }
+                }
+            }
             ACTION_STOP -> {
                 Prefs.clearActiveScan(this)
                 SpiritBoxEvents.holdActive = false
@@ -339,12 +363,7 @@ class SpiritBoxService : Service() {
             null -> {
                 val saved = Prefs.activeScan(this)
                 if (saved != null && engine == null) {
-                    val notif = buildNotification(getString(R.string.notif_text_scanning))
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        startForeground(NOTIF_ID, notif, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
-                    } else {
-                        startForeground(NOTIF_ID, notif)
-                    }
+                    promoteForeground(getString(R.string.notif_text_scanning))
                     SpiritBoxEvents.pushStatus(getString(R.string.service_resumed))
                     startScan(saved.mode, saved.server, saved.rangeIndex, saved.dwell, saved.settle, saved.thresholdPct, saved.gap)
                 }
@@ -421,6 +440,7 @@ class SpiritBoxService : Service() {
             val servers = buildServerList(server)
             c.start(servers)
         }
+        if (Prefs.evpEnabled(this)) startEvp()
     }
 
     private fun buildServerList(preferred: String): List<String> {
@@ -429,6 +449,121 @@ class SpiritBoxService : Service() {
             if (!list.contains(s)) list.add(s)
         }
         return list
+    }
+
+    private fun currentNotificationText(): String {
+        val freq = lastFreq
+        val frozen = isFrozen()
+        return when {
+            frozen && freq > 0 -> getString(R.string.notif_paused_freq, formatFreq(freq))
+            frozen -> getString(R.string.notif_paused)
+            freq > 0 -> getString(R.string.notif_scanning_freq, formatFreq(freq))
+            else -> getString(R.string.notif_text_scanning)
+        }
+    }
+
+    /** (Re)entra em foreground com o tipo certo para o modo atual: o tipo microfone
+     * só é somado quando o EVP está ligado e a permissão de gravação concedida,
+     * senão o sistema recusa o startForeground no Android 14+. */
+    private fun promoteForeground(text: String) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(NOTIF_ID, buildNotification(text), foregroundType())
+        } else {
+            startForeground(NOTIF_ID, buildNotification(text))
+        }
+    }
+
+    @SuppressLint("InlinedApi")
+    private fun foregroundType(): Int {
+        var type = ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && evpWanted()) {
+            type = type or ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
+        }
+        return type
+    }
+
+    private fun evpWanted(): Boolean =
+        Prefs.evpEnabled(this) && ContextCompat.checkSelfPermission(
+            this, Manifest.permission.RECORD_AUDIO
+        ) == PackageManager.PERMISSION_GRANTED
+
+    private fun startEvp() {
+        if (evp != null) return
+        if (!Prefs.evpEnabled(this)) return
+        val rec = EvpRecorder(this)
+        if (!rec.hasPermission()) {
+            SpiritBoxEvents.pushStatus(getString(R.string.evp_no_permission))
+            return
+        }
+        if (rec.start()) {
+            evp = rec
+            SpiritBoxEvents.pushStatus(getString(R.string.status_evp_on))
+        } else {
+            SpiritBoxEvents.pushStatus(getString(R.string.evp_start_failed))
+        }
+    }
+
+    private fun stopEvp(save: Boolean) {
+        val rec = evp ?: return
+        evp = null
+        val result = rec.stop()
+        if (save && result != null) saveEvp(result)
+        SpiritBoxEvents.pushStatus(getString(R.string.status_evp_off))
+    }
+
+    private fun saveEvp(result: EvpRecorder.Result) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            result.pcmFile.delete()
+            return
+        }
+        try {
+            val stamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+            val resolver = contentResolver
+            val collection = MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+            val wavUri = resolver.insert(
+                collection,
+                ContentValues().apply {
+                    put(MediaStore.MediaColumns.DISPLAY_NAME, "spiritbox_evp_$stamp.wav")
+                    put(MediaStore.MediaColumns.MIME_TYPE, "audio/wav")
+                    put(
+                        MediaStore.MediaColumns.RELATIVE_PATH,
+                        "${Environment.DIRECTORY_DOWNLOADS}/SpiritBox"
+                    )
+                }
+            )
+            if (wavUri != null) {
+                resolver.openOutputStream(wavUri)?.use { os ->
+                    os.write(
+                        WavUtil.header(
+                            result.pcmFile.length().toInt(),
+                            result.session.sampleRate
+                        )
+                    )
+                    result.pcmFile.inputStream().use { it.copyTo(os) }
+                }
+            }
+            val jsonUri = resolver.insert(
+                collection,
+                ContentValues().apply {
+                    put(MediaStore.MediaColumns.DISPLAY_NAME, "spiritbox_evp_$stamp.json")
+                    put(MediaStore.MediaColumns.MIME_TYPE, "application/json")
+                    put(
+                        MediaStore.MediaColumns.RELATIVE_PATH,
+                        "${Environment.DIRECTORY_DOWNLOADS}/SpiritBox"
+                    )
+                }
+            )
+            if (jsonUri != null) {
+                resolver.openOutputStream(jsonUri)?.use {
+                    it.write(result.session.toJson().toByteArray())
+                }
+            }
+            result.pcmFile.delete()
+            SpiritBoxEvents.pushStatus(getString(R.string.evp_saved))
+        } catch (e: Exception) {
+            Log.w(TAG, "Falha ao salvar gravação EVP", e)
+            result.pcmFile.delete()
+        }
     }
 
     private fun stopScan() {
@@ -449,6 +584,7 @@ class SpiritBoxService : Service() {
         fm?.stop()
         fm = null
         clipRecorder = null
+        stopEvp(save = true)
         // O AudioTrack do modo SDR é liberado pelo próprio thread de escrita
         // (AudioWriterThread) durante client.close(), evitando uso-após-release.
         audioTrack = null
@@ -508,14 +644,7 @@ class SpiritBoxService : Service() {
     }
 
     private fun refreshNotificationNow() {
-        val freq = lastFreq
-        val frozen = isFrozen()
-        val text = when {
-            frozen && freq > 0 -> getString(R.string.notif_paused_freq, formatFreq(freq))
-            frozen -> getString(R.string.notif_paused)
-            freq > 0 -> getString(R.string.notif_scanning_freq, formatFreq(freq))
-            else -> getString(R.string.notif_text_scanning)
-        }
+        val text = currentNotificationText()
         try {
             getSystemService(NotificationManager::class.java)
                 .notify(NOTIF_ID, buildNotification(text))
@@ -604,6 +733,7 @@ class SpiritBoxService : Service() {
     }
 
     private fun logCapture(freqKHz: Double, level: Int) {
+        evp?.addMarker(freqKHz, level)
         val file = captureLog ?: return
         try {
             val f = if (freqKHz >= 1000) {

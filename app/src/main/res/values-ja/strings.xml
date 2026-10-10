@@ -133,4 +133,13 @@
     <string name="check_update_error">更新を確認できませんでした。</string>
     <string name="check_update_now">更新を確認</string>
     <string name="check_update_checking">確認中…</string>
+    <string name="switch_evp">EVPを録音（マイク）</string>
+    <string name="status_evp_on">EVP録音を開始しました</string>
+    <string name="status_evp_off">EVP録音を停止しました</string>
+    <string name="evp_no_permission">マイクの権限が拒否されました — EVP録音は利用できません。</string>
+    <string name="evp_start_failed">マイク録音を開始できませんでした。</string>
+    <string name="evp_saved">EVP録音を Downloads/SpiritBox に保存しました。</string>
+    <string name="emf_corr_title">ラジオ＋EMFの相関（5秒ウィンドウ）</string>
+    <string name="emf_corr_status">%1$d 件の複合イベント</string>
+    <string name="emf_corr_no_sensor">磁力計の読み取りなし</string>
 </resources>

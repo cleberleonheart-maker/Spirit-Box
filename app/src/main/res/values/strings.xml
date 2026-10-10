@@ -133,4 +133,13 @@
     <string name="emf_status_no_magnetometer">Este aparelho não expõe magnetômetro — o mapa de hotspots não funciona aqui.</string>
     <string name="emf_status_uncalibrated">Usando o sensor sem calibração (o aparelho não expõe o calibrado). Leituras podem variar mais com a orientação.</string>
     <string name="emf_status_recording">Gravando · %1$d pontos</string>
+    <string name="switch_evp">Gravar EVP (microfone)</string>
+    <string name="status_evp_on">Gravação EVP iniciada</string>
+    <string name="status_evp_off">Gravação EVP encerrada</string>
+    <string name="evp_no_permission">Permissão de microfone negada — gravação EVP indisponível.</string>
+    <string name="evp_start_failed">Não foi possível iniciar a gravação do microfone.</string>
+    <string name="evp_saved">Gravação EVP salva em Downloads/SpiritBox.</string>
+    <string name="emf_corr_title">Correlação rádio + EMF (janela de 5 s)</string>
+    <string name="emf_corr_status">%1$d eventos combinados</string>
+    <string name="emf_corr_no_sensor">Sem leitura do magnetômetro</string>
 </resources>

@@ -76,6 +76,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var swFm: MaterialSwitch
     private lateinit var swAlerts: MaterialSwitch
     private lateinit var swNoise: MaterialSwitch
+    private lateinit var swEvp: MaterialSwitch
     private lateinit var spBand: Spinner
     private lateinit var etDwell: EditText
     private lateinit var etSettle: EditText
@@ -110,6 +111,10 @@ class MainActivity : AppCompatActivity() {
     private var emfTrendView: EmfTrendView? = null
     private var emfDialog: Dialog? = null
     private var hotspotDialog: Dialog? = null
+    private var correlation: CorrelationTimeline? = null
+    private var corrView: EmfCorrelationView? = null
+    private var corrStatus: TextView? = null
+    private var corrHasSensor = false
     private var recordingLocation = false
     private var lastLocation: Location? = null
 
@@ -182,6 +187,18 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+    private val evpPermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (granted) {
+                Prefs.saveEvpEnabled(this, true)
+                swEvp.isChecked = true
+                if (SpiritBoxEvents.serviceRunning) SpiritBoxService.setEvp(this, true)
+            } else {
+                swEvp.isChecked = false
+                Toast.makeText(this, R.string.evp_no_permission, Toast.LENGTH_LONG).show()
+            }
+        }
+
     private val listener = object : SpiritBoxEvents.Listener {
         override fun onFreq(freqKHz: Double) {
             tvFreq.text = formatFreq(freqKHz)
@@ -197,6 +214,7 @@ class MainActivity : AppCompatActivity() {
             addCapture(CaptureEntry(freqKHz, level, System.currentTimeMillis()))
             waterfall.markCapture(freqKHz)
             monitor.onCapture(freqKHz, level)
+            correlation?.addRadio(System.currentTimeMillis(), freqKHz, level)
         }
 
         override fun onRms(rms: Double) {
@@ -238,6 +256,7 @@ class MainActivity : AppCompatActivity() {
         swFm = findViewById(R.id.swFm)
         swAlerts = findViewById(R.id.swAlerts)
         swNoise = findViewById(R.id.swNoise)
+        swEvp = findViewById(R.id.swEvp)
         listCaptures = findViewById(R.id.listCaptures)
         tvVersion = findViewById(R.id.tvVersion)
         tvVersion.text = getString(R.string.app_version, BuildConfig.VERSION_NAME)
@@ -347,6 +366,22 @@ class MainActivity : AppCompatActivity() {
             Prefs.saveNoiseReduction(this, checked)
             if (SpiritBoxEvents.serviceRunning) {
                 SpiritBoxService.setNoiseReduction(this, checked)
+            }
+        }
+
+        swEvp.setOnCheckedChangeListener { _, checked ->
+            if (checked) {
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+                    == PackageManager.PERMISSION_GRANTED
+                ) {
+                    Prefs.saveEvpEnabled(this, true)
+                    if (SpiritBoxEvents.serviceRunning) SpiritBoxService.setEvp(this, true)
+                } else {
+                    evpPermission.launch(Manifest.permission.RECORD_AUDIO)
+                }
+            } else {
+                Prefs.saveEvpEnabled(this, false)
+                if (SpiritBoxEvents.serviceRunning) SpiritBoxService.setEvp(this, false)
             }
         }
 
@@ -533,6 +568,11 @@ class MainActivity : AppCompatActivity() {
         emfReadout = dialog.findViewById(R.id.emfReadout)
         emfTrendView = dialog.findViewById(R.id.emfTrend)
         emfTrendView?.clear()
+        correlation = CorrelationTimeline()
+        corrHasSensor = false
+        corrView = dialog.findViewById(R.id.emfCorr)
+        corrStatus = dialog.findViewById(R.id.emfCorrStatus)
+        updateCorrelationView()
         dialog.findViewById<MaterialButton>(R.id.emfMapBtn).setOnClickListener {
             dialog.dismiss()
             openEmfMapDialog()
@@ -549,6 +589,10 @@ class MainActivity : AppCompatActivity() {
             emfHandler.removeCallbacks(emfRunnable)
             emfMeter.stop()
             emfDialog = null
+            correlation = null
+            corrView = null
+            corrStatus = null
+            corrHasSensor = false
         }
         dialog.show()
     }
@@ -887,6 +931,10 @@ class MainActivity : AppCompatActivity() {
         override fun run() {
             if (!emfRunning) return
             val fresh = emfMeter.milliGauss()
+            if (fresh != null) {
+                corrHasSensor = true
+                correlation?.addEmf(System.currentTimeMillis(), fresh)
+            }
             val value: Float = if (fresh != null) {
                 fresh
             } else {
@@ -905,7 +953,20 @@ class MainActivity : AppCompatActivity() {
             }
             emfReadout?.setTextColor(color)
             emfReadout?.text = String.format(Locale.US, "%.1f mG", emfValue)
+            updateCorrelationView()
             emfHandler.postDelayed(this, 250)
+        }
+    }
+
+    private fun updateCorrelationView() {
+        val corr = correlation ?: return
+        val view = corrView ?: return
+        val combined = corr.combined()
+        view.show(corr.emfSamples(), corr.radioEvents(), corr.peaks(), combined, corrHasSensor)
+        corrStatus?.text = if (corrHasSensor) {
+            getString(R.string.emf_corr_status, combined.size)
+        } else {
+            getString(R.string.emf_corr_no_sensor)
         }
     }
 
@@ -972,6 +1033,7 @@ class MainActivity : AppCompatActivity() {
         swFm.isChecked = Prefs.fmMode(this)
         swAlerts.isChecked = Prefs.alerts(this)
         swNoise.isChecked = Prefs.noiseReduction(this)
+        swEvp.isChecked = Prefs.evpEnabled(this)
         spBand.setSelection(Prefs.rangeIndex(this).coerceIn(0, SweepEngine.PRESETS.size - 1))
         etDwell.setText(Prefs.dwell(this).toString())
         etSettle.setText(Prefs.settle(this).toString())
@@ -991,6 +1053,7 @@ class MainActivity : AppCompatActivity() {
         etGap.text.toString().toLongOrNull()?.let { Prefs.saveGap(this, it) }
         Prefs.saveAlerts(this, swAlerts.isChecked)
         Prefs.saveNoiseReduction(this, swNoise.isChecked)
+        Prefs.saveEvpEnabled(this, swEvp.isChecked)
     }
 
     private fun followCapturesIfNearBottom() {

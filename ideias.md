@@ -1,6 +1,17 @@
 # Ideias para o SpiritBox
 
 ## Implementado recentemente
+- **Correlação rádio+EMF** (v1.25): timeline no diálogo EMF com a linha do campo
+  (mG), traços das capturas de rádio e destaque dos **eventos combinados** — um
+  pico do magnetômetro dentro de 5 s de uma captura. A lógica é pura
+  (`CorrelationTimeline`, testada): cada excursão do campo acima de 15 mG vira um
+  pico no seu maior valor e pareia com a captura mais próxima no tempo.
+- **Modo EVP** (v1.25): grava o microfone em paralelo à varredura, **no serviço**
+  (continua com a tela apagada). Cada captura de rádio vira um marcador com offset
+  em ms; ao parar, salva `spiritbox_evp_*.wav` + `.json` (marcadores) em
+  `Downloads/SpiritBox`. No Android 14+ o serviço entra em foreground também com
+  o tipo `microphone` (só quando a permissão está concedida). Toggle "Gravar EVP"
+  pede `RECORD_AUDIO`. Lógica de marcadores pura em `EvpSession` (testada).
 - **Update check sem API (v1.18)**: descobre a última release com `HEAD` em
   `github.com/.../releases/latest` lendo o header `Location` — contorna redes
   onde `api.github.com` responde 404/301 e o auto-check sempre falhava.
@@ -117,6 +128,40 @@
 
 ### Android
 - **Notificação com frequência atual e contador de capturas**; widget com play/pause.
+
+## Novas ideias (06/10)
+### Detecção / alertas
+- **Watch list com alarme**: marcar frequências (ou faixas) e vibrar/notificar quando
+  capturar — reusa favoritos + notificação. (rápido)
+- **Nível em SNR** (dB acima do piso de ruído) em vez de %, no app e no CSV.
+- **Dedup por frequência**: agrupar capturas iguais (nº de avistamentos, nível máx).
+- **Classificador simples voz/CW/ruído** usando o min/max por coluna do waterfall.
+- **Voltar ao pico**: botão que volta à frequência de maior nível desde o último pico.
+
+### Sessões & dados
+- **Sessões nomeadas**: iniciar/encerrar, com nº de capturas, tempo, top frequências;
+  exportar tudo num zip.
+- **Comparar sessões**: o que apareceu/sumiu entre duas sessões.
+- **Cartão de captura** compartilhável: PNG com recorte do waterfall + frequência/hora/GPS.
+- **GPS nas capturas** (hoje só o EMF tem) e mapa de capturas reusando o mapa de hotspots.
+
+### EMF / investigação
+- **Gradiente do campo** (variação/s) com alarme, além do desvio da linha de base.
+
+### Áudio
+- **Gravação contínua** da sessão (não só 8 s) com marcadores nas capturas.
+- **Repetir clipe** / loop de um trecho para reescutar no local.
+- **Media session**: play/pause/mudo pelo fone, tela de bloqueio e (futuro) Android Auto.
+
+### WebSDR / servidores
+- **Lista de servidores públicos** com ping/latência e auto-reconnect, em vez de digitar o host.
+- **Presets de varredura nomeados** (todos os parâmetros) com export/import JSON.
+- **Indicador de buffer/qualidade** da conexão.
+
+### Android/UX
+- **Widget** com nível/pico + iniciar/parar (também na lista antiga).
+- **Quick Settings tile** e atalhos do app: "iniciar AM", "iniciar SW".
+- **Perfil carro / tela sempre ligada**.
 
 ## Ideias futuras (EMF / investigação)
 - **Mapa de hotspots sobre mapa de fundo / imagem**: hoje é projeção local (lat/lng
