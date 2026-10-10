@@ -48,6 +48,8 @@ class SpiritBoxService : Service() {
 
         private const val CHANNEL_ID = "spiritbox_scan"
         private const val NOTIF_ID = 1
+        private const val WATCH_CHANNEL_ID = "spiritbox_watch"
+        private const val WATCH_NOTIF_ID = 2
         private const val TAG = "SpiritBox"
         private const val ACTION_START = "com.spiritbox.app.START"
         private const val ACTION_STOP = "com.spiritbox.app.STOP"
@@ -736,11 +738,7 @@ class SpiritBoxService : Service() {
         evp?.addMarker(freqKHz, level)
         val file = captureLog ?: return
         try {
-            val f = if (freqKHz >= 1000) {
-                String.format(Locale.US, "%.3f", freqKHz / 1000) + " MHz"
-            } else {
-                "${freqKHz.toInt()} kHz"
-            }
+            val f = WatchList.label(freqKHz)
             val tsFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
                 timeZone = java.util.TimeZone.getTimeZone("UTC")
             }
@@ -756,7 +754,11 @@ class SpiritBoxService : Service() {
         } catch (e: Exception) {
             Log.w(TAG, "Falha ao gravar captura", e)
         }
-        if (Prefs.alerts(this)) playCaptureAlert()
+        if (Prefs.watchFavorites(this) && WatchList.contains(Prefs.favorites(this), freqKHz)) {
+            playWatchAlert(freqKHz, level)
+        } else if (Prefs.alerts(this)) {
+            playCaptureAlert()
+        }
     }
 
     private fun saveClipFor() {
@@ -813,6 +815,70 @@ class SpiritBoxService : Service() {
         }
     }
 
+    /** Alerta da watch list: uma frequência favorita foi capturada. Vibração e som
+     * distintos do alerta comum, mais uma notificação para quando a tela está off. */
+    private fun playWatchAlert(freqKHz: Double, level: Int) {
+        try {
+            val tg = ToneGenerator(AudioManager.STREAM_NOTIFICATION, 90)
+            tg.startTone(ToneGenerator.TONE_PROP_BEEP, 180)
+            Handler(Looper.getMainLooper()).postDelayed({ tg.release() }, 280)
+        } catch (e: Exception) {
+            Log.w(TAG, "Falha no alerta sonoro do watch", e)
+        }
+        try {
+            val vibe = getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+            if (vibe != null) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    vibe.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 120, 80, 120), -1))
+                } else {
+                    @Suppress("DEPRECATION")
+                    vibe.vibrate(320)
+                }
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Falha na vibração do watch", e)
+        }
+        notifyWatch(freqKHz, level)
+    }
+
+    private fun notifyWatch(freqKHz: Double, level: Int) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+        try {
+            val text = getString(R.string.watch_notif_text, WatchList.label(freqKHz), level)
+            getSystemService(NotificationManager::class.java)
+                .notify(WATCH_NOTIF_ID, buildWatchNotification(text))
+        } catch (e: Exception) {
+            Log.w(TAG, "Falha na notificação do watch", e)
+        }
+    }
+
+    private fun buildWatchNotification(text: String): Notification {
+        val openPi = PendingIntent.getActivity(
+            this, 2,
+            Intent(this, MainActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Notification.Builder(this, WATCH_CHANNEL_ID)
+        } else {
+            @Suppress("DEPRECATION")
+            Notification.Builder(this)
+        }
+        return builder
+            .setContentTitle(getString(R.string.watch_notif_title))
+            .setContentText(text)
+            .setSmallIcon(drawableIcon())
+            .setAutoCancel(true)
+            .setContentIntent(openPi)
+            .build()
+    }
+
     private fun mirrorToDownloads(src: File) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return
         try {
@@ -864,7 +930,14 @@ class SpiritBoxService : Service() {
             getString(R.string.notif_channel),
             NotificationManager.IMPORTANCE_LOW
         )
-        getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
+        val manager = getSystemService(NotificationManager::class.java)
+        manager.createNotificationChannel(channel)
+        val watch = NotificationChannel(
+            WATCH_CHANNEL_ID,
+            getString(R.string.watch_channel),
+            NotificationManager.IMPORTANCE_HIGH
+        )
+        manager.createNotificationChannel(watch)
     }
 
     private fun buildNotification(text: String): Notification {

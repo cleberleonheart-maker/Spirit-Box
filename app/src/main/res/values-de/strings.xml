@@ -138,6 +138,10 @@
     <string name="check_update_now">UPDATE PRÜFEN</string>
     <string name="check_update_checking">Wird geprüft…</string>
     <string name="switch_evp">EVP aufnehmen (Mikrofon)</string>
+    <string name="switch_watch">Favoriten-Alarm</string>
+    <string name="watch_channel">Watch list</string>
+    <string name="watch_notif_title">Favoritenfrequenz empfangen</string>
+    <string name="watch_notif_text">%1$s empfangen · %2$d%%</string>
     <string name="status_evp_on">EVP-Aufnahme gestartet</string>
     <string name="status_evp_off">EVP-Aufnahme beendet</string>
     <string name="evp_no_permission">Mikrofonberechtigung verweigert — EVP-Aufnahme nicht verfügbar.</string>

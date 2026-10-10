@@ -138,6 +138,10 @@
     <string name="check_update_now">更新を確認</string>
     <string name="check_update_checking">確認中…</string>
     <string name="switch_evp">EVPを録音（マイク）</string>
+    <string name="switch_watch">お気に入りアラーム</string>
+    <string name="watch_channel">ウォッチリスト</string>
+    <string name="watch_notif_title">お気に入り周波数を受信</string>
+    <string name="watch_notif_text">%1$s を受信 · %2$d%%</string>
     <string name="status_evp_on">EVP録音を開始しました</string>
     <string name="status_evp_off">EVP録音を停止しました</string>
     <string name="evp_no_permission">マイクの権限が拒否されました — EVP録音は利用できません。</string>

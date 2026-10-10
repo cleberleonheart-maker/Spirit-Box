@@ -21,6 +21,7 @@ object Prefs {
     private const val KEY_NOISE = "noiseReduction"
     private const val KEY_MOTION_UNLOCKED = "motionUnlocked"
     private const val KEY_EVP = "evpEnabled"
+    private const val KEY_WATCH = "watchFavorites"
 
     private const val KEY_SCAN_ACTIVE = "scanActive"
     private const val KEY_SCAN_MODE = "scanMode"
@@ -96,6 +97,12 @@ object Prefs {
 
     fun saveEvpEnabled(c: Context, v: Boolean) =
         prefs(c).edit().putBoolean(KEY_EVP, v).apply()
+
+    /** Watch list: alerta (vibra/notifica) quando uma frequência favorita é capturada. */
+    fun watchFavorites(c: Context): Boolean = prefs(c).getBoolean(KEY_WATCH, false)
+
+    fun saveWatchFavorites(c: Context, v: Boolean) =
+        prefs(c).edit().putBoolean(KEY_WATCH, v).apply()
 
     /** 0 = sistema, 1 = claro, 2 = escuro. */
     fun themeMode(c: Context): Int = prefs(c).getInt(KEY_THEME_MODE, 0)

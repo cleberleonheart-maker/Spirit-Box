@@ -138,6 +138,10 @@
     <string name="check_update_now">CHECK FOR UPDATES</string>
     <string name="check_update_checking">Checking…</string>
     <string name="switch_evp">Record EVP (microphone)</string>
+    <string name="switch_watch">Favorites alarm</string>
+    <string name="watch_channel">Watch list</string>
+    <string name="watch_notif_title">Favorite frequency captured</string>
+    <string name="watch_notif_text">%1$s captured · %2$d%%</string>
     <string name="status_evp_on">EVP recording started</string>
     <string name="status_evp_off">EVP recording stopped</string>
     <string name="evp_no_permission">Microphone permission denied — EVP recording unavailable.</string>

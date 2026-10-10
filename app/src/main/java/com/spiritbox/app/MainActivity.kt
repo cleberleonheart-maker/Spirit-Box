@@ -77,6 +77,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var swAlerts: MaterialSwitch
     private lateinit var swNoise: MaterialSwitch
     private lateinit var swEvp: MaterialSwitch
+    private lateinit var swWatch: MaterialSwitch
     private lateinit var spBand: Spinner
     private lateinit var etDwell: EditText
     private lateinit var etSettle: EditText
@@ -257,6 +258,7 @@ class MainActivity : AppCompatActivity() {
         swAlerts = findViewById(R.id.swAlerts)
         swNoise = findViewById(R.id.swNoise)
         swEvp = findViewById(R.id.swEvp)
+        swWatch = findViewById(R.id.swWatch)
         listCaptures = findViewById(R.id.listCaptures)
         tvVersion = findViewById(R.id.tvVersion)
         tvVersion.text = getString(R.string.app_version, BuildConfig.VERSION_NAME)
@@ -383,6 +385,10 @@ class MainActivity : AppCompatActivity() {
                 Prefs.saveEvpEnabled(this, false)
                 if (SpiritBoxEvents.serviceRunning) SpiritBoxService.setEvp(this, false)
             }
+        }
+
+        swWatch.setOnCheckedChangeListener { _, checked ->
+            Prefs.saveWatchFavorites(this, checked)
         }
 
         btnShare.setOnClickListener { shareCaptures() }
@@ -1048,6 +1054,7 @@ class MainActivity : AppCompatActivity() {
         swAlerts.isChecked = Prefs.alerts(this)
         swNoise.isChecked = Prefs.noiseReduction(this)
         swEvp.isChecked = Prefs.evpEnabled(this)
+        swWatch.isChecked = Prefs.watchFavorites(this)
         spBand.setSelection(Prefs.rangeIndex(this).coerceIn(0, SweepEngine.PRESETS.size - 1))
         etDwell.setText(Prefs.dwell(this).toString())
         etSettle.setText(Prefs.settle(this).toString())
@@ -1068,6 +1075,7 @@ class MainActivity : AppCompatActivity() {
         Prefs.saveAlerts(this, swAlerts.isChecked)
         Prefs.saveNoiseReduction(this, swNoise.isChecked)
         Prefs.saveEvpEnabled(this, swEvp.isChecked)
+        Prefs.saveWatchFavorites(this, swWatch.isChecked)
     }
 
     private fun followCapturesIfNearBottom() {

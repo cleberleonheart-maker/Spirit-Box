@@ -138,6 +138,10 @@
     <string name="emf_status_uncalibrated">Usando o sensor sem calibração (o aparelho não expõe o calibrado). Leituras podem variar mais com a orientação.</string>
     <string name="emf_status_recording">Gravando · %1$d pontos</string>
     <string name="switch_evp">Gravar EVP (microfone)</string>
+    <string name="switch_watch">Alarme nas favoritas</string>
+    <string name="watch_channel">Watch list</string>
+    <string name="watch_notif_title">Frequência favorita capturada</string>
+    <string name="watch_notif_text">%1$s capturada · %2$d%%</string>
     <string name="status_evp_on">Gravação EVP iniciada</string>
     <string name="status_evp_off">Gravação EVP encerrada</string>
     <string name="evp_no_permission">Permissão de microfone negada — gravação EVP indisponível.</string>

@@ -1,6 +1,11 @@
 # Ideias para o SpiritBox
 
 ## Implementado recentemente
+- **Watch list com alarme** (v1.27): os **favoritos** viram uma lista de
+  observação. Ligando "Alarme nas favoritas", quando uma captura casa (tolerância
+  de 1 kHz) com uma frequência marcada o app vibra (padrão distinto), toca um som
+  e posta uma **notificação** — útil com a tela apagada. A lógica de casamento é
+  pura (`WatchList`, testada). O alerta comum continua valendo para as demais.
 - **Ajuda nos diálogos EMF** (v1.26): bolinha "i" ao lado do título abre um
   diálogo explicativo. Na **correlação**, descreve cada elemento do gráfico
   (linha do campo, pico, traço de rádio, faixa de evento combinado) e que a

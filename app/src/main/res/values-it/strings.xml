@@ -138,6 +138,10 @@
     <string name="check_update_now">CERCA AGGIORNAMENTI</string>
     <string name="check_update_checking">Controllo in corso…</string>
     <string name="switch_evp">Registra EVP (microfono)</string>
+    <string name="switch_watch">Allarme preferiti</string>
+    <string name="watch_channel">Watch list</string>
+    <string name="watch_notif_title">Frequenza preferita catturata</string>
+    <string name="watch_notif_text">%1$s catturata · %2$d%%</string>
     <string name="status_evp_on">Registrazione EVP avviata</string>
     <string name="status_evp_off">Registrazione EVP fermata</string>
     <string name="evp_no_permission">Permesso microfono negato — registrazione EVP non disponibile.</string>
