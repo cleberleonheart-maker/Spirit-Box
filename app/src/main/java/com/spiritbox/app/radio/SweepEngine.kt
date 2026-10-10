@@ -57,6 +57,10 @@ class SweepEngine(
          * historico de 200 linhas da mesma emissora a cada varredura. */
         const val CAPTURE_COOLDOWN_MS = 60_000L
 
+        /** Piso minimo usado como referencia do SNR quando ainda nao ha amostras
+         * suficientes do ruido e o limiar do usuario tambem e' zero. */
+        private const val MIN_FLOOR = 1e-6
+
         fun nextFreq(freqKHz: Double, stepKHz: Int): Double = freqKHz + stepKHz
 
         fun isWithinRange(freqKHz: Double, endKHz: Int): Boolean = freqKHz <= endKHz
@@ -164,6 +168,15 @@ class SweepEngine(
         val byFloor = noiseFloor * NoiseFloor.MULTIPLIER
         return if (byFloor > captureThreshold) byFloor else captureThreshold
     }
+
+    /** Referencia do SNR em dB: o piso de ruido medido da faixa. Antes de o piso
+     * existir (poucas amostras) cai para o limiar do usuario, para a captura nao
+     * ficar sem base de comparacao. */
+    fun snrReference(): Double =
+        if (noiseFloor > 0.0) noiseFloor else kotlin.math.max(captureThreshold, MIN_FLOOR)
+
+    /** SNR da captura em dB acima da referencia (ver [Snr]). */
+    fun snrDb(peak: Double): Int = Snr.db(peak, snrReference())
 
     /** Relogio monotono: as fases sao duracoes (settle/hold/gap) e nao instantes de
      * agenda. Com currentTimeMillis mudar o fuso ou o NTP ajustar a hora no meio da
@@ -291,7 +304,7 @@ class SweepEngine(
                         )
                     ) {
                         lastCaptureByFreq[key] = now
-                        val level = (peak * 100).toInt().coerceIn(0, 100)
+                        val level = snrDb(peak)
                         SpiritBoxEvents.pushCapture(freqEnd, level)
                         try {
                             onCaptureHook?.invoke(freqEnd, level)

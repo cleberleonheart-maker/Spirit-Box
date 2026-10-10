@@ -267,7 +267,7 @@ class SpiritBoxService : Service() {
                     stopSelf()
                 } else {
                     val freq = lastFreq
-                    val level = (lastRms * 100).toInt().coerceIn(0, 100)
+                    val level = engine?.snrDb(lastRms) ?: 0
                     if (freq <= 0) {
                         SpiritBoxEvents.pushStatus(getString(R.string.scan_waiting_freq))
                     } else {
@@ -747,7 +747,7 @@ class SpiritBoxService : Service() {
                 file.appendText("data_iso,frequencia,nivel,modo,banda,servidor\n")
             }
             file.appendText(
-                "${csvEscape(ts)},${csvEscape(f)},${csvEscape("$level%")}," +
+                "${csvEscape(ts)},${csvEscape(f)},${csvEscape("$level dB")}," +
                     "${csvEscape(activeMode)},${csvEscape(activeBand)},${csvEscape(activeServer)}\n"
             )
             mirrorToDownloads(file)

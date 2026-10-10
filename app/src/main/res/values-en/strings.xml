@@ -40,7 +40,8 @@
    <string name="hint_threshold">Threshold %</string>
    <string name="capture_detail_title">Capture details</string>
    <string name="capture_detail_freq">Frequency: %1$s</string>
-   <string name="capture_detail_level">Level: %1$d%%</string>
+   <string name="capture_detail_level">Level: %1$d dB</string>
+   <string name="capture_level_db">level %1$d dB</string>
    <string name="capture_detail_time">Date: %1$s</string>
    <string name="btn_copy_freq">Copy frequency</string>
    <string name="copied">Frequency copied</string>
@@ -141,7 +142,7 @@
     <string name="switch_watch">Favorites alarm</string>
     <string name="watch_channel">Watch list</string>
     <string name="watch_notif_title">Favorite frequency captured</string>
-    <string name="watch_notif_text">%1$s captured · %2$d%%</string>
+    <string name="watch_notif_text">%1$s captured · %2$d dB</string>
     <string name="status_evp_on">EVP recording started</string>
     <string name="status_evp_off">EVP recording stopped</string>
     <string name="evp_no_permission">Microphone permission denied — EVP recording unavailable.</string>

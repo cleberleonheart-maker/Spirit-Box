@@ -40,7 +40,8 @@
    <string name="hint_threshold">Schwelle %</string>
    <string name="capture_detail_title">Erfassungsdetails</string>
    <string name="capture_detail_freq">Frequenz: %1$s</string>
-   <string name="capture_detail_level">Pegel: %1$d%%</string>
+   <string name="capture_detail_level">Pegel: %1$d dB</string>
+   <string name="capture_level_db">Pegel %1$d dB</string>
    <string name="capture_detail_time">Datum: %1$s</string>
    <string name="btn_copy_freq">Frequenz kopieren</string>
    <string name="copied">Frequenz kopiert</string>
@@ -141,7 +142,7 @@
     <string name="switch_watch">Favoriten-Alarm</string>
     <string name="watch_channel">Watch list</string>
     <string name="watch_notif_title">Favoritenfrequenz empfangen</string>
-    <string name="watch_notif_text">%1$s empfangen · %2$d%%</string>
+    <string name="watch_notif_text">%1$s empfangen · %2$d dB</string>
     <string name="status_evp_on">EVP-Aufnahme gestartet</string>
     <string name="status_evp_off">EVP-Aufnahme beendet</string>
     <string name="evp_no_permission">Mikrofonberechtigung verweigert — EVP-Aufnahme nicht verfügbar.</string>

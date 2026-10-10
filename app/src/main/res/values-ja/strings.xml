@@ -40,7 +40,8 @@
    <string name="hint_threshold">しきい値 %</string>
    <string name="capture_detail_title">捕捉詳細</string>
    <string name="capture_detail_freq">周波数: %1$s</string>
-   <string name="capture_detail_level">レベル: %1$d%%</string>
+   <string name="capture_detail_level">レベル: %1$d dB</string>
+   <string name="capture_level_db">レベル %1$d dB</string>
    <string name="capture_detail_time">日時: %1$s</string>
    <string name="btn_copy_freq">周波数をコピー</string>
    <string name="copied">周波数をコピーしました</string>
@@ -141,7 +142,7 @@
     <string name="switch_watch">お気に入りアラーム</string>
     <string name="watch_channel">ウォッチリスト</string>
     <string name="watch_notif_title">お気に入り周波数を受信</string>
-    <string name="watch_notif_text">%1$s を受信 · %2$d%%</string>
+    <string name="watch_notif_text">%1$s を受信 · %2$d dB</string>
     <string name="status_evp_on">EVP録音を開始しました</string>
     <string name="status_evp_off">EVP録音を停止しました</string>
     <string name="evp_no_permission">マイクの権限が拒否されました — EVP録音は利用できません。</string>

@@ -1,6 +1,12 @@
 # Ideias para o SpiritBox
 
 ## Implementado recentemente
+- **Nível em SNR (dB)** (v1.28): as capturas passam a mostrar **dB acima do piso
+  de ruído** em vez de %. O cálculo (20·log10 do pico sobre o piso medido) é puro
+  (`Snr`, testado); quando ainda não há piso (poucas amostras) usa o limiar do
+  usuário como referência. Vale na lista, no detalhe, na busca, no CSV
+  (`capturas.csv`) e na notificação da watch list. CSVs antigos (com `%`) continuam
+  sendo lidos.
 - **Watch list com alarme** (v1.27): os **favoritos** viram uma lista de
   observação. Ligando "Alarme nas favoritas", quando uma captura casa (tolerância
   de 1 kHz) com uma frequência marcada o app vibra (padrão distinto), toca um som

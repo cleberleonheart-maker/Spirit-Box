@@ -1130,7 +1130,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun captureLabel(entry: CaptureEntry): String =
-        "${formatFreq(entry.freqKHz)}  ·  nível ${entry.level}%"
+        "${formatFreq(entry.freqKHz)}  ·  ${getString(R.string.capture_level_db, entry.level)}"
 
     /** Texto que a busca varre: inclui banda, modo e servidor quando o CSV os tem. */
     private fun captureHaystack(entry: CaptureEntry): String = buildString {
@@ -1214,7 +1214,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun parseLevel(text: String): Int? =
-        text.removeSuffix("%").trim().toIntOrNull()?.coerceIn(0, 100)
+        text.removeSuffix("%").removeSuffix("dB").trim().toIntOrNull()?.coerceIn(0, 100)
 
     private fun showCaptureDetail(entry: CaptureEntry) {
         val time = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
