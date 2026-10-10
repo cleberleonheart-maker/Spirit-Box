@@ -114,6 +114,10 @@
     <string name="emf_map_record">AUFNAHME</string>
     <string name="emf_map_record_on">STOPP</string>
     <string name="emf_map_clear">LÖSCHEN</string>
+    <string name="emf_map_info_btn">i</string>
+    <string name="emf_map_info_cd">So aktivierst du sie und was die Karte macht</string>
+    <string name="emf_map_info_title">EMF-Hotspot-Karte</string>
+    <string name="emf_map_info_msg">So aktivieren\n• Erfordert den freigeschalteten Untersuchungsmodus und die Standortberechtigung bei eingeschaltetem GPS.\n• Tippe auf AUFNEHMEN, um zu starten: Die App protokolliert deine Position auf der Karte zusammen mit der Magnetometer-Messung (mG). Tippe auf STOPP, um zu beenden.\n\nFunktionen\n• Jeder Punkt erfasst einen Hotspot: seine Position auf der Karte und die Feldstärke dort.\n• Die Statuszeile zeigt, was zum Aufnehmen fehlt (Berechtigung, GPS, Fix oder Sensor).\n• Oben die Statistik: Anzahl der Punkte und die höchste Messung.\n• LÖSCHEN entfernt alle gespeicherten Hotspots.\n• Benötigt ein Magnetometer; Geräte ohne den Sensor können diese Karte nicht nutzen.</string>
     <string name="emf_map_locked">Aktiviere den Untersuchungsmodus (7 Tippen auf Status) für die Hotspot-Karte.</string>
     <string name="emf_map_denied">Standort verweigert — Hotspot-Karte nicht verfügbar.</string>
     <string name="battery_not_exempt">Batterie optimiert: Scan und EMF-Karte funktionieren nicht mehr. Setze die Energieeinschränkung auf Keine.</string>
@@ -142,4 +146,8 @@
     <string name="emf_corr_title">Radio- + EMF-Korrelation (5-s-Fenster)</string>
     <string name="emf_corr_status">%1$d kombinierte Ereignisse</string>
     <string name="emf_corr_no_sensor">Keine Magnetometer-Messung</string>
+    <string name="emf_corr_info_btn">i</string>
+    <string name="emf_corr_info_cd">So funktioniert die Korrelation</string>
+    <string name="emf_corr_info_title">So funktioniert die Korrelation</string>
+    <string name="emf_corr_info_msg">Das Fenster zeigt die letzten 5 Sekunden.\n\n• Grüne Linie: das Magnetfeld (Magnetometer) in mG.\n• Roter Kreis: ein Feld-Peak — jeder Anstieg über 15 mG wird zu einem Peak bei seinem höchsten Wert.\n• Blaue Linie: eine Funkaufnahme.\n• Oranger Balken: kombiniertes Ereignis — eine Funkaufnahme innerhalb von 5 s nach einem Feld-Peak.\n\nDer Zähler unten zeigt, wie viele kombinierte Ereignisse aufgetreten sind. Beim Schließen und erneuten Öffnen dieses Fensters wird alles zurückgesetzt.</string>
 </resources>

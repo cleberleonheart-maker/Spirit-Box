@@ -1,6 +1,12 @@
 # Ideias para o SpiritBox
 
 ## Implementado recentemente
+- **Ajuda nos diálogos EMF** (v1.26): bolinha "i" ao lado do título abre um
+  diálogo explicativo. Na **correlação**, descreve cada elemento do gráfico
+  (linha do campo, pico, traço de rádio, faixa de evento combinado) e que a
+  janela cobre só os últimos 5 s. No **mapa de hotspots**, explica como ativar
+  (modo investigação + permissão/GPS) e o que cada botão faz (GRAVAR/PARAR, LIMPAR,
+  estatísticas, exigência de magnetômetro).
 - **Correlação rádio+EMF** (v1.25): timeline no diálogo EMF com a linha do campo
   (mG), traços das capturas de rádio e destaque dos **eventos combinados** — um
   pico do magnetômetro dentro de 5 s de uma captura. A lógica é pura

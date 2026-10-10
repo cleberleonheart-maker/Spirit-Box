@@ -114,6 +114,10 @@
     <string name="emf_map_record">REGISTRA</string>
     <string name="emf_map_record_on">FERMA</string>
     <string name="emf_map_clear">PULISCI</string>
+    <string name="emf_map_info_btn">i</string>
+    <string name="emf_map_info_cd">Come attivarlo e cosa fa la mappa</string>
+    <string name="emf_map_info_title">Mappa dei punti caldi EMF</string>
+    <string name="emf_map_info_msg">Come attivare\n• Richiede la modalità indagine sbloccata e il permesso di localizzazione con il GPS attivo.\n• Tocca REGISTRA per iniziare: l\'app registra la tua posizione sulla mappa insieme alla lettura del magnetometro (mG). Tocca FERMA per terminare.\n\nFunzioni\n• Ogni punto registra un hotspot: la posizione sulla mappa e l\'intensità del campo in quel luogo.\n• La riga di stato mostra cosa manca per registrare (permesso, GPS, fix o sensore).\n• In alto, le statistiche: numero di punti e la lettura massima.\n• PULISCI cancella tutti gli hotspot salvati.\n• Serve il magnetometro; i dispositivi senza il sensore non possono usare questa mappa.</string>
     <string name="emf_map_locked">Attiva la modalità indagine (7 tocchi sullo stato) per la mappa dei punti caldi.</string>
     <string name="emf_map_denied">Posizione negata — mappa dei punti caldi non disponibile.</string>
     <string name="battery_not_exempt">Batteria ottimizzata: la scansione e la mappa EMF smettono di funzionare. Imposta la restrizione energetica su Nessuna.</string>
@@ -142,4 +146,8 @@
     <string name="emf_corr_title">Correlazione radio + EMF (finestra di 5 s)</string>
     <string name="emf_corr_status">%1$d eventi combinati</string>
     <string name="emf_corr_no_sensor">Nessuna lettura del magnetometro</string>
+    <string name="emf_corr_info_btn">i</string>
+    <string name="emf_corr_info_cd">Come funziona la correlazione</string>
+    <string name="emf_corr_info_title">Come funziona la correlazione</string>
+    <string name="emf_corr_info_msg">La finestra mostra gli ultimi 5 secondi.\n\n• Linea verde: il campo magnetico (magnetometro) in mG.\n• Cerchio rosso: un picco del campo — ogni salita sopra 15 mG diventa un picco nel suo valore massimo.\n• Linea blu: una cattura radio.\n• Banda arancione: evento combinato — una cattura radio che avviene entro 5 s da un picco del campo.\n\nIl contatore sotto mostra quanti eventi combinati si sono verificati. Tutto si azzera quando chiudi e riapri questo pannello.</string>
 </resources>

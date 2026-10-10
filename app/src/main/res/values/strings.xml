@@ -118,6 +118,10 @@
     <string name="emf_map_record">GRAVAR</string>
     <string name="emf_map_record_on">PARAR</string>
     <string name="emf_map_clear">LIMPAR</string>
+    <string name="emf_map_info_btn">i</string>
+    <string name="emf_map_info_cd">Como ativar e o que o mapa faz</string>
+    <string name="emf_map_info_title">Mapa de hotspots EMF</string>
+    <string name="emf_map_info_msg">Como ativar\n• Requer o modo investigação desbloqueado e permissão de localização com o GPS ligado.\n• Toque em GRAVAR para começar: o app registra sua posição no mapa junto da leitura do magnetômetro (mG). Toque em PARAR para encerrar.\n\nFunções\n• Cada ponto grava um hotspot: a posição no mapa e a intensidade do campo naquele lugar.\n• A linha de status mostra o que falta para gravar (permissão, GPS, fix ou sensor).\n• No topo, as estatísticas: número de pontos e a leitura máxima.\n• LIMPAR apaga todos os hotspots salvos.\n• Precisa de magnetômetro; aparelhos sem o sensor não usam este mapa.</string>
     <string name="emf_map_locked">Ative o modo investigação (7 toques no status) para o mapa de hotspots.</string>
     <string name="emf_map_denied">Localização negada — mapa de hotspots indisponível.</string>
     <string name="battery_not_exempt">Bateria otimizada: a varredura e o mapa EMF param de funcionar. Ajuste a restrição de energia para Nenhum.</string>
@@ -142,4 +146,8 @@
     <string name="emf_corr_title">Correlação rádio + EMF (janela de 5 s)</string>
     <string name="emf_corr_status">%1$d eventos combinados</string>
     <string name="emf_corr_no_sensor">Sem leitura do magnetômetro</string>
+    <string name="emf_corr_info_btn">i</string>
+    <string name="emf_corr_info_cd">Como funciona a correlação</string>
+    <string name="emf_corr_info_title">Como funciona a correlação</string>
+    <string name="emf_corr_info_msg">A janela mostra os últimos 5 segundos.\n\n• Linha verde: o campo magnético (magnetômetro) em mG.\n• Círculo vermelho: um pico do campo — cada subida acima de 15 mG vira um pico no seu maior valor.\n• Risco azul: uma captura de rádio.\n• Faixa laranja: evento combinado — uma captura de rádio que acontece a até 5 s de um pico do campo.\n\nO contador abaixo mostra quantos eventos combinados já ocorreram. Tudo é zerado ao fechar e reabrir este painel.</string>
 </resources>

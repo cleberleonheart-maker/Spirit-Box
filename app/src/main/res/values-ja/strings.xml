@@ -114,6 +114,10 @@
     <string name="emf_map_record">記録</string>
     <string name="emf_map_record_on">停止</string>
     <string name="emf_map_clear">クリア</string>
+    <string name="emf_map_info_btn">i</string>
+    <string name="emf_map_info_cd">有効化の方法とマップの機能</string>
+    <string name="emf_map_info_title">EMFホットスポットマップ</string>
+    <string name="emf_map_info_msg">有効化の方法\n• 調査モードのロック解除と、GPSをオンにした位置情報の許可が必要です。\n• 「記録」をタップして開始：アプリは磁力計の値（mG）と一緒に地図上の位置を記録します。「停止」で終了します。\n\n機能\n• 各ポイントがホットスポットとして記録されます：地図上の位置とその場所の磁場の強さ。\n• ステータス行に、記録に足りないもの（許可・GPS・測位・センサー）が表示されます。\n• 上部に統計：ポイント数と最大値。\n• 「クリア」ですべての保存済みホットスポットを消去します。\n• 磁力計が必要です。センサーのない端末ではこのマップを使えません。</string>
     <string name="emf_map_locked">調査モード（ステータスを7回タップ）を有効にすると、ホットスポットマップが使えます。</string>
     <string name="emf_map_denied">位置情報が拒否されました — ホットスポットマップを利用できません。</string>
     <string name="battery_not_exempt">バッテリー最適化中: スキャンと EMF マップが動かなくなります。電池の制限を「なし」に設定してください。</string>
@@ -142,4 +146,8 @@
     <string name="emf_corr_title">ラジオ＋EMFの相関（5秒ウィンドウ）</string>
     <string name="emf_corr_status">%1$d 件の複合イベント</string>
     <string name="emf_corr_no_sensor">磁力計の読み取りなし</string>
+    <string name="emf_corr_info_btn">i</string>
+    <string name="emf_corr_info_cd">相関の仕組み</string>
+    <string name="emf_corr_info_title">相関の仕組み</string>
+    <string name="emf_corr_info_msg">ウィンドウには直近5秒間が表示されます。\n\n• 緑の線：磁場（磁力計）の値（mG）。\n• 赤い丸：磁場のピーク — 15 mG を超える上昇は、その最大値で1つのピークになります。\n• 青い線：ラジオのキャプチャ。\n• オレンジの帯：複合イベント — 磁場のピークから5秒以内に発生したラジオのキャプチャ。\n\n下のカウンターは発生した複合イベントの数を示します。このパネルを閉じて開き直すとすべてリセットされます。</string>
 </resources>

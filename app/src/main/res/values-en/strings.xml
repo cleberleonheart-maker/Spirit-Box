@@ -114,6 +114,10 @@
     <string name="emf_map_record">RECORD</string>
     <string name="emf_map_record_on">STOP</string>
     <string name="emf_map_clear">CLEAR</string>
+    <string name="emf_map_info_btn">i</string>
+    <string name="emf_map_info_cd">How to enable it and what the map does</string>
+    <string name="emf_map_info_title">EMF hotspots map</string>
+    <string name="emf_map_info_msg">How to enable\n• Requires investigation mode unlocked and location permission with GPS on.\n• Tap RECORD to start: the app logs your position on the map together with the magnetometer reading (mG). Tap STOP to finish.\n\nFeatures\n• Each point records a hotspot: its position on the map and the field strength there.\n• The status line shows what is missing to record (permission, GPS, fix or sensor).\n• Stats on top: number of points and the highest reading.\n• CLEAR wipes all saved hotspots.\n• Needs a magnetometer; devices without the sensor cannot use this map.</string>
     <string name="emf_map_locked">Enable investigation mode (7 taps on status) to use the hotspots map.</string>
     <string name="emf_map_denied">Location denied — hotspots map unavailable.</string>
     <string name="battery_not_exempt">Battery optimized: scanning and the EMF map stop working. Set the energy restriction to None.</string>
@@ -142,4 +146,8 @@
     <string name="emf_corr_title">Radio + EMF correlation (5 s window)</string>
     <string name="emf_corr_status">%1$d combined events</string>
     <string name="emf_corr_no_sensor">No magnetometer reading</string>
+    <string name="emf_corr_info_btn">i</string>
+    <string name="emf_corr_info_cd">How the correlation works</string>
+    <string name="emf_corr_info_title">How the correlation works</string>
+    <string name="emf_corr_info_msg">The window shows the last 5 seconds.\n\n• Green line: the magnetic field (magnetometer) in mG.\n• Red circle: a field peak — every rise above 15 mG becomes a peak at its highest value.\n• Blue line: a radio capture.\n• Orange band: combined event — a radio capture happening within 5 s of a field peak.\n\nThe counter below shows how many combined events have occurred. Everything resets when you close and reopen this panel.</string>
 </resources>

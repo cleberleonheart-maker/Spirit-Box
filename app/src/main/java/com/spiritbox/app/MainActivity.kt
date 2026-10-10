@@ -572,6 +572,13 @@ class MainActivity : AppCompatActivity() {
         corrHasSensor = false
         corrView = dialog.findViewById(R.id.emfCorr)
         corrStatus = dialog.findViewById(R.id.emfCorrStatus)
+        dialog.findViewById<MaterialButton>(R.id.emfCorrInfoBtn).setOnClickListener {
+            MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.emf_corr_info_title)
+                .setMessage(R.string.emf_corr_info_msg)
+                .setPositiveButton(android.R.string.ok, null)
+                .show()
+        }
         updateCorrelationView()
         dialog.findViewById<MaterialButton>(R.id.emfMapBtn).setOnClickListener {
             dialog.dismiss()
@@ -712,6 +719,13 @@ class MainActivity : AppCompatActivity() {
                     Log.w("SpiritBox", "Falha ao limpar hotspots", e)
                 }
             }
+        }
+        dialog.findViewById<MaterialButton>(R.id.emfMapInfoBtn).setOnClickListener {
+            MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.emf_map_info_title)
+                .setMessage(R.string.emf_map_info_msg)
+                .setPositiveButton(android.R.string.ok, null)
+                .show()
         }
         dialog.setOnDismissListener {
             recordingLocation = false
