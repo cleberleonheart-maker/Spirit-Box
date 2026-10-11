@@ -1408,9 +1408,11 @@ class MainActivity : AppCompatActivity() {
             0, SweepEngine.PRESETS.size - 1
         )]
         val start = range.startKHz.toDouble()
+        val end = range.endKHz.toDouble()
         val step = range.stepKHz.toDouble()
-        if (step <= 0) return freqKHz
-        return start + Math.round((freqKHz - start) / step) * step
+        if (step <= 0) return freqKHz.coerceIn(start, end)
+        val snapped = start + Math.round((freqKHz - start) / step) * step
+        return snapped.coerceIn(start, end)
     }
 
     private fun setupFavorites() {

@@ -17,7 +17,8 @@ class ScanWidgetProvider : AppWidgetProvider() {
 
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) {
         val running = Prefs.activeScan(context) != null
-        val views = build(context, running, Prefs.paused(context), 0.0)
+        val frozen = Prefs.paused(context) || SpiritBoxEvents.holdActive
+        val views = build(context, running, frozen, 0.0)
         for (id in ids) manager.updateAppWidget(id, views)
     }
 

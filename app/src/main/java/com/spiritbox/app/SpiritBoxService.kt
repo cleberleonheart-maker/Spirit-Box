@@ -285,6 +285,7 @@ class SpiritBoxService : Service() {
                 if (e == null) {
                     SpiritBoxEvents.pushStatus(getString(R.string.scan_not_running))
                     stopSelf()
+                    ScanWidgetProvider.refresh(this, running = false, paused = false, freqKHz = 0.0)
                 } else {
                     val h = !e.hold
                     e.hold = h
@@ -293,6 +294,7 @@ class SpiritBoxService : Service() {
                     SpiritBoxEvents.pushStatus(
                         getString(if (h) R.string.hold_engaged else R.string.hold_released)
                     )
+                    refreshNotificationNow()
                 }
             }
             ACTION_MUTE -> {
@@ -318,6 +320,7 @@ class SpiritBoxService : Service() {
                 if (e == null) {
                     SpiritBoxEvents.pushStatus(getString(R.string.scan_not_running))
                     stopSelf()
+                    ScanWidgetProvider.refresh(this, running = false, paused = false, freqKHz = 0.0)
                 } else {
                     val frozen = paused || e.hold
                     paused = !frozen
@@ -660,7 +663,12 @@ class SpiritBoxService : Service() {
         } catch (e: Exception) {
             Log.w(TAG, "Falha ao atualizar notificação", e)
         }
-        ScanWidgetProvider.refresh(this, running = engine != null, paused = paused, freqKHz = lastFreq)
+        ScanWidgetProvider.refresh(
+            this,
+            running = engine != null,
+            paused = paused || engine?.hold == true,
+            freqKHz = lastFreq
+        )
     }
 
     private fun formatFreq(khz: Double): String {
