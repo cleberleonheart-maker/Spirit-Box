@@ -64,6 +64,9 @@ class MainActivity : AppCompatActivity() {
 
         /** Linhas mostradas sem busca ativa — mantém a lista curta como antes. */
         private const val MAX_VISIBLE = 200
+
+        /** Arquivo compartilhado na exportação de favoritos (cacheDir, via FileProvider). */
+        private const val FAV_FILE_NAME = "spiritbox_favoritos.json"
     }
 
     private lateinit var tvFreq: TextView
@@ -88,6 +91,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnHold: MaterialButton
     private lateinit var btnMute: MaterialButton
     private lateinit var btnBookmark: MaterialButton
+    private lateinit var btnFavExport: MaterialButton
+    private lateinit var btnFavImport: MaterialButton
     private lateinit var spFav: Spinner
     private lateinit var btnShare: MaterialButton
     private lateinit var btnTheme: MaterialButton
@@ -204,6 +209,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+    private val openFavDocument =
+        registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+            if (uri != null) importFavorites(uri)
+        }
+
     private val listener = object : SpiritBoxEvents.Listener {
         override fun onFreq(freqKHz: Double) {
             tvFreq.text = formatFreq(freqKHz)
@@ -279,6 +289,8 @@ class MainActivity : AppCompatActivity() {
         btnHold = findViewById(R.id.btnHold)
         btnMute = findViewById(R.id.btnMute)
         btnBookmark = findViewById(R.id.btnBookmark)
+        btnFavExport = findViewById(R.id.btnFavExport)
+        btnFavImport = findViewById(R.id.btnFavImport)
         spFav = findViewById(R.id.spFav)
         btnShare = findViewById(R.id.btnShare)
         btnTheme = findViewById(R.id.btnTheme)
@@ -419,6 +431,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         setupFavorites()
+
+        btnFavExport.setOnClickListener { exportFavorites() }
+        btnFavImport.setOnClickListener { openFavDocument.launch(arrayOf("*/*")) }
 
         waterfall.setOnLongClickListener {
             shareWaterfall()
@@ -1354,6 +1369,62 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateBookmarkButton() {
         btnBookmark.text = if (Prefs.isFavorite(this, lastFreq)) "★" else getString(R.string.bookmark_off)
+    }
+
+    /** Compartilha a lista de favoritos como arquivo JSON (mesmo caminho do CSV). */
+    private fun exportFavorites() {
+        val favs = Prefs.favorites(this)
+        if (favs.isEmpty()) {
+            Toast.makeText(this, R.string.fav_export_none, Toast.LENGTH_SHORT).show()
+            return
+        }
+        val file = File(cacheDir, FAV_FILE_NAME)
+        try {
+            file.writeText(FavoritesCodec.export(favs), Charsets.UTF_8)
+        } catch (e: Exception) {
+            Log.w("SpiritBox", "Falha ao exportar favoritos", e)
+            Toast.makeText(this, R.string.fav_export_none, Toast.LENGTH_SHORT).show()
+            return
+        }
+        val uri: Uri = FileProvider.getUriForFile(this, "$packageName.fileprovider", file)
+        val send = Intent(Intent.ACTION_SEND).apply {
+            type = "application/json"
+            putExtra(Intent.EXTRA_STREAM, uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        try {
+            startActivity(Intent.createChooser(send, getString(R.string.fav_export_title)))
+        } catch (e: ActivityNotFoundException) {
+            Toast.makeText(this, R.string.fav_export_none, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    /** Lê um arquivo de favoritos escolhido no seletor e une ao que já existe. */
+    private fun importFavorites(uri: Uri) {
+        val text = runCatching {
+            contentResolver.openInputStream(uri)?.use { it.readBytes().toString(Charsets.UTF_8) }
+        }.getOrNull()
+        if (text.isNullOrBlank()) {
+            Toast.makeText(this, R.string.fav_import_invalid, Toast.LENGTH_LONG).show()
+            return
+        }
+        val parsed = FavoritesCodec.parse(text)
+        if (parsed == null) {
+            Toast.makeText(this, R.string.fav_import_invalid, Toast.LENGTH_LONG).show()
+            return
+        }
+        val result = FavoritesCodec.merge(parsed, Prefs.favorites(this))
+        if (result.added > 0) {
+            Prefs.saveFavorites(this, result.favorites)
+            loadFavorites()
+            Toast.makeText(
+                this,
+                getString(R.string.fav_import_ok, result.added),
+                Toast.LENGTH_LONG
+            ).show()
+        } else {
+            Toast.makeText(this, R.string.fav_import_none, Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun shareWaterfall() {

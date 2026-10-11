@@ -127,6 +127,10 @@ object Prefs {
         return raw.split(',').mapNotNull { it.trim().toDoubleOrNull() }
     }
 
+    /** Substitui a lista de favoritos (usada pela importação de arquivo). */
+    fun saveFavorites(c: Context, freqs: List<Double>) =
+        prefs(c).edit().putString(KEY_FAVORITES, freqs.joinToString(",")).apply()
+
     fun isFavorite(c: Context, freqKHz: Double): Boolean =
         favorites(c).any { kotlin.math.abs(it - freqKHz) < 1.0 }
 

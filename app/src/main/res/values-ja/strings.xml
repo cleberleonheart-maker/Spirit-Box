@@ -64,6 +64,13 @@
    <string name="share_waterfall_title">ウォーターフォールを共有</string>
     <string name="fav_prompt">★ お気に入り</string>
     <string name="bookmark_off">☆</string>
+    <string name="btn_export_fav">エクスポート</string>
+    <string name="btn_import_fav">インポート</string>
+    <string name="fav_export_title">お気に入りを共有</string>
+    <string name="fav_export_none">エクスポートできるお気に入りがありません。</string>
+    <string name="fav_import_invalid">無効なお気に入りファイルです。</string>
+    <string name="fav_import_ok">お気に入りをインポートしました: 新しい周波数 %1$d 件。</string>
+    <string name="fav_import_none">追加する新しい周波数はありません — お気に入りは最新です。</string>
    <string name="default_threshold">12</string>
    <string name="default_settle">150</string>
    <string name="btn_hold">ホールド</string>

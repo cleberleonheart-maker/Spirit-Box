@@ -64,6 +64,13 @@
    <string name="share_waterfall_title">Compartilhar waterfall</string>
     <string name="fav_prompt">★ Favoritos</string>
     <string name="bookmark_off">☆</string>
+    <string name="btn_export_fav">EXPORTAR</string>
+    <string name="btn_import_fav">IMPORTAR</string>
+    <string name="fav_export_title">Compartilhar favoritos</string>
+    <string name="fav_export_none">Nenhum favorito para exportar.</string>
+    <string name="fav_import_invalid">Arquivo de favoritos inválido.</string>
+    <string name="fav_import_ok">Favoritos importados: %1$d novas frequências.</string>
+    <string name="fav_import_none">Nenhuma frequência nova para adicionar — favoritos já atualizados.</string>
    <string name="default_threshold">12</string>
    <string name="default_settle">150</string>
    <string name="btn_hold">TRAVAR</string>

@@ -1,6 +1,12 @@
 # Ideias para o SpiritBox
 
 ## Implementado recentemente
+- **Exportar/importar favoritos** (v1.30): botões EXPORTAR e IMPORTAR ao lado do
+  spinner de favoritos. A exportação salva a lista como JSON
+  (`spiritbox_favoritos.json`) e compartilha via FileProvider; a importação abre
+  o seletor de arquivos (`OpenDocument`), lê o JSON e **une** à lista atual com a
+  mesma tolerância de 1 kHz do histórico/watch list. Lógica pura em `FavoritesCodec`
+  (export, parse tolerante a espaços/lista simples e merge sem duplicatas, testada).
 - **Dedup por frequência** (v1.29): toggle "Agrupar por frequência" no histórico.
   Ligado, a lista mostra uma linha por frequência (tolerância de 1 kHz) com nº de
   avistamentos e **nível máximo** em dB; tocar abre um detalhe com a primeira e a
@@ -130,7 +136,6 @@
 ## Próximas (não implementadas)
 - **Widget de notificação com play/pause**.
 - **Remover modo FM stub** ou marcá-lo experimental.
-- **Bookmarks exportados/importados**: salvar lista de favoritos como arquivo.
 
 ## Novas ideias (26/09)
 ### Waterfall / leitura
@@ -144,8 +149,8 @@
 ### Dados / investigação
 - **Estatísticas por frequência**: nº de capturas, primeiro/último avistamento, nível
   máximo, e um painel de "top frequências".
-- **Exportar/importar favoritos e presets** em JSON, junto do trajeto EMF em **GPX**
-  (o `emf_hotspots.jsonl` já tem lat/lng).
+- **Exportar/importar presets** em JSON (os favoritos já saíram na v1.30) e trajeto
+  EMF em **GPX** (o `emf_hotspots.jsonl` já tem lat/lng).
 - **"Limpar dados de investigação"**: hotspots + histórico num botão só.
 
 ### Android
