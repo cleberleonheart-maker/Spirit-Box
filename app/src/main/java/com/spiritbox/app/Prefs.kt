@@ -32,6 +32,7 @@ object Prefs {
     private const val KEY_SCAN_THRESHOLD = "scanThreshold"
     private const val KEY_SCAN_SETTLE = "scanSettle"
     private const val KEY_SCAN_GAP = "scanGap"
+    private const val KEY_SCAN_PAUSED = "scanPaused"
     private const val KEY_LAST_UPDATE_CHECK = "lastUpdateCheckAt"
 
     private fun prefs(c: Context): SharedPreferences =
@@ -186,6 +187,12 @@ object Prefs {
             p.getLong(KEY_SCAN_GAP, 300L)
         )
     }
+
+    /** Estado pausado da varredura, para o widget da tela inicial após o app morrer. */
+    fun paused(c: Context): Boolean = prefs(c).getBoolean(KEY_SCAN_PAUSED, false)
+
+    fun savePaused(c: Context, v: Boolean) =
+        prefs(c).edit().putBoolean(KEY_SCAN_PAUSED, v).apply()
 
     fun lastUpdateCheckAt(c: Context): Long = prefs(c).getLong(KEY_LAST_UPDATE_CHECK, 0L)
 

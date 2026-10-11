@@ -57,7 +57,9 @@ class SpiritBoxService : Service() {
         private const val ACTION_HOLD = "com.spiritbox.app.HOLD"
         private const val ACTION_MUTE = "com.spiritbox.app.MUTE"
         private const val ACTION_NOISE = "com.spiritbox.app.NOISE"
-        private const val ACTION_PAUSE = "com.spiritbox.app.PAUSE"
+
+        /** Pausa/retoma a varredura; usada pela notificação e pelo widget. */
+        const val ACTION_PAUSE = "com.spiritbox.app.PAUSE"
         private const val ACTION_TUNE = "com.spiritbox.app.TUNE"
         private const val ACTION_EVP = "com.spiritbox.app.EVP"
         private const val EXTRA_MUTED = "muted"
@@ -319,6 +321,7 @@ class SpiritBoxService : Service() {
                 } else {
                     val frozen = paused || e.hold
                     paused = !frozen
+                    Prefs.savePaused(this, paused)
                     e.paused = paused
                     if (!paused && e.hold) {
                         e.hold = false
@@ -382,6 +385,7 @@ class SpiritBoxService : Service() {
     private fun startScan(mode: String, server: String, rangeIndex: Int, dwell: Long, settle: Long, threshold: Int, gap: Long) {
         if (engine != null) return
         paused = false
+        Prefs.savePaused(this, false)
         lastFreq = 0.0
         lastRms = 0.0
         lastNotifUpdateMs = 0L
@@ -443,6 +447,7 @@ class SpiritBoxService : Service() {
             c.start(servers)
         }
         if (Prefs.evpEnabled(this)) startEvp()
+        ScanWidgetProvider.refresh(this, running = true, paused = false, freqKHz = 0.0)
     }
 
     private fun buildServerList(preferred: String): List<String> {
@@ -576,6 +581,7 @@ class SpiritBoxService : Service() {
         SpiritBoxEvents.serviceRunning = false
         SpiritBoxEvents.holdActive = false
         paused = false
+        Prefs.savePaused(this, false)
         Prefs.clearActiveScan(this)
         SpiritBoxEvents.removeListener(eventsListener)
         engine?.stop()
@@ -594,6 +600,7 @@ class SpiritBoxService : Service() {
         abandonAudioFocus()
         SpiritBoxEvents.pushStatus(getString(R.string.status_stopped))
         SpiritBoxEvents.pushServiceStopped()
+        ScanWidgetProvider.refresh(this, running = false, paused = false, freqKHz = 0.0)
     }
 
     private fun acquireWakeLock() {
@@ -653,6 +660,7 @@ class SpiritBoxService : Service() {
         } catch (e: Exception) {
             Log.w(TAG, "Falha ao atualizar notificação", e)
         }
+        ScanWidgetProvider.refresh(this, running = engine != null, paused = paused, freqKHz = lastFreq)
     }
 
     private fun formatFreq(khz: Double): String {

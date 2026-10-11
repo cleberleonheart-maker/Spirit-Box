@@ -4,7 +4,8 @@
    <string name="status_ready">Bereit</string>
    <string name="hint_server">WebSDR-Server (Host:Port)</string>
    <string name="default_server">websdr.ewi.utwente.nl:8901</string>
-   <string name="switch_fm">Lokales FM-Radio</string>
+   <string name="switch_fm">Lokales FM-Radio (experimentell)</string>
+   <string name="fm_experimental_warning">Experimenteller FM-Modus: nutzt das Geräte-Radio (versteckte API) und funktioniert möglicherweise nicht auf allen Modellen.</string>
    <string name="hint_dwell">Verweildauer ms</string>
    <string name="default_dwell">300</string>
    <string name="btn_start">START</string>
@@ -170,4 +171,6 @@
     <string name="emf_corr_info_cd">So funktioniert die Korrelation</string>
     <string name="emf_corr_info_title">So funktioniert die Korrelation</string>
     <string name="emf_corr_info_msg">Das Fenster zeigt die letzten 5 Sekunden.\n\n• Grüne Linie: das Magnetfeld (Magnetometer) in mG.\n• Roter Kreis: ein Feld-Peak — jeder Anstieg über 15 mG wird zu einem Peak bei seinem höchsten Wert.\n• Blaue Linie: eine Funkaufnahme.\n• Oranger Balken: kombiniertes Ereignis — eine Funkaufnahme innerhalb von 5 s nach einem Feld-Peak.\n\nDer Zähler unten zeigt, wie viele kombinierte Ereignisse aufgetreten sind. Beim Schließen und erneuten Öffnen dieses Fensters wird alles zurückgesetzt.</string>
+    <string name="widget_description">SpiritBox-Scan mit Play/Pause</string>
+    <string name="widget_status_stopped">Scan gestoppt</string>
 </resources>

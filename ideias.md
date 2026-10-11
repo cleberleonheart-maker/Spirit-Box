@@ -1,6 +1,17 @@
 # Ideias para o SpiritBox
 
 ## Implementado recentemente
+- **Widget da tela inicial com play/pause** (v1.31): `ScanWidgetProvider` mostra a
+  frequência atual e um botão play/pause que pausa/retoma a varredura sem abrir o
+  app (o corpo do widget abre o `MainActivity`). O botão reusa a ação `ACTION_PAUSE`
+  do serviço (mesma da notificação) e o estado (rodando/pausado) é apresentado por
+  `WidgetStatus` (puro, testado). O serviço atualiza o widget junto da notificação e
+  ao iniciar/parar; o estado pausado também fica em `Prefs` para o `onUpdate` após o
+  app morrer.
+- **Modo FM marcado como experimental** (v1.31): o switch passou a "Rádio FM local
+  (experimental)" (6 idiomas) e ligá-lo mostra um aviso. O FM usa o rádio do aparelho
+  por API oculta (compilado contra `radio-stub.jar`), então pode não funcionar em
+  todos os modelos; o README deixa isso explícito.
 - **Exportar/importar favoritos** (v1.30): botões EXPORTAR e IMPORTAR ao lado do
   spinner de favoritos. A exportação salva a lista como JSON
   (`spiritbox_favoritos.json`) e compartilha via FileProvider; a importação abre
@@ -134,8 +145,7 @@
   amostras (antes disso é o limiar do usuário).
 
 ## Próximas (não implementadas)
-- **Widget de notificação com play/pause**.
-- **Remover modo FM stub** ou marcá-lo experimental.
+- (nada pendente — ver as ideias abaixo)
 
 ## Novas ideias (26/09)
 ### Waterfall / leitura

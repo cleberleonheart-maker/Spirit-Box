@@ -4,7 +4,8 @@
    <string name="status_ready">準備完了</string>
    <string name="hint_server">WebSDRサーバー (ホスト:ポート)</string>
    <string name="default_server">websdr.ewi.utwente.nl:8901</string>
-   <string name="switch_fm">ローカルFMラジオ</string>
+   <string name="switch_fm">ローカルFMラジオ（実験的）</string>
+   <string name="fm_experimental_warning">実験的なFMモードです。端末のラジオ（非公開API）を使用するため、すべての機種で動作するとは限りません。</string>
    <string name="hint_dwell">保持時間 ms</string>
    <string name="default_dwell">300</string>
    <string name="btn_start">開始</string>
@@ -170,4 +171,6 @@
     <string name="emf_corr_info_cd">相関の仕組み</string>
     <string name="emf_corr_info_title">相関の仕組み</string>
     <string name="emf_corr_info_msg">ウィンドウには直近5秒間が表示されます。\n\n• 緑の線：磁場（磁力計）の値（mG）。\n• 赤い丸：磁場のピーク — 15 mG を超える上昇は、その最大値で1つのピークになります。\n• 青い線：ラジオのキャプチャ。\n• オレンジの帯：複合イベント — 磁場のピークから5秒以内に発生したラジオのキャプチャ。\n\n下のカウンターは発生した複合イベントの数を示します。このパネルを閉じて開き直すとすべてリセットされます。</string>
+    <string name="widget_description">再生/一時停止付きSpiritBoxスキャン</string>
+    <string name="widget_status_stopped">スキャン停止中</string>
 </resources>

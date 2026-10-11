@@ -4,7 +4,8 @@
    <string name="status_ready">Pronto</string>
    <string name="hint_server">Servidor WebSDR (host:porta)</string>
    <string name="default_server">websdr.ewi.utwente.nl:8901</string>
-   <string name="switch_fm">Rádio FM local</string>
+   <string name="switch_fm">Rádio FM local (experimental)</string>
+   <string name="fm_experimental_warning">Modo FM experimental: usa o rádio do aparelho (API oculta) e pode não funcionar em todos os modelos.</string>
    <string name="hint_dwell">Dwell ms</string>
    <string name="default_dwell">300</string>
    <string name="btn_start">INICIAR</string>
@@ -170,4 +171,6 @@
     <string name="emf_corr_info_cd">Como funciona a correlação</string>
     <string name="emf_corr_info_title">Como funciona a correlação</string>
     <string name="emf_corr_info_msg">A janela mostra os últimos 5 segundos.\n\n• Linha verde: o campo magnético (magnetômetro) em mG.\n• Círculo vermelho: um pico do campo — cada subida acima de 15 mG vira um pico no seu maior valor.\n• Risco azul: uma captura de rádio.\n• Faixa laranja: evento combinado — uma captura de rádio que acontece a até 5 s de um pico do campo.\n\nO contador abaixo mostra quantos eventos combinados já ocorreram. Tudo é zerado ao fechar e reabrir este painel.</string>
+    <string name="widget_description">Varredura SpiritBox com play/pause</string>
+    <string name="widget_status_stopped">Varredura parada</string>
 </resources>

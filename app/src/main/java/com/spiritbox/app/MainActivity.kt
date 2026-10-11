@@ -418,6 +418,13 @@ class MainActivity : AppCompatActivity() {
             rebuildVisible()
         }
 
+        swFm.setOnCheckedChangeListener { _, checked ->
+            Prefs.saveFmMode(this, checked)
+            if (checked) {
+                Toast.makeText(this, R.string.fm_experimental_warning, Toast.LENGTH_LONG).show()
+            }
+        }
+
         btnShare.setOnClickListener { shareCaptures() }
 
         btnBookmark.setOnClickListener {

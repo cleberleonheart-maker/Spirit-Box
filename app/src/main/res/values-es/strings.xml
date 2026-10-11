@@ -4,7 +4,8 @@
    <string name="status_ready">Listo</string>
    <string name="hint_server">Servidor WebSDR (host:puerto)</string>
    <string name="default_server">websdr.ewi.utwente.nl:8901</string>
-   <string name="switch_fm">Radio FM local</string>
+   <string name="switch_fm">Radio FM local (experimental)</string>
+   <string name="fm_experimental_warning">Modo FM experimental: usa la radio del dispositivo (API oculta) y puede no funcionar en todos los modelos.</string>
    <string name="hint_dwell">Espera ms</string>
    <string name="default_dwell">300</string>
    <string name="btn_start">INICIAR</string>
@@ -170,4 +171,6 @@
     <string name="emf_corr_info_cd">Cómo funciona la correlación</string>
     <string name="emf_corr_info_title">Cómo funciona la correlación</string>
     <string name="emf_corr_info_msg">La ventana muestra los últimos 5 segundos.\n\n• Línea verde: el campo magnético (magnetómetro) en mG.\n• Círculo rojo: un pico del campo — cada subida por encima de 15 mG se convierte en un pico en su valor máximo.\n• Línea azul: una captura de radio.\n• Franja naranja: evento combinado — una captura de radio que ocurre a menos de 5 s de un pico del campo.\n\nEl contador de abajo muestra cuántos eventos combinados han ocurrido. Todo se reinicia al cerrar y reabrir este panel.</string>
+    <string name="widget_description">Escaneo SpiritBox con reproducir/pausar</string>
+    <string name="widget_status_stopped">Escaneo detenido</string>
 </resources>
