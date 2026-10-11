@@ -53,6 +53,15 @@
    <string name="group_detail_first">Primera: %1$s</string>
    <string name="group_detail_last">Última: %1$s</string>
    <string name="btn_copy_freq">Copiar frecuencia</string>
+   <string name="btn_stats">ESTADÍSTICAS</string>
+   <string name="btn_peak">IR AL PICO</string>
+   <string name="stats_title">Estadísticas de capturas</string>
+   <string name="stats_total">Capturas: %1$d</string>
+   <string name="stats_distinct">Frecuencias distintas: %1$d</string>
+   <string name="stats_top_title">Frecuencias más capturadas</string>
+   <string name="stats_empty">Sin capturas en el historial.</string>
+   <string name="peak_none">Sin capturas para ir al pico.</string>
+   <string name="peak_tuned">Pico: %1$s</string>
    <string name="copied">Frecuencia copiada</string>
    <string name="scan_not_running">Inicia el barrido antes de guardar.</string>
    <string name="scan_waiting_freq">Esperando una frecuencia...</string>

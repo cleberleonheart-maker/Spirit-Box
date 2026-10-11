@@ -53,6 +53,15 @@
    <string name="group_detail_first">Erste: %1$s</string>
    <string name="group_detail_last">Letzte: %1$s</string>
    <string name="btn_copy_freq">Frequenz kopieren</string>
+   <string name="btn_stats">STATISTIK</string>
+   <string name="btn_peak">ZUM PEAK</string>
+   <string name="stats_title">Aufnahme-Statistik</string>
+   <string name="stats_total">Aufnahmen: %1$d</string>
+   <string name="stats_distinct">Verschiedene Frequenzen: %1$d</string>
+   <string name="stats_top_title">Häufigste Frequenzen</string>
+   <string name="stats_empty">Keine Aufnahmen im Verlauf.</string>
+   <string name="peak_none">Keine Aufnahmen für den Peak.</string>
+   <string name="peak_tuned">Peak: %1$s</string>
    <string name="copied">Frequenz kopiert</string>
    <string name="scan_not_running">Suche vor dem Speichern starten.</string>
    <string name="scan_waiting_freq">Warte auf eine Frequenz...</string>

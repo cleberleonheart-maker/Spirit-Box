@@ -10,6 +10,7 @@ Aplicativo Android para varredura de frequências via WebSDR, com waterfall ao v
 - Modo noturno (filtro vermelho) e tema claro/escuro/sistema.
 - Favoritos de frequência com sintonia direta.
 - Histórico de capturas persistido em CSV e espelhado em `Download/SpiritBox/`.
+- **Estatísticas das capturas** (diálogo com total, frequências distintas e as mais capturadas) e botão **IR AO PICO** que sintoniza na frequência de maior nível do histórico.
 - Clipes WAV dos últimos 8 s (modo SDR, API >= 29) salvos ao apertar **Salvar**.
 - Notificação com ações (Salvar, Play/Pause, Parar) e auto-check de atualização via GitHub Releases.
 - Widget da tela inicial com a frequência atual e um botão play/pause que pausa/retoma a varredura sem abrir o app (o corpo do widget abre o app).

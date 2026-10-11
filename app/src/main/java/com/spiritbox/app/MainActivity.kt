@@ -93,6 +93,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnBookmark: MaterialButton
     private lateinit var btnFavExport: MaterialButton
     private lateinit var btnFavImport: MaterialButton
+    private lateinit var btnPeak: MaterialButton
+    private lateinit var btnStats: MaterialButton
     private lateinit var spFav: Spinner
     private lateinit var btnShare: MaterialButton
     private lateinit var btnTheme: MaterialButton
@@ -291,6 +293,8 @@ class MainActivity : AppCompatActivity() {
         btnBookmark = findViewById(R.id.btnBookmark)
         btnFavExport = findViewById(R.id.btnFavExport)
         btnFavImport = findViewById(R.id.btnFavImport)
+        btnPeak = findViewById(R.id.btnPeak)
+        btnStats = findViewById(R.id.btnStats)
         spFav = findViewById(R.id.spFav)
         btnShare = findViewById(R.id.btnShare)
         btnTheme = findViewById(R.id.btnTheme)
@@ -426,6 +430,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnShare.setOnClickListener { shareCaptures() }
+
+        btnStats.setOnClickListener { showStats() }
+
+        btnPeak.setOnClickListener { goToPeak() }
 
         btnBookmark.setOnClickListener {
             if (lastFreq <= 0) {
@@ -1338,6 +1346,71 @@ class MainActivity : AppCompatActivity() {
         } catch (e: ActivityNotFoundException) {
             Toast.makeText(this, R.string.share_no_file, Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun statsSightings(): List<Sighting> =
+        captureEntries.map { Sighting(it.freqKHz, it.level, it.time) }
+
+    /** Diálogo com total, frequências distintas e as mais capturadas do histórico. */
+    private fun showStats() {
+        if (captureEntries.isEmpty()) {
+            Toast.makeText(this, R.string.stats_empty, Toast.LENGTH_SHORT).show()
+            return
+        }
+        val summary = CaptureStats.summarize(statsSightings())
+        val fmt = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+        val message = StringBuilder()
+            .append(getString(R.string.stats_total, summary.total)).append('\n')
+            .append(getString(R.string.stats_distinct, summary.distinct))
+        if (summary.top.isNotEmpty()) {
+            message.append('\n').append('\n').append(getString(R.string.stats_top_title)).append('\n')
+            for (g in summary.top) {
+                message.append("• ").append(formatFreq(g.freqKHz))
+                    .append("  ·  ").append(getString(R.string.group_count, g.count))
+                    .append("  ·  ").append(getString(R.string.group_max_db, g.maxLevel))
+                    .append("  ·  ").append(fmt.format(Date(g.lastTime)))
+                    .append('\n')
+            }
+        }
+        AlertDialog.Builder(this)
+            .setTitle(R.string.stats_title)
+            .setMessage(message.toString().trimEnd())
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
+    }
+
+    /** Sintoniza na frequência de maior nível do histórico, arredondada para a faixa atual. */
+    private fun goToPeak() {
+        if (captureEntries.isEmpty()) {
+            Toast.makeText(this, R.string.peak_none, Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (!SpiritBoxEvents.serviceRunning) {
+            Toast.makeText(this, R.string.scan_not_running, Toast.LENGTH_SHORT).show()
+            return
+        }
+        val peak = CaptureStats.peak(statsSightings()) ?: return
+        val freq = snapToBand(peak.freqKHz)
+        lastFreq = freq
+        SpiritBoxService.tuneTo(this, freq)
+        tvFreq.text = formatFreq(freq)
+        updateBookmarkButton()
+        Toast.makeText(
+            this,
+            getString(R.string.peak_tuned, formatFreq(freq)),
+            Toast.LENGTH_SHORT
+        ).show()
+    }
+
+    /** Arredonda para o passo da faixa selecionada (mesma regra do toque no waterfall). */
+    private fun snapToBand(freqKHz: Double): Double {
+        val range = SweepEngine.PRESETS[spBand.selectedItemPosition.coerceIn(
+            0, SweepEngine.PRESETS.size - 1
+        )]
+        val start = range.startKHz.toDouble()
+        val step = range.stepKHz.toDouble()
+        if (step <= 0) return freqKHz
+        return start + Math.round((freqKHz - start) / step) * step
     }
 
     private fun setupFavorites() {

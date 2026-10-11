@@ -53,6 +53,15 @@
    <string name="group_detail_first">最初: %1$s</string>
    <string name="group_detail_last">最後: %1$s</string>
    <string name="btn_copy_freq">周波数をコピー</string>
+   <string name="btn_stats">統計</string>
+   <string name="btn_peak">ピークへ</string>
+   <string name="stats_title">キャプチャ統計</string>
+   <string name="stats_total">キャプチャ数: %1$d</string>
+   <string name="stats_distinct">異なる周波数: %1$d</string>
+   <string name="stats_top_title">最も多くキャプチャされた周波数</string>
+   <string name="stats_empty">履歴にキャプチャがありません。</string>
+   <string name="peak_none">ピークへ移動するキャプチャがありません。</string>
+   <string name="peak_tuned">ピーク: %1$s</string>
    <string name="copied">周波数をコピーしました</string>
    <string name="scan_not_running">保存する前にスキャンを開始してください。</string>
    <string name="scan_waiting_freq">周波数を待機中...</string>

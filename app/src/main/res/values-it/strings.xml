@@ -53,6 +53,15 @@
    <string name="group_detail_first">Prima: %1$s</string>
    <string name="group_detail_last">Ultima: %1$s</string>
    <string name="btn_copy_freq">Copia frequenza</string>
+   <string name="btn_stats">STATISTICHE</string>
+   <string name="btn_peak">VAI AL PICCO</string>
+   <string name="stats_title">Statistiche delle catture</string>
+   <string name="stats_total">Catture: %1$d</string>
+   <string name="stats_distinct">Frequenze distinte: %1$d</string>
+   <string name="stats_top_title">Frequenze più catturate</string>
+   <string name="stats_empty">Nessuna cattura nello storico.</string>
+   <string name="peak_none">Nessuna cattura per andare al picco.</string>
+   <string name="peak_tuned">Picco: %1$s</string>
    <string name="copied">Frequenza copiata</string>
    <string name="scan_not_running">Avvia la scansione prima di salvare.</string>
    <string name="scan_waiting_freq">In attesa di una frequenza...</string>

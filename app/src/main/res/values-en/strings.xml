@@ -53,6 +53,15 @@
    <string name="group_detail_first">First: %1$s</string>
    <string name="group_detail_last">Last: %1$s</string>
    <string name="btn_copy_freq">Copy frequency</string>
+   <string name="btn_stats">STATISTICS</string>
+   <string name="btn_peak">GO TO PEAK</string>
+   <string name="stats_title">Capture statistics</string>
+   <string name="stats_total">Captures: %1$d</string>
+   <string name="stats_distinct">Distinct frequencies: %1$d</string>
+   <string name="stats_top_title">Most captured frequencies</string>
+   <string name="stats_empty">No captures in history.</string>
+   <string name="peak_none">No captures to go to the peak.</string>
+   <string name="peak_tuned">Peak: %1$s</string>
    <string name="copied">Frequency copied</string>
    <string name="scan_not_running">Start scanning before saving.</string>
    <string name="scan_waiting_freq">Waiting for a frequency...</string>

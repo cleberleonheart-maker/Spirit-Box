@@ -1,6 +1,13 @@
 # Ideias para o SpiritBox
 
 ## Implementado recentemente
+- **Estatísticas por frequência** (v1.32): botão ESTATÍSTICAS acima do histórico abre um
+  diálogo com total de capturas, frequências distintas e as top (mais avistamentos,
+  depois maior nível) com data do último avistamento. Lógica pura em `CaptureStats`
+  (resumo + pico, testada), reusando o agrupamento de `CaptureGroups`.
+- **Voltar ao pico** (v1.32): botão IR AO PICO sintoniza na frequência de maior nível
+  do histórico (empate vai para a mais recente), arredondada para o passo da faixa
+  atual (mesma regra do toque no waterfall).
 - **Widget da tela inicial com play/pause** (v1.31): `ScanWidgetProvider` mostra a
   frequência atual e um botão play/pause que pausa/retoma a varredura sem abrir o
   app (o corpo do widget abre o `MainActivity`). O botão reusa a ação `ACTION_PAUSE`
@@ -157,8 +164,8 @@
 - **Faixa personalizada**: editar início/fim/passo em vez de usar só os 8 presets.
 
 ### Dados / investigação
-- **Estatísticas por frequência**: nº de capturas, primeiro/último avistamento, nível
-  máximo, e um painel de "top frequências".
+- ~~**Estatísticas por frequência**~~ (feito na v1.32): nº de capturas, primeiro/último
+  avistamento, nível máximo, e um painel de "top frequências".
 - **Exportar/importar presets** em JSON (os favoritos já saíram na v1.30) e trajeto
   EMF em **GPX** (o `emf_hotspots.jsonl` já tem lat/lng).
 - **"Limpar dados de investigação"**: hotspots + histórico num botão só.
@@ -173,7 +180,8 @@
 - **Nível em SNR** (dB acima do piso de ruído) em vez de %, no app e no CSV.
 - **Dedup por frequência**: agrupar capturas iguais (nº de avistamentos, nível máx).
 - **Classificador simples voz/CW/ruído** usando o min/max por coluna do waterfall.
-- **Voltar ao pico**: botão que volta à frequência de maior nível desde o último pico.
+- ~~**Voltar ao pico**~~ (feito na v1.32): botão que volta à frequência de maior nível
+  desde o último pico.
 
 ### Sessões & dados
 - **Sessões nomeadas**: iniciar/encerrar, com nº de capturas, tempo, top frequências;
