@@ -140,6 +140,15 @@
     <string name="emf_map_record">GRABAR</string>
     <string name="emf_map_record_on">PARAR</string>
     <string name="emf_map_clear">LIMPIAR</string>
+    <string name="emf_map_gpx">GPX</string>
+    <string name="gpx_none">No hay hotspots para exportar.</string>
+    <string name="gpx_share_title">Compartir trayecto GPX</string>
+    <string name="btn_clear_data">BORRAR DATOS</string>
+    <string name="clear_data_title">Borrar datos de investigación</string>
+    <string name="clear_data_message">¿Borrar todo el historial de capturas y los puntos magnéticos? No se puede deshacer.</string>
+    <string name="clear_data_confirm">Borrar</string>
+    <string name="clear_data_done">Datos de investigación borrados.</string>
+    <string name="clear_data_none">Nada que borrar.</string>
     <string name="emf_map_info_btn">i</string>
     <string name="emf_map_info_cd">Cómo activarlo y qué hace el mapa</string>
     <string name="emf_map_info_title">Mapa de hotspots EMF</string>

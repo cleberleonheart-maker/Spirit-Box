@@ -140,6 +140,15 @@
     <string name="emf_map_record">RECORD</string>
     <string name="emf_map_record_on">STOP</string>
     <string name="emf_map_clear">CLEAR</string>
+    <string name="emf_map_gpx">GPX</string>
+    <string name="gpx_none">No hotspots to export.</string>
+    <string name="gpx_share_title">Share GPX track</string>
+    <string name="btn_clear_data">CLEAR DATA</string>
+    <string name="clear_data_title">Clear investigation data</string>
+    <string name="clear_data_message">Delete the entire capture history and magnetic hotspots? This cannot be undone.</string>
+    <string name="clear_data_confirm">Delete</string>
+    <string name="clear_data_done">Investigation data cleared.</string>
+    <string name="clear_data_none">Nothing to delete.</string>
     <string name="emf_map_info_btn">i</string>
     <string name="emf_map_info_cd">How to enable it and what the map does</string>
     <string name="emf_map_info_title">EMF hotspots map</string>

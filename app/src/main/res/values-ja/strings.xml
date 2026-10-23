@@ -140,6 +140,15 @@
     <string name="emf_map_record">記録</string>
     <string name="emf_map_record_on">停止</string>
     <string name="emf_map_clear">クリア</string>
+    <string name="emf_map_gpx">GPX</string>
+    <string name="gpx_none">エクスポートするホットスポットがありません。</string>
+    <string name="gpx_share_title">GPX トラックを共有</string>
+    <string name="btn_clear_data">データ消去</string>
+    <string name="clear_data_title">調査データを消去</string>
+    <string name="clear_data_message">キャプチャ履歴と磁気ホットスポットをすべて消去しますか？この操作は元に戻せません。</string>
+    <string name="clear_data_confirm">消去</string>
+    <string name="clear_data_done">調査データを消去しました。</string>
+    <string name="clear_data_none">消去するデータがありません。</string>
     <string name="emf_map_info_btn">i</string>
     <string name="emf_map_info_cd">有効化の方法とマップの機能</string>
     <string name="emf_map_info_title">EMFホットスポットマップ</string>

@@ -382,6 +382,16 @@
                 android:text="@string/btn_stats"
                 android:textSize="12sp"
                 app:cornerRadius="18dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnClearData"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:text="@string/btn_clear_data"
+                android:textSize="12sp"
+                app:cornerRadius="18dp" />
         </LinearLayout>
 
         <EditText

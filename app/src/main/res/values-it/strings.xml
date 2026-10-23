@@ -140,6 +140,15 @@
     <string name="emf_map_record">REGISTRA</string>
     <string name="emf_map_record_on">FERMA</string>
     <string name="emf_map_clear">PULISCI</string>
+    <string name="emf_map_gpx">GPX</string>
+    <string name="gpx_none">Nessun hotspot da esportare.</string>
+    <string name="gpx_share_title">Condividi percorso GPX</string>
+    <string name="btn_clear_data">CANCELLA DATI</string>
+    <string name="clear_data_title">Cancella dati di indagine</string>
+    <string name="clear_data_message">Eliminare tutto lo storico delle catture e gli hotspot magnetici? L\'operazione non può essere annullata.</string>
+    <string name="clear_data_confirm">Elimina</string>
+    <string name="clear_data_done">Dati di indagine cancellati.</string>
+    <string name="clear_data_none">Niente da eliminare.</string>
     <string name="emf_map_info_btn">i</string>
     <string name="emf_map_info_cd">Come attivarlo e cosa fa la mappa</string>
     <string name="emf_map_info_title">Mappa dei punti caldi EMF</string>

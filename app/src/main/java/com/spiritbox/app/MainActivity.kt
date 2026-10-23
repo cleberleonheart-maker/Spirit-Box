@@ -67,6 +67,9 @@ class MainActivity : AppCompatActivity() {
 
         /** Arquivo compartilhado na exportação de favoritos (cacheDir, via FileProvider). */
         private const val FAV_FILE_NAME = "spiritbox_favoritos.json"
+
+        /** Trajeto EMF exportado como GPX (cacheDir, via FileProvider). */
+        private const val GPX_FILE_NAME = "spiritbox_trajeto.gpx"
     }
 
     private lateinit var tvFreq: TextView
@@ -95,6 +98,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnFavImport: MaterialButton
     private lateinit var btnPeak: MaterialButton
     private lateinit var btnStats: MaterialButton
+    private lateinit var btnClearData: MaterialButton
     private lateinit var spFav: Spinner
     private lateinit var btnShare: MaterialButton
     private lateinit var btnTheme: MaterialButton
@@ -295,6 +299,7 @@ class MainActivity : AppCompatActivity() {
         btnFavImport = findViewById(R.id.btnFavImport)
         btnPeak = findViewById(R.id.btnPeak)
         btnStats = findViewById(R.id.btnStats)
+        btnClearData = findViewById(R.id.btnClearData)
         spFav = findViewById(R.id.spFav)
         btnShare = findViewById(R.id.btnShare)
         btnTheme = findViewById(R.id.btnTheme)
@@ -432,6 +437,8 @@ class MainActivity : AppCompatActivity() {
         btnShare.setOnClickListener { shareCaptures() }
 
         btnStats.setOnClickListener { showStats() }
+
+        btnClearData.setOnClickListener { confirmClearInvestigationData() }
 
         btnPeak.setOnClickListener { goToPeak() }
 
@@ -770,6 +777,9 @@ class MainActivity : AppCompatActivity() {
                     Log.w("SpiritBox", "Falha ao limpar hotspots", e)
                 }
             }
+        }
+        dialog.findViewById<MaterialButton>(R.id.emfMapGpx).setOnClickListener {
+            exportGpx()
         }
         dialog.findViewById<MaterialButton>(R.id.emfMapInfoBtn).setOnClickListener {
             MaterialAlertDialogBuilder(this)
@@ -1348,6 +1358,50 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun confirmClearInvestigationData() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.clear_data_title)
+            .setMessage(R.string.clear_data_message)
+            .setPositiveButton(R.string.clear_data_confirm) { _, _ -> clearInvestigationData() }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    /** Apaga o histórico de capturas e os hotspots magnéticos de uma vez. */
+    private fun clearInvestigationData() {
+        val captureFile = File(filesDir, "capturas.csv")
+        val hotspot = hotspotFile()
+        val legacy = legacyHotspotFile()
+        val hadData = captureFile.exists() || hotspot.exists() || legacy.exists() ||
+            captureEntries.isNotEmpty()
+        try {
+            captureFile.delete()
+        } catch (e: Exception) {
+            Log.w("SpiritBox", "Falha ao limpar histórico", e)
+        }
+        hotspotIo.execute {
+            try {
+                hotspot.delete()
+                legacy.delete()
+            } catch (e: Exception) {
+                Log.w("SpiritBox", "Falha ao limpar hotspots", e)
+            }
+        }
+        captureEntries.clear()
+        captureQuery = ""
+        etCaptureSearch.setText("")
+        rebuildVisible()
+        mapMap?.clear()
+        hotspotDialog?.findViewById<TextView>(R.id.emfMapStats)?.let { stats ->
+            mapMap?.let { updateHotspotStats(stats, it) }
+        }
+        Toast.makeText(
+            this,
+            if (hadData) R.string.clear_data_done else R.string.clear_data_none,
+            Toast.LENGTH_SHORT
+        ).show()
+    }
+
     private fun statsSightings(): List<Sighting> =
         captureEntries.map { Sighting(it.freqKHz, it.level, it.time) }
 
@@ -1454,6 +1508,37 @@ class MainActivity : AppCompatActivity() {
     }
 
     /** Compartilha a lista de favoritos como arquivo JSON (mesmo caminho do CSV). */
+    /** Exporta o trajeto de hotspots magnéticos como GPX e compartilha. */
+    private fun exportGpx() {
+        val points = mapMap?.points() ?: loadHotspots()
+        if (points.isEmpty()) {
+            Toast.makeText(this, R.string.gpx_none, Toast.LENGTH_SHORT).show()
+            return
+        }
+        val gpx = GpxExport.build(
+            points.map { GpxExport.Point(it.lat, it.lng, it.mg, it.time) }
+        )
+        val file = File(cacheDir, GPX_FILE_NAME)
+        try {
+            file.writeText(gpx, Charsets.UTF_8)
+        } catch (e: Exception) {
+            Log.w("SpiritBox", "Falha ao exportar GPX", e)
+            Toast.makeText(this, R.string.gpx_none, Toast.LENGTH_SHORT).show()
+            return
+        }
+        val uri: Uri = FileProvider.getUriForFile(this, "$packageName.fileprovider", file)
+        val send = Intent(Intent.ACTION_SEND).apply {
+            type = "application/gpx+xml"
+            putExtra(Intent.EXTRA_STREAM, uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        try {
+            startActivity(Intent.createChooser(send, getString(R.string.gpx_share_title)))
+        } catch (e: ActivityNotFoundException) {
+            Toast.makeText(this, R.string.gpx_none, Toast.LENGTH_SHORT).show()
+        }
+    }
+
     private fun exportFavorites() {
         val favs = Prefs.favorites(this)
         if (favs.isEmpty()) {

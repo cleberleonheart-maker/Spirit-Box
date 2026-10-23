@@ -140,6 +140,15 @@
     <string name="emf_map_record">AUFNAHME</string>
     <string name="emf_map_record_on">STOPP</string>
     <string name="emf_map_clear">LÖSCHEN</string>
+    <string name="emf_map_gpx">GPX</string>
+    <string name="gpx_none">Keine Hotspots zum Exportieren.</string>
+    <string name="gpx_share_title">GPX-Track teilen</string>
+    <string name="btn_clear_data">DATEN LÖSCHEN</string>
+    <string name="clear_data_title">Untersuchungsdaten löschen</string>
+    <string name="clear_data_message">Gesamten Erfassungsverlauf und magnetische Hotspots löschen? Das kann nicht rückgängig gemacht werden.</string>
+    <string name="clear_data_confirm">Löschen</string>
+    <string name="clear_data_done">Untersuchungsdaten gelöscht.</string>
+    <string name="clear_data_none">Nichts zu löschen.</string>
     <string name="emf_map_info_btn">i</string>
     <string name="emf_map_info_cd">So aktivierst du sie und was die Karte macht</string>
     <string name="emf_map_info_title">EMF-Hotspot-Karte</string>
