@@ -107,6 +107,12 @@ object Prefs {
     fun saveWatchFavorites(c: Context, v: Boolean) =
         prefs(c).edit().putBoolean(KEY_WATCH, v).apply()
 
+    /** Agrupa o histórico por frequência (nº de avistamentos, nível máximo). */
+    fun groupHistory(c: Context): Boolean = prefs(c).getBoolean(KEY_GROUP, false)
+
+    fun saveGroupHistory(c: Context, v: Boolean) =
+        prefs(c).edit().putBoolean(KEY_GROUP, v).apply()
+
     /** Mantém a tela ligada enquanto o app está em primeiro plano. */
     fun keepScreenOn(c: Context): Boolean = prefs(c).getBoolean(KEY_SCREEN_ON, false)
 
