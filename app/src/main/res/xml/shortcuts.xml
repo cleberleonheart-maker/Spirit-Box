@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:enabled="true"
+        android:icon="@android:drawable/ic_media_play"
+        android:shortcutId="start_am"
+        android:shortcutLongLabel="@string/shortcut_am_long"
+        android:shortcutShortLabel="@string/shortcut_am_short">
+        <intent
+            android:action="com.spiritbox.app.ACTION_START_BAND"
+            android:targetClass="com.spiritbox.app.MainActivity"
+            android:targetPackage="com.spiritbox.app">
+            <extra android:name="bandIndex" android:value="0" />
+        </intent>
+    </shortcut>
+    <shortcut
+        android:enabled="true"
+        android:icon="@android:drawable/ic_media_play"
+        android:shortcutId="start_sw"
+        android:shortcutLongLabel="@string/shortcut_sw_long"
+        android:shortcutShortLabel="@string/shortcut_sw_short">
+        <intent
+            android:action="com.spiritbox.app.ACTION_START_BAND"
+            android:targetClass="com.spiritbox.app.MainActivity"
+            android:targetPackage="com.spiritbox.app">
+            <extra android:name="bandIndex" android:value="1" />
+        </intent>
+    </shortcut>
+</shortcuts>

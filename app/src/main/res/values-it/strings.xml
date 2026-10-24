@@ -201,5 +201,9 @@
     <string name="emf_corr_info_title">Come funziona la correlazione</string>
     <string name="emf_corr_info_msg">La finestra mostra gli ultimi 5 secondi.\n\n• Linea verde: il campo magnetico (magnetometro) in mG.\n• Cerchio rosso: un picco del campo — ogni salita sopra 15 mG diventa un picco nel suo valore massimo.\n• Linea blu: una cattura radio.\n• Banda arancione: evento combinato — una cattura radio che avviene entro 5 s da un picco del campo.\n\nIl contatore sotto mostra quanti eventi combinati si sono verificati. Tutto si azzera quando chiudi e riapri questo pannello.</string>
     <string name="widget_description">Scansione SpiritBox con play/pausa</string>
-    <string name="widget_status_stopped">Scansione ferma</string>
+    <string name="widget_status_stopped">Scansione fermata</string>
+    <string name="shortcut_am_short">Avvia AM</string>
+    <string name="shortcut_am_long">Avvia scansione onde medie</string>
+    <string name="shortcut_sw_short">Avvia OC</string>
+    <string name="shortcut_sw_long">Avvia scansione onde corte</string>
 </resources>

@@ -202,4 +202,8 @@
     <string name="emf_corr_info_msg">A janela mostra os últimos 5 segundos.\n\n• Linha verde: o campo magnético (magnetômetro) em mG.\n• Círculo vermelho: um pico do campo — cada subida acima de 15 mG vira um pico no seu maior valor.\n• Risco azul: uma captura de rádio.\n• Faixa laranja: evento combinado — uma captura de rádio que acontece a até 5 s de um pico do campo.\n\nO contador abaixo mostra quantos eventos combinados já ocorreram. Tudo é zerado ao fechar e reabrir este painel.</string>
     <string name="widget_description">Varredura SpiritBox com play/pause</string>
     <string name="widget_status_stopped">Varredura parada</string>
+    <string name="shortcut_am_short">Iniciar AM</string>
+    <string name="shortcut_am_long">Iniciar varredura em Onda Média</string>
+    <string name="shortcut_sw_short">Iniciar SW</string>
+    <string name="shortcut_sw_long">Iniciar varredura em Onda Curta</string>
 </resources>

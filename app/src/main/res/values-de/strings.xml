@@ -202,4 +202,8 @@
     <string name="emf_corr_info_msg">Das Fenster zeigt die letzten 5 Sekunden.\n\n• Grüne Linie: das Magnetfeld (Magnetometer) in mG.\n• Roter Kreis: ein Feld-Peak — jeder Anstieg über 15 mG wird zu einem Peak bei seinem höchsten Wert.\n• Blaue Linie: eine Funkaufnahme.\n• Oranger Balken: kombiniertes Ereignis — eine Funkaufnahme innerhalb von 5 s nach einem Feld-Peak.\n\nDer Zähler unten zeigt, wie viele kombinierte Ereignisse aufgetreten sind. Beim Schließen und erneuten Öffnen dieses Fensters wird alles zurückgesetzt.</string>
     <string name="widget_description">SpiritBox-Scan mit Play/Pause</string>
     <string name="widget_status_stopped">Scan gestoppt</string>
+    <string name="shortcut_am_short">AM starten</string>
+    <string name="shortcut_am_long">Mittelwellen-Scan starten</string>
+    <string name="shortcut_sw_short">KW starten</string>
+    <string name="shortcut_sw_long">Kurzwellenscan starten</string>
 </resources>

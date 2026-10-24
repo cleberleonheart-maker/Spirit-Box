@@ -202,4 +202,8 @@
     <string name="emf_corr_info_msg">La ventana muestra los últimos 5 segundos.\n\n• Línea verde: el campo magnético (magnetómetro) en mG.\n• Círculo rojo: un pico del campo — cada subida por encima de 15 mG se convierte en un pico en su valor máximo.\n• Línea azul: una captura de radio.\n• Franja naranja: evento combinado — una captura de radio que ocurre a menos de 5 s de un pico del campo.\n\nEl contador de abajo muestra cuántos eventos combinados han ocurrido. Todo se reinicia al cerrar y reabrir este panel.</string>
     <string name="widget_description">Escaneo SpiritBox con reproducir/pausar</string>
     <string name="widget_status_stopped">Escaneo detenido</string>
+    <string name="shortcut_am_short">Iniciar AM</string>
+    <string name="shortcut_am_long">Iniciar escaneo en onda media</string>
+    <string name="shortcut_sw_short">Iniciar OC</string>
+    <string name="shortcut_sw_long">Iniciar escaneo en onda corta</string>
 </resources>

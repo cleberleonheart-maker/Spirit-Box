@@ -278,6 +278,7 @@ class MainActivity : AppCompatActivity() {
         applyThemeMode()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        handleShortcutIntent(intent)
 
         tvFreq = findViewById(R.id.tvFreq)
         tvStatus = findViewById(R.id.tvStatus)
@@ -536,6 +537,37 @@ class MainActivity : AppCompatActivity() {
         applyNightFilter()
 
         spiritCheckUpdatesSilently()
+    }
+
+    private fun handleShortcutIntent(intent: Intent?) {
+        if (intent?.action != "com.spiritbox.app.ACTION_START_BAND") return
+        val bandIndex = intent.getIntExtra("bandIndex", -1).coerceIn(0, SweepEngine.PRESETS.size - 1)
+        if (bandIndex < 0) return
+        spBand.setSelection(bandIndex)
+        Prefs.saveRangeIndex(this, bandIndex)
+        val range = SweepEngine.PRESETS[bandIndex]
+        Prefs.saveFmMode(this, false)
+        swFm.isChecked = false
+        waterfall.configure(range.startKHz.toDouble(), range.endKHz.toDouble(), range.stepKHz.toDouble())
+        monitor.configureBand(range.startKHz.toDouble(), range.endKHz.toDouble())
+        monitor.reset()
+        miniMap.reset()
+        requestPermissionsIfNeeded()
+        savePrefs()
+        val server = Prefs.server(this)
+        val dwell = Prefs.dwell(this)
+        val settle = Prefs.settle(this)
+        val threshold = Prefs.thresholdPct(this)
+        val gap = Prefs.gap(this)
+        if (!SpiritBoxEvents.serviceRunning) {
+            SpiritBoxService.start(this, SpiritBoxService.MODE_SDR, server, range, dwell, settle, threshold, gap)
+        }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleShortcutIntent(intent)
     }
 
     /** Auto-check de atualização. Respeita o cooldown do Prefs; resultado vira diálogo. */
