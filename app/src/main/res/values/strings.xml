@@ -66,7 +66,9 @@
    <string name="scan_not_running">Inicie a varredura antes de salvar.</string>
    <string name="scan_waiting_freq">Aguardando uma frequência...</string>
    <string name="manual_capture_saved">Frequência salva.</string>
-   <string name="notif_scanning_freq">Varrendo %1$s</string>
+    <string name="notif_scanning_freq">Varrendo %1$s</string>
+    <string name="notif_scanning_freq_count">Varrendo %1$s · %2$d capturas</string>
+    <string name="notif_scanning_count">%1$d capturas</string>
    <string name="service_resumed">Varredura retomada</string>
    <string name="share_title">Compartilhar capturas</string>
    <string name="share_no_file">Nenhuma captura para exportar ainda.</string>
@@ -110,6 +112,8 @@
     <string name="status_resumed">Varredura retomada</string>
     <string name="notif_paused">Varredura pausada</string>
     <string name="notif_paused_freq">Pausado em %1$s</string>
+    <string name="notif_paused_freq_count">Pausado em %1$s · %2$d capturas</string>
+    <string name="notif_paused_count">Pausado · %1$d capturas</string>
     <string name="status_noise_on">Filtro de ruído ativado</string>
     <string name="status_noise_off">Filtro de ruído desativado</string>
     <string name="update_downloading">Baixando atualização…</string>

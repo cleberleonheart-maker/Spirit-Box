@@ -203,6 +203,9 @@ class SpiritBoxService : Service() {
     @Volatile
     private var lastRms: Double = 0.0
 
+    @Volatile
+    private var captureCount: Int = 0
+
     private var lastNotifUpdateMs = 0L
 
     @Volatile
@@ -391,6 +394,7 @@ class SpiritBoxService : Service() {
         Prefs.savePaused(this, false)
         lastFreq = 0.0
         lastRms = 0.0
+        captureCount = 0
         lastNotifUpdateMs = 0L
         activeMode = mode
         activeServer = server
@@ -464,10 +468,16 @@ class SpiritBoxService : Service() {
     private fun currentNotificationText(): String {
         val freq = lastFreq
         val frozen = isFrozen()
+        val count = captureCount
         return when {
+            frozen && freq > 0 && count > 0 ->
+                getString(R.string.notif_paused_freq_count, formatFreq(freq), count)
             frozen && freq > 0 -> getString(R.string.notif_paused_freq, formatFreq(freq))
+            frozen && count > 0 -> getString(R.string.notif_paused_count, count)
             frozen -> getString(R.string.notif_paused)
+            freq > 0 && count > 0 -> getString(R.string.notif_scanning_freq_count, formatFreq(freq), count)
             freq > 0 -> getString(R.string.notif_scanning_freq, formatFreq(freq))
+            count > 0 -> getString(R.string.notif_scanning_count, count)
             else -> getString(R.string.notif_text_scanning)
         }
     }
@@ -751,6 +761,8 @@ class SpiritBoxService : Service() {
     }
 
     private fun logCapture(freqKHz: Double, level: Int) {
+        captureCount++
+        refreshNotificationNow()
         evp?.addMarker(freqKHz, level)
         val file = captureLog ?: return
         try {
