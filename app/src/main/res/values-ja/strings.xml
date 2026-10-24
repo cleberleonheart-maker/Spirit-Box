@@ -67,6 +67,8 @@
    <string name="scan_waiting_freq">周波数を待機中...</string>
    <string name="manual_capture_saved">周波数を保存しました。</string>
    <string name="notif_scanning_freq">%1$s をスキャン中</string>
+   <string name="notif_scanning_freq_count">%1$s をスキャン中 · %2$d 件</string>
+   <string name="notif_scanning_count">%1$d 件</string>
    <string name="service_resumed">スキャンを再開しました</string>
    <string name="share_title">捕捉を共有</string>
    <string name="share_no_file">まだエクスポートできる捕捉がありません。</string>
@@ -109,6 +111,8 @@
     <string name="status_resumed">スキャンを再開しました</string>
     <string name="notif_paused">スキャン一時停止中</string>
     <string name="notif_paused_freq">%1$s で一時停止</string>
+    <string name="notif_paused_freq_count">%1$s で一時停止 · %2$d 件</string>
+    <string name="notif_paused_count">一時停止 · %1$d 件</string>
    <string name="switch_noise">ノイズ除去</string>
    <string name="status_noise_on">ノイズフィルター有効</string>
    <string name="status_noise_off">ノイズフィルター無効</string>

@@ -67,6 +67,8 @@
    <string name="scan_waiting_freq">In attesa di una frequenza...</string>
    <string name="manual_capture_saved">Frequenza salvata.</string>
    <string name="notif_scanning_freq">Scansione %1$s</string>
+   <string name="notif_scanning_freq_count">Scansione %1$s · %2$d acquisizioni</string>
+   <string name="notif_scanning_count">%1$d acquisizioni</string>
    <string name="service_resumed">Scansione ripresa</string>
    <string name="share_title">Condividi catture</string>
    <string name="share_no_file">Nessuna cattura da esportare.</string>
@@ -109,6 +111,8 @@
     <string name="status_resumed">Scansione ripresa</string>
     <string name="notif_paused">Scansione in pausa</string>
     <string name="notif_paused_freq">In pausa su %1$s</string>
+    <string name="notif_paused_freq_count">In pausa su %1$s · %2$d acquisizioni</string>
+    <string name="notif_paused_count">In pausa · %1$d acquisizioni</string>
    <string name="switch_noise">Riduzione del rumore</string>
    <string name="status_noise_on">Filtro antirumore attivato</string>
    <string name="status_noise_off">Filtro antirumore disattivato</string>

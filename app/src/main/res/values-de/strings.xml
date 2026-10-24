@@ -67,6 +67,8 @@
    <string name="scan_waiting_freq">Warte auf eine Frequenz...</string>
    <string name="manual_capture_saved">Frequenz gespeichert.</string>
    <string name="notif_scanning_freq">Scanne %1$s</string>
+   <string name="notif_scanning_freq_count">Scanne %1$s · %2$d Erfassungen</string>
+   <string name="notif_scanning_count">%1$d Erfassungen</string>
    <string name="service_resumed">Suche fortgesetzt</string>
    <string name="share_title">Erfassungen teilen</string>
    <string name="share_no_file">Noch nichts zu exportieren.</string>
@@ -109,6 +111,8 @@
     <string name="status_resumed">Suche fortgesetzt</string>
     <string name="notif_paused">Suche angehalten</string>
     <string name="notif_paused_freq">Angehalten bei %1$s</string>
+    <string name="notif_paused_freq_count">Angehalten bei %1$s · %2$d Erfassungen</string>
+    <string name="notif_paused_count">Angehalten · %1$d Erfassungen</string>
    <string name="switch_noise">Rauschunterdrückung</string>
    <string name="status_noise_on">Rauschfilter aktiviert</string>
    <string name="status_noise_off">Rauschfilter deaktiviert</string>

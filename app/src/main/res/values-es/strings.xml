@@ -67,6 +67,8 @@
    <string name="scan_waiting_freq">Esperando una frecuencia...</string>
    <string name="manual_capture_saved">Frecuencia guardada.</string>
    <string name="notif_scanning_freq">Escaneando %1$s</string>
+   <string name="notif_scanning_freq_count">Escaneando %1$s · %2$d capturas</string>
+   <string name="notif_scanning_count">%1$d capturas</string>
    <string name="service_resumed">Barrido reanudado</string>
    <string name="share_title">Compartir capturas</string>
    <string name="share_no_file">Aún no hay nada que exportar.</string>
@@ -109,6 +111,8 @@
     <string name="status_resumed">Barrido reanudado</string>
     <string name="notif_paused">Barrido en pausa</string>
     <string name="notif_paused_freq">En pausa en %1$s</string>
+    <string name="notif_paused_freq_count">En pausa en %1$s · %2$d capturas</string>
+    <string name="notif_paused_count">En pausa · %1$d capturas</string>
    <string name="switch_noise">Reducción de ruido</string>
    <string name="status_noise_on">Filtro de ruido activado</string>
    <string name="status_noise_off">Filtro de ruido desactivado</string>
