@@ -78,6 +78,12 @@
     <string name="bookmark_off">☆</string>
     <string name="btn_export_fav">EXPORTAR</string>
     <string name="btn_import_fav">IMPORTAR</string>
+    <string name="btn_preset_export">EXPORTAR PRESET</string>
+    <string name="btn_preset_import">IMPORTAR PRESET</string>
+    <string name="preset_export_title">Compartir preset</string>
+    <string name="preset_import_invalid">Preset inválido o corrupto.</string>
+    <string name="preset_import_ok">Preset aplicado.</string>
+    <string name="preset_export_none">No se pudo exportar el preset.</string>
     <string name="fav_export_title">Compartir favoritos</string>
     <string name="fav_export_none">Aún no hay favoritos que exportar.</string>
     <string name="fav_import_invalid">Archivo de favoritos no válido.</string>

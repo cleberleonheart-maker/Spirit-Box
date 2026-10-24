@@ -78,6 +78,12 @@
     <string name="bookmark_off">☆</string>
     <string name="btn_export_fav">エクスポート</string>
     <string name="btn_import_fav">インポート</string>
+    <string name="btn_preset_export">プリセット書出</string>
+    <string name="btn_preset_import">プリセット読込</string>
+    <string name="preset_export_title">プリセットを共有</string>
+    <string name="preset_import_invalid">無効または壊れたプリセットです。</string>
+    <string name="preset_import_ok">プリセットを適用しました。</string>
+    <string name="preset_export_none">プリセットをエクスポートできません。</string>
     <string name="fav_export_title">お気に入りを共有</string>
     <string name="fav_export_none">エクスポートできるお気に入りがありません。</string>
     <string name="fav_import_invalid">無効なお気に入りファイルです。</string>

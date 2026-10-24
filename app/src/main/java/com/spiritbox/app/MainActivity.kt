@@ -68,6 +68,9 @@ class MainActivity : AppCompatActivity() {
         /** Arquivo compartilhado na exportação de favoritos (cacheDir, via FileProvider). */
         private const val FAV_FILE_NAME = "spiritbox_favoritos.json"
 
+        /** Arquivo compartilhado na exportação de preset de varredura (cacheDir, via FileProvider). */
+        private const val PRESET_FILE_NAME = "spiritbox_preset.json"
+
         /** Trajeto EMF exportado como GPX (cacheDir, via FileProvider). */
         private const val GPX_FILE_NAME = "spiritbox_trajeto.gpx"
     }
@@ -96,6 +99,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnBookmark: MaterialButton
     private lateinit var btnFavExport: MaterialButton
     private lateinit var btnFavImport: MaterialButton
+    private lateinit var btnPresetExport: MaterialButton
+    private lateinit var btnPresetImport: MaterialButton
     private lateinit var btnPeak: MaterialButton
     private lateinit var btnStats: MaterialButton
     private lateinit var btnClearData: MaterialButton
@@ -220,6 +225,11 @@ class MainActivity : AppCompatActivity() {
             if (uri != null) importFavorites(uri)
         }
 
+    private val openPresetDocument =
+        registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+            if (uri != null) importPreset(uri)
+        }
+
     private val listener = object : SpiritBoxEvents.Listener {
         override fun onFreq(freqKHz: Double) {
             tvFreq.text = formatFreq(freqKHz)
@@ -297,6 +307,8 @@ class MainActivity : AppCompatActivity() {
         btnBookmark = findViewById(R.id.btnBookmark)
         btnFavExport = findViewById(R.id.btnFavExport)
         btnFavImport = findViewById(R.id.btnFavImport)
+        btnPresetExport = findViewById(R.id.btnPresetExport)
+        btnPresetImport = findViewById(R.id.btnPresetImport)
         btnPeak = findViewById(R.id.btnPeak)
         btnStats = findViewById(R.id.btnStats)
         btnClearData = findViewById(R.id.btnClearData)
@@ -456,6 +468,8 @@ class MainActivity : AppCompatActivity() {
 
         btnFavExport.setOnClickListener { exportFavorites() }
         btnFavImport.setOnClickListener { openFavDocument.launch(arrayOf("*/*")) }
+        btnPresetExport.setOnClickListener { exportPreset() }
+        btnPresetImport.setOnClickListener { openPresetDocument.launch(arrayOf("*/*")) }
 
         waterfall.setOnLongClickListener {
             shareWaterfall()
@@ -1564,6 +1578,86 @@ class MainActivity : AppCompatActivity() {
         } catch (e: ActivityNotFoundException) {
             Toast.makeText(this, R.string.fav_export_none, Toast.LENGTH_SHORT).show()
         }
+    }
+
+    /** Lê um arquivo de favoritos escolhido no seletor e une ao que já existe. */
+    private fun exportPreset() {
+        val mode = if (swFm.isChecked) SpiritBoxService.MODE_FM else SpiritBoxService.MODE_SDR
+        val host = etServer.text.toString().trim()
+        val server = if (host.isEmpty()) SpiritBoxService.DEFAULT_SERVER else host
+        val rangeIndex = spBand.selectedItemPosition.coerceIn(0, SweepEngine.PRESETS.size - 1)
+        val dwell = etDwell.text.toString().toLongOrNull() ?: 300L
+        val settle = etSettle.text.toString().toLongOrNull() ?: 150L
+        val threshold = etThreshold.text.toString().toIntOrNull() ?: 12
+        val gap = etGap.text.toString().toLongOrNull() ?: 300L
+        val preset = ScanPresetCodec.Preset(
+            mode = mode,
+            server = server,
+            rangeIndex = rangeIndex,
+            dwell = dwell,
+            settle = settle,
+            gap = gap,
+            threshold = threshold
+        )
+        val file = File(cacheDir, PRESET_FILE_NAME)
+        try {
+            file.writeText(ScanPresetCodec.export(preset), Charsets.UTF_8)
+        } catch (e: Exception) {
+            Log.w("SpiritBox", "Falha ao exportar preset", e)
+            Toast.makeText(this, R.string.preset_export_none, Toast.LENGTH_SHORT).show()
+            return
+        }
+        val uri: Uri = FileProvider.getUriForFile(this, "$packageName.fileprovider", file)
+        val send = Intent(Intent.ACTION_SEND).apply {
+            type = "application/json"
+            putExtra(Intent.EXTRA_STREAM, uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        try {
+            startActivity(Intent.createChooser(send, getString(R.string.preset_export_title)))
+        } catch (e: ActivityNotFoundException) {
+            Toast.makeText(this, R.string.preset_export_none, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun importPreset(uri: Uri) {
+        val text = runCatching {
+            contentResolver.openInputStream(uri)?.use { it.readBytes().toString(Charsets.UTF_8) }
+        }.getOrNull()
+        if (text.isNullOrBlank()) {
+            Toast.makeText(this, R.string.preset_import_invalid, Toast.LENGTH_LONG).show()
+            return
+        }
+        val res = ScanPresetCodec.parse(text)
+        val p = res.preset
+        if (p == null) {
+            Toast.makeText(this, R.string.preset_import_invalid, Toast.LENGTH_LONG).show()
+            return
+        }
+        swFm.isChecked = p.mode == SpiritBoxService.MODE_FM
+        Prefs.saveFmMode(this, swFm.isChecked)
+        Prefs.saveServer(this, p.server)
+        etServer.setText(p.server)
+        val idx = p.rangeIndex.coerceIn(0, SweepEngine.PRESETS.size - 1)
+        spBand.setSelection(idx)
+        Prefs.saveRangeIndex(this, idx)
+        etDwell.setText(p.dwell.toString())
+        etSettle.setText(p.settle.toString())
+        etGap.setText(p.gap.toString())
+        etThreshold.setText(p.threshold.toString())
+        Prefs.saveDwell(this, p.dwell)
+        Prefs.saveSettle(this, p.settle)
+        Prefs.saveGap(this, p.gap)
+        Prefs.saveThreshold(this, p.threshold)
+        waterfall.configure(
+            SweepEngine.PRESETS[idx].startKHz.toDouble(),
+            SweepEngine.PRESETS[idx].endKHz.toDouble(),
+            SweepEngine.PRESETS[idx].stepKHz.toDouble()
+        )
+        monitor.configureBand(SweepEngine.PRESETS[idx].startKHz.toDouble(), SweepEngine.PRESETS[idx].endKHz.toDouble())
+        monitor.reset()
+        miniMap.reset()
+        Toast.makeText(this, R.string.preset_import_ok, Toast.LENGTH_LONG).show()
     }
 
     /** Lê um arquivo de favoritos escolhido no seletor e une ao que já existe. */
