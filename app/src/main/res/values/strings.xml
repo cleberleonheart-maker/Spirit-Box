@@ -184,6 +184,7 @@
     <string name="emf_status_recording">Gravando · %1$d pontos</string>
     <string name="switch_evp">Gravar EVP (microfone)</string>
     <string name="switch_watch">Alarme nas favoritas</string>
+    <string name="switch_keep_screen_on">Manter tela ligada</string>
     <string name="watch_channel">Watch list</string>
     <string name="watch_notif_title">Frequência favorita capturada</string>
     <string name="watch_notif_text">%1$s capturada · %2$d dB</string>

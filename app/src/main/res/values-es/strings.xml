@@ -184,6 +184,7 @@
     <string name="check_update_checking">Comprobando…</string>
     <string name="switch_evp">Grabar EVP (micrófono)</string>
     <string name="switch_watch">Alarma en favoritas</string>
+    <string name="switch_keep_screen_on">Mantener pantalla encendida</string>
     <string name="watch_channel">Watch list</string>
     <string name="watch_notif_title">Frecuencia favorita capturada</string>
     <string name="watch_notif_text">%1$s capturada · %2$d dB</string>

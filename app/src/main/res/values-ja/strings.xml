@@ -184,6 +184,7 @@
     <string name="check_update_checking">確認中…</string>
     <string name="switch_evp">EVPを録音（マイク）</string>
     <string name="switch_watch">お気に入りアラーム</string>
+    <string name="switch_keep_screen_on">画面を常時点灯</string>
     <string name="watch_channel">ウォッチリスト</string>
     <string name="watch_notif_title">お気に入り周波数を受信</string>
     <string name="watch_notif_text">%1$s を受信 · %2$d dB</string>

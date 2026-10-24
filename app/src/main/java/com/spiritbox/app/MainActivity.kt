@@ -87,6 +87,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var swNoise: MaterialSwitch
     private lateinit var swEvp: MaterialSwitch
     private lateinit var swWatch: MaterialSwitch
+    private lateinit var swKeepScreenOn: MaterialSwitch
     private lateinit var swGroup: MaterialSwitch
     private lateinit var spBand: Spinner
     private lateinit var etDwell: EditText
@@ -289,6 +290,7 @@ class MainActivity : AppCompatActivity() {
         swNoise = findViewById(R.id.swNoise)
         swEvp = findViewById(R.id.swEvp)
         swWatch = findViewById(R.id.swWatch)
+        swKeepScreenOn = findViewById(R.id.swKeepScreenOn)
         swGroup = findViewById(R.id.swGroup)
         listCaptures = findViewById(R.id.listCaptures)
         tvVersion = findViewById(R.id.tvVersion)
@@ -431,6 +433,11 @@ class MainActivity : AppCompatActivity() {
 
         swWatch.setOnCheckedChangeListener { _, checked ->
             Prefs.saveWatchFavorites(this, checked)
+        }
+
+        swKeepScreenOn.setOnCheckedChangeListener { _, checked ->
+            Prefs.saveKeepScreenOn(this, checked)
+            applyKeepScreenOn(checked)
         }
 
         swGroup.setOnCheckedChangeListener { _, checked ->
@@ -1124,6 +1131,8 @@ class MainActivity : AppCompatActivity() {
         swNoise.isChecked = Prefs.noiseReduction(this)
         swEvp.isChecked = Prefs.evpEnabled(this)
         swWatch.isChecked = Prefs.watchFavorites(this)
+        swKeepScreenOn.isChecked = Prefs.keepScreenOn(this)
+        applyKeepScreenOn(swKeepScreenOn.isChecked)
         swGroup.isChecked = Prefs.groupHistory(this)
         groupHistory = swGroup.isChecked
         spBand.setSelection(Prefs.rangeIndex(this).coerceIn(0, SweepEngine.PRESETS.size - 1))
@@ -1147,6 +1156,7 @@ class MainActivity : AppCompatActivity() {
         Prefs.saveNoiseReduction(this, swNoise.isChecked)
         Prefs.saveEvpEnabled(this, swEvp.isChecked)
         Prefs.saveWatchFavorites(this, swWatch.isChecked)
+        Prefs.saveKeepScreenOn(this, swKeepScreenOn.isChecked)
         Prefs.saveGroupHistory(this, swGroup.isChecked)
     }
 
@@ -1821,6 +1831,14 @@ class MainActivity : AppCompatActivity() {
     private fun updateMuteButton() {
         val muted = Prefs.muted(this)
         btnMute.text = getString(if (muted) R.string.btn_unmute else R.string.btn_mute)
+    }
+
+    private fun applyKeepScreenOn(on: Boolean) {
+        if (on) {
+            window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        } else {
+            window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
     }
 
     private fun nightModeFor(mode: Int): Int = when (mode) {

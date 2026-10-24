@@ -184,6 +184,7 @@
     <string name="check_update_checking">Controllo in corso…</string>
     <string name="switch_evp">Registra EVP (microfono)</string>
     <string name="switch_watch">Allarme preferiti</string>
+    <string name="switch_keep_screen_on">Mantieni schermo acceso</string>
     <string name="watch_channel">Watch list</string>
     <string name="watch_notif_title">Frequenza preferita catturata</string>
     <string name="watch_notif_text">%1$s catturata · %2$d dB</string>
